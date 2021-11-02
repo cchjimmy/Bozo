@@ -151,7 +151,6 @@ function draw() {
     viewport.noStroke();
     viewport.rect(0, 0, viewport.width, viewport.height);
 
-
     mousePos = createVector(floor((mouseX - viewport.width / 2 + cam.pos.x * cam.scl) / (textureSize * cam.scl)), floor(-(mouseY - viewport.height / 2 - cam.pos.y * cam.scl) / (textureSize * cam.scl)));
 
     viewport.push();
