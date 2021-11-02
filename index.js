@@ -9,9 +9,12 @@ var texture;
 var font;
 var fps;
 var backdrop;
+var viewport;
+var mousePos;
 
 var buttons = [];
 var toggles = [];
+var entities = [];
 
 var playing = false;
 var mainMenu = true;
@@ -20,6 +23,7 @@ var selection = false;
 
 var debug = true;
 var fullsrn = false;
+var entityShadow = false;
 
 var tiles = [];
 var tileIds = [];
@@ -34,8 +38,8 @@ function generate() {
       if (noise(i / 100, j / 100) > 0.5) {
         id = 0;
       }
-      tileIds.push(tiles[id]);
-      world.image(tileIds[i + j * worldSize], i * textureSize, (worldSize - j - 1) * textureSize);
+      tileIds.push(id);
+      world.image(tiles[tileIds[i + j * worldSize]], i * textureSize, (worldSize - j - 1) * textureSize);
     }
   }
 }
@@ -93,6 +97,11 @@ function draw() {
     selection = false;
   }
 
+  if (keyIsDown(82)) { // r
+    entities = [];
+    entities.push(player);
+  }
+
   // interfaces
   if (mainMenu) {
     viewport.push();
@@ -138,7 +147,8 @@ function draw() {
     // toggles
     toggles[0] = new Toggle('Fullscreen', fullsrn, 50, 100);
     toggles[1] = new Toggle('Debug', debug, 50, 100 + 30);
-    for (let i = 0; i < 2; i++) {
+    toggles[2] = new Toggle('Entity shadow', entityShadow, 50, 100 + 60);
+    for (let i = 0; i <= 2; i++) {
       toggles[i].show();
     }
     viewport.pop();
@@ -151,12 +161,16 @@ function draw() {
     viewport.noStroke();
     viewport.rect(0, 0, viewport.width, viewport.height);
 
-    mousePos = createVector(floor((mouseX - viewport.width / 2 + cam.pos.x * cam.scl) / (textureSize * cam.scl)), floor(-(mouseY - viewport.height / 2 - cam.pos.y * cam.scl) / (textureSize * cam.scl)));
+    mousePos = createVector((mouseX - viewport.width / 2 + cam.pos.x * cam.scl) / (textureSize * cam.scl), -(mouseY - viewport.height / 2 - cam.pos.y * cam.scl) / (textureSize * cam.scl));
 
     viewport.push();
     cam.update();
     worldUpdate();
-    player.update();
+
+    entities.sort((a, b) => { return - a.pos.y + b.pos.y });
+    entities.forEach(entity => {
+      entity.update();
+    });
     viewport.pop();
 
     if (debug) {
@@ -171,7 +185,7 @@ function draw() {
 
       viewport.text('debug', 10, 5);
       viewport.text('scale: ' + floor(cam.scl), 10, 20);
-      viewport.text('player position: ' + floor(player.translatedPos.x) + ', ' + floor(player.translatedPos.y), 10, 35);
+      viewport.text('player position: ' + floor(player.pos.x / textureSize) + ', ' + floor(player.pos.y / textureSize), 10, 35);
       // viewport.text('fps: ' + floor(fps), 10, 30);
       viewport.text('mouse position: ' + floor(mousePos.x) + ', ' + floor(mousePos.y), 10, 50);
       viewport.text('camera position: ' + floor(cam.pos.x / textureSize) + ', ' + floor(cam.pos.y / textureSize), 10, 65);
@@ -219,8 +233,12 @@ function mousePressed() {
       mainMenu = false;
       selection = false;
 
+      tileIds = [];
+      entities = [];
+
       cam = new Camera();
-      player = new Player();
+      player = new Entity(2, 0, 0, 1, 3, 'player');
+      entities.push(player);
       world = createGraphics(worldSize * textureSize, worldSize * textureSize);
       generate();
     }
@@ -242,6 +260,10 @@ function mousePressed() {
     if (toggles[1].hover()) { // debug
       debug = !debug;
     }
+
+    if (toggles[2].hover()) { // entity shadow
+      entityShadow = !entityShadow;
+    }
   }
 
   if (selection) {
@@ -251,72 +273,7 @@ function mousePressed() {
   }
 
   if (playing) {
-
-  }
-}
-
-class Player {
-  constructor() {
-    this.pos = createVector(0 * textureSize, 0 * textureSize);
-    this.size = textureSize;
-    // this.pos = p5.Vector.random2D().mult(random(10));
-  }
-
-  update() {
-    this.speed = 3 * this.size * (1 / fps); // because of delta time this.speed needs to be in the update function
-
-    this.translatedPos = createVector(player.pos.x / textureSize, player.pos.y / textureSize);
-
-    if (this.pos.x < this.size / 2) {
-      this.pos.x = this.size / 2;
-    }
-    if (this.pos.y < this.size / 2) {
-      this.pos.y = this.size / 2;
-    }
-    if (this.pos.x > this.size * worldSize - this.size / 2) {
-      this.pos.x = this.size * worldSize - this.size / 2;
-    }
-    if (this.pos.y > this.size * worldSize - this.size / 2) {
-      this.pos.y = this.size * worldSize - this.size / 2;
-    }
-
-    // movement
-    if (keyIsDown(87)) { // w
-      this.pos.y += this.speed;
-    }
-
-    if (keyIsDown(65)) { // a
-      this.pos.x -= this.speed;
-    }
-
-    if (keyIsDown(83)) { // s
-      this.pos.y -= this.speed;
-    }
-
-    if (keyIsDown(68)) { // d
-      this.pos.x += this.speed
-    }
-
-    this.show();
-  }
-
-  show() {
-
-    viewport.push();
-    viewport.translate(this.pos.x - (this.size / 2), -this.pos.y - this.size);
-
-    // shadow
-    viewport.noStroke();
-    viewport.fill(0, 50);
-    viewport.ellipse(this.size / 2, this.size, this.size / 2 + 5, this.size / 4);
-
-    // player models
-    viewport.image(tiles[2], 0, 0, this.size)
-    // noStroke();
-    // fill(200, 0, 0);
-    // square(0, 0, this.size);
-    // triangle(-(this.size / 3), this.size / 2, -(this.size / 3), - this.size / 2, this.size - (this.size / 3), 0);
-    viewport.pop();
+    entities.push(new Entity(2, mousePos.x, mousePos.y, 1, 1, 'npc'));
   }
 }
 
@@ -432,10 +389,63 @@ class Toggle {
 }
 
 class Entity {
-  constructor(type, x, y, speed) {
-    this.type = type;
-    this.x = x;
-    this.y = y;
+  constructor(id, x, y, size, speed, type) {
+    this.id = id;
+    this.pos = createVector(x * textureSize, y * textureSize);
+    this.size = size * textureSize;
     this.speed = speed;
+    this.type = type;
+  }
+
+  update() {
+    let speed = this.speed * textureSize * (1 / fps); // because of delta time this.speed needs to be in the update function
+
+    if (this.type == 'player') {
+      // movement
+      if (keyIsDown(87)) { // w
+        this.pos.y += speed;
+      }
+
+      if (keyIsDown(65)) { // a
+        this.pos.x -= speed;
+      }
+
+      if (keyIsDown(83)) { // s
+        this.pos.y -= speed;
+      }
+
+      if (keyIsDown(68)) { // d
+        this.pos.x += speed;
+      }
+    }
+    this.show();
+  }
+
+  show() {
+    viewport.push();
+    if (this.pos.x < this.size / 2) {
+      this.pos.x = this.size / 2;
+    }
+    if (this.pos.y < this.size / 2) {
+      this.pos.y = this.size / 2;
+    }
+    if (this.pos.x > this.size * worldSize - this.size / 2) {
+      this.pos.x = this.size * worldSize - this.size / 2;
+    }
+    if (this.pos.y > this.size * worldSize - this.size / 2) {
+      this.pos.y = this.size * worldSize - this.size / 2;
+    }
+
+    viewport.translate(this.pos.x, -this.pos.y);
+
+    // shadow
+    if (entityShadow) {
+      viewport.noStroke();
+      viewport.fill(0, 50);
+      viewport.ellipse(0, this.size / 2, (this.size / 2 + 5), this.size / 4);
+    }
+
+    viewport.image(tiles[this.id], - this.size / 2, - this.size / 2, this.size);
+    viewport.pop();
   }
 }
