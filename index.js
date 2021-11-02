@@ -27,6 +27,7 @@ var entityShadow = false;
 
 var tiles = [];
 var tileIds = [];
+var tileNames = ['Grass', 'Orange thing', 'Person', 'Water', 'Rock', 'Blank'];
 
 function generate() {
   let id;
@@ -176,7 +177,7 @@ function draw() {
     if (debug) {
       viewport.push();
       viewport.fill(0, 100);
-      viewport.rect(0, 0, 180, 100);
+      viewport.rect(0, 0, 280, 110);
 
       viewport.textAlign(LEFT, TOP);
       viewport.noStroke();
@@ -189,6 +190,7 @@ function draw() {
       // viewport.text('fps: ' + floor(fps), 10, 30);
       viewport.text('mouse position: ' + floor(mousePos.x) + ', ' + floor(mousePos.y), 10, 50);
       viewport.text('camera position: ' + floor(cam.pos.x / textureSize) + ', ' + floor(cam.pos.y / textureSize), 10, 65);
+      viewport.text('currently on: ' + tileNames[tileIds[floor(player.pos.x / textureSize) + floor(player.pos.y / textureSize) * worldSize]], 10, 80);
 
       viewport.pop();
     }
@@ -237,7 +239,7 @@ function mousePressed() {
       entities = [];
 
       cam = new Camera();
-      player = new Entity(2, 0, 0, 1, 3, 'player');
+      player = new Entity(2, 500, 1000, 1, 3, 'player');
       entities.push(player);
       world = createGraphics(worldSize * textureSize, worldSize * textureSize);
       generate();
@@ -272,7 +274,7 @@ function mousePressed() {
     // }
   }
 
-  if (playing) {
+  if (playing && mousePos != null) {
     entities.push(new Entity(2, mousePos.x, mousePos.y, 1, 1, 'npc'));
   }
 }
