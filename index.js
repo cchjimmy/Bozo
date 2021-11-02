@@ -1,5 +1,7 @@
 const textureSize = 16; // side length of each tile in pixels
 const worldSize = 500; // worldSize^2 tiles
+const viewportX = 0;
+const viewportY = 0;
 
 var player;
 var cam;
@@ -39,7 +41,7 @@ function generate() {
 }
 
 function worldUpdate() {
-  translate(-cam.pos.x, cam.pos.y);
+  viewport.translate(-cam.pos.x, cam.pos.y);
   viewport.image(world, 0, -worldSize * textureSize);
 }
 
@@ -66,21 +68,21 @@ function separateTextures(x, y) {
 
 function preload() {
   texture = loadImage('textures/texture4832.png');
-  backdrop = loadImage('textures/sky.jpeg')
+  // backdrop = loadImage('textures/sky.jpeg')
   // texture = loadImage('textures/texture.png');
   font = loadFont('fonts/Mulish-VariableFont_wght.ttf');
 }
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  viewport = createGraphics(500, 500);
+  viewport = createGraphics(windowWidth, windowHeight);
   viewport.textFont(font);
   separateTextures(3, 2); // number of tiles (x, y) in texture
 }
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
-  // viewport = createGraphics(windowWidth, windowHeight);
+  viewport = createGraphics(windowWidth, windowHeight);
 }
 
 function draw() {
@@ -89,18 +91,16 @@ function draw() {
     playing = false;
     settingsMenu = false;
     selection = false;
-
-    console.log('esc');
   }
 
   // interfaces
   if (mainMenu) {
-    push();
+    viewport.push();
     viewport.textAlign(CENTER, CENTER);
+
     // background
     viewport.fill(59, 52, 59);
     viewport.noStroke();
-    // viewport.stroke(0);
     viewport.rect(0, 0, viewport.width, viewport.height);
 
     // some texts
@@ -117,13 +117,13 @@ function draw() {
     for (let i = 0; i <= 1; i++) {
       buttons[i].show();
     }
-    pop();
+    viewport.pop();
   }
 
   if (settingsMenu) {
-    push();
-    // viewport.textAlign(CENTER, CENTER);
-    
+    viewport.push();
+    viewport.textAlign(CENTER, CENTER);
+
     // background
     viewport.fill(59, 52, 59);
     viewport.noStroke();
@@ -141,33 +141,39 @@ function draw() {
     for (let i = 0; i < 2; i++) {
       toggles[i].show();
     }
-    pop();
+    viewport.pop();
   }
 
   if (playing) {
     fps = 1 / (deltaTime / 1000);
-    viewport.image(backdrop, 0, 0);
+    // viewport.image(backdrop, 0, 0);
+    viewport.fill('#93bdc2');
+    viewport.noStroke();
+    viewport.rect(0, 0, viewport.width, viewport.height);
 
-    mousePos = createVector((mouseX - width / 2 + cam.pos.x) / (textureSize * cam.scl), -(mouseY - height / 2 - cam.pos.y) / (textureSize * cam.scl));
 
-    push();
+    mousePos = createVector((mouseX - viewport.width / 2 + cam.pos.x) / (textureSize * cam.scl), -(mouseY - viewport.height / 2 - cam.pos.y) / (textureSize * cam.scl));
+
+    viewport.push();
     cam.update();
     worldUpdate();
     player.update();
-    pop();
+    viewport.pop();
 
     if (debug) {
-      push();
+      viewport.push();
       viewport.textAlign(LEFT);
-      viewport.stroke(0);
-      viewport.noFill();
+      viewport.noStroke();
+      // viewport.fill(0);
       viewport.textSize(11);
-      viewport.text('player position: ' + floor(player.translatedPos.x) + ', ' + floor(player.translatedPos.y), 10, 10);
-      viewport.text('scale: ' + floor(cam.scl), 10, 20);
-      viewport.text('fps: ' + floor(fps), 10, 30);
-      viewport.text('mouse position: ' + floor(mousePos.x) + ', ' + floor(mousePos.y), 10, 40);
-      viewport.text('camera position: ' + floor(cam.pos.x / textureSize) + ', ' + floor(cam.pos.y / textureSize), 10, 50);
-      pop();
+
+      viewport.text('scale: ' + floor(cam.scl), 10, 10);
+      viewport.text('player position: ' + floor(player.translatedPos.x) + ', ' + floor(player.translatedPos.y), 10, 20);
+      // viewport.text('fps: ' + floor(fps), 10, 30);
+      viewport.text('mouse position: ' + floor(mousePos.x) + ', ' + floor(mousePos.y), 10, 30);
+      viewport.text('camera position: ' + floor(cam.pos.x / textureSize) + ', ' + floor(cam.pos.y / textureSize), 10, 40);
+
+      viewport.pop();
     }
   }
 
@@ -198,7 +204,7 @@ function draw() {
     pop();
   }
 
-  image(viewport, 10, 20);
+  image(viewport, viewportX, viewportY);
 }
 
 function mousePressed() {
@@ -232,7 +238,6 @@ function mousePressed() {
 
     if (toggles[1].hover()) { // debug
       debug = !debug;
-      console.log('debug');
     }
   }
 
@@ -243,13 +248,13 @@ function mousePressed() {
   }
 
   if (playing) {
-    
+
   }
 }
 
 class Player {
   constructor() {
-    this.pos = createVector(500 * textureSize, 500 * textureSize);
+    this.pos = createVector(0 * textureSize, 0 * textureSize);
     this.size = textureSize;
     // this.pos = p5.Vector.random2D().mult(random(10));
   }
@@ -294,8 +299,8 @@ class Player {
 
   show() {
 
-    push();
-    translate(this.pos.x - (this.size / 2), -this.pos.y - this.size);
+    viewport.push();
+    viewport.translate(this.pos.x - (this.size / 2), -this.pos.y - this.size);
 
     // shadow
     viewport.noStroke();
@@ -308,13 +313,13 @@ class Player {
     // fill(200, 0, 0);
     // square(0, 0, this.size);
     // triangle(-(this.size / 3), this.size / 2, -(this.size / 3), - this.size / 2, this.size - (this.size / 3), 0);
-    pop();
+    viewport.pop();
   }
 }
 
 class Camera {
   constructor() {
-    this.pos = createVector(0, 0);
+    this.pos = createVector(0 * textureSize, 0 * textureSize);
     this.scl = 1;
   }
 
@@ -346,7 +351,7 @@ class Camera {
     // }
 
     // translate -> rotate -> scale
-    viewport.translate(width / 2, height / 2);
+    viewport.translate(viewport.width / 2, viewport.height / 2);
     viewport.scale(this.scl);
   }
 }
@@ -361,7 +366,7 @@ class Button {
   }
 
   show() {
-    push();
+    viewport.push();
     viewport.noStroke();
     viewport.fill(255);
     viewport.rect(this.x - this.w / 2, this.y - this.h / 2, this.w, this.h, 10, 10, 10, 10);
@@ -376,11 +381,11 @@ class Button {
       viewport.text('>', this.x - this.w / 2 - 15, this.y - 4);
       viewport.text('<', this.x + this.w / 2 + 15, this.y - 4);
     }
-    pop();
+    viewport.pop();
   }
 
   hover() {
-    if (mouseX <= this.x + this.w / 2 && mouseX >= this.x - this.w / 2 && mouseY <= this.y + this.h / 2 && mouseY >= this.y - this.h / 2) {
+    if (mouseX <= viewportX + this.x + this.w / 2 && mouseX >= viewportX + this.x - this.w / 2 && mouseY <= viewportY + this.y + this.h / 2 && mouseY >= viewportY + this.y - this.h / 2) {
       return true;
     }
     return false;
@@ -396,7 +401,7 @@ class Toggle {
   }
 
   show() {
-    push();
+    viewport.push();
     viewport.textAlign(LEFT, CENTER);
     viewport.textSize(20);
     viewport.fill(255);
@@ -411,14 +416,23 @@ class Toggle {
     } else {
       viewport.fill(59, 52, 59);
     }
-    viewport.rect(viewport.width - 120, this.y + 3.5, 20, 10, 10, 10, 10, 10);
-    pop();
+    viewport.rect(viewport.width - 120, this.y, 20, 10, 10, 10, 10, 10);
+    viewport.pop();
   }
 
   hover() {
-    if (mouseX <= viewport.width - 107.5 && mouseX >= viewport.width - 132.5 && mouseY <= this.y + 10 && mouseY >= this.y - 4) {
+    if (mouseX <= viewportX + viewport.width - 120 + 20 + 2.5 && mouseX >= viewportX + viewport.width - 120 - 2.5 && mouseY <= viewportY + this.y + 10 + 2.5 && mouseY >= viewportY + this.y - 2.5) {
       return true;
     }
     return false;
+  }
+}
+
+class Entity {
+  constructor(type, x, y, speed) {
+    this.type = type;
+    this.x = x;
+    this.y = y;
+    this.speed = speed;
   }
 }
