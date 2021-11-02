@@ -152,7 +152,7 @@ function draw() {
     viewport.rect(0, 0, viewport.width, viewport.height);
 
 
-    mousePos = createVector((mouseX - viewport.width / 2 + cam.pos.x) / (textureSize * cam.scl), -(mouseY - viewport.height / 2 - cam.pos.y) / (textureSize * cam.scl));
+    mousePos = createVector(floor((mouseX - viewport.width / 2 + cam.pos.x * cam.scl) / (textureSize * cam.scl)), floor(-(mouseY - viewport.height / 2 - cam.pos.y * cam.scl) / (textureSize * cam.scl)));
 
     viewport.push();
     cam.update();
@@ -162,16 +162,20 @@ function draw() {
 
     if (debug) {
       viewport.push();
-      viewport.textAlign(LEFT);
-      viewport.noStroke();
-      viewport.fill(0);
-      viewport.textSize(11);
+      viewport.fill(0, 100);
+      viewport.rect(0, 0, 180, 100);
 
-      viewport.text('scale: ' + floor(cam.scl), 10, 10);
-      viewport.text('player position: ' + floor(player.translatedPos.x) + ', ' + floor(player.translatedPos.y), 10, 20);
+      viewport.textAlign(LEFT, TOP);
+      viewport.noStroke();
+      viewport.fill(255);
+      viewport.textSize(15);
+
+      viewport.text('debug', 10, 5);
+      viewport.text('scale: ' + floor(cam.scl), 10, 20);
+      viewport.text('player position: ' + floor(player.translatedPos.x) + ', ' + floor(player.translatedPos.y), 10, 35);
       // viewport.text('fps: ' + floor(fps), 10, 30);
-      viewport.text('mouse position: ' + floor(mousePos.x) + ', ' + floor(mousePos.y), 10, 30);
-      viewport.text('camera position: ' + floor(cam.pos.x / textureSize) + ', ' + floor(cam.pos.y / textureSize), 10, 40);
+      viewport.text('mouse position: ' + floor(mousePos.x) + ', ' + floor(mousePos.y), 10, 50);
+      viewport.text('camera position: ' + floor(cam.pos.x / textureSize) + ', ' + floor(cam.pos.y / textureSize), 10, 65);
 
       viewport.pop();
     }
