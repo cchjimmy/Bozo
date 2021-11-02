@@ -164,7 +164,7 @@ function draw() {
       viewport.push();
       viewport.textAlign(LEFT);
       viewport.noStroke();
-      // viewport.fill(0);
+      viewport.fill(0);
       viewport.textSize(11);
 
       viewport.text('scale: ' + floor(cam.scl), 10, 10);
