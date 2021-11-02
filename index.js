@@ -368,10 +368,6 @@ class Button {
     viewport.fill(0);
     viewport.textSize(11);
     viewport.text(this.name, this.x - this.w / 2, this.y - this.h / 2, this.w, this.h);
-    // viewport.strokeWeight(1);
-    // viewport.stroke(0);
-    // viewport.line(this.x - this.w / 2, this.y, this.x + this.w / 2, this.y);
-    // viewport.line(this.x, this.y - this.h / 2, this.x, this.y + this.h / 2);
 
     if (this.hover()) {
       viewport.fill(255);
