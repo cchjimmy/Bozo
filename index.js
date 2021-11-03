@@ -8,7 +8,7 @@ var cam;
 var texture;
 var font;
 var fps;
-var backdrop;
+// var backdrop;
 var viewport;
 var mousePos;
 
@@ -23,7 +23,7 @@ var selection = false;
 
 var debug = true;
 var fullsrn = false;
-var entityShadow = false;
+var entityShadow = true;
 
 var tiles = [];
 var tileIds = [];
@@ -71,6 +71,18 @@ function separateTextures(x, y) {
   }
 }
 
+// function separateTextures(x, y) {
+//   let gridArea = createVector(x, y);
+//   let n = 0;
+//   for (let y = 0; y < gridArea.y; y++) {
+//     for (let x = 0; x < gridArea.x; x++) {
+//       tiles[n] = createGraphics(textureSize, textureSize);
+//       tiles[n].image(texture, 0, 0, textureSize, textureSize, x * textureSize, y * textureSize, textureSize, textureSize);
+//       n++;
+//     }
+//   }
+// }
+
 function preload() {
   texture = loadImage('textures/texture4832.png');
   // backdrop = loadImage('textures/sky.jpeg')
@@ -83,6 +95,8 @@ function setup() {
   viewport = createGraphics(windowWidth, windowHeight);
   viewport.textFont(font);
   separateTextures(3, 2); // number of tiles (x, y) in texture
+  noCursor();
+  cursor(CROSS);
 }
 
 function windowResized() {
@@ -239,7 +253,7 @@ function mousePressed() {
       entities = [];
 
       cam = new Camera();
-      player = new Entity(2, 500, 1000, 1, 3, 'player');
+      player = new Entity(2, 500, 500, 1, 3, 'player');
       entities.push(player);
       world = createGraphics(worldSize * textureSize, worldSize * textureSize);
       generate();
@@ -282,7 +296,7 @@ function mousePressed() {
 class Camera {
   constructor() {
     this.pos = createVector(0 * textureSize, 0 * textureSize);
-    this.scl = 1;
+    this.scl = 2.5;
   }
 
   update() {
@@ -440,14 +454,20 @@ class Entity {
 
     viewport.translate(this.pos.x, -this.pos.y);
 
-    // shadow
-    if (entityShadow) {
-      viewport.noStroke();
-      viewport.fill(0, 50);
-      viewport.ellipse(0, this.size / 2, (this.size / 2 + 5), this.size / 4);
-    }
+    if (dist(cam.pos.x, cam.pos.y, this.pos.x, this.pos.y) < 10 * textureSize) {
+      // shadow
+      if (entityShadow) {
+        viewport.noStroke();
+        viewport.fill(0, 50);
+        viewport.ellipse(0, 0, (this.size / 2 + 5), this.size / 4);
+      }
 
-    viewport.image(tiles[this.id], - this.size / 2, - this.size / 2, this.size);
+      viewport.image(tiles[this.id], - this.size / 2, - this.size, this.size);
+    }
     viewport.pop();
   }
+}
+
+function dist(x1, y1, x2, y2) {
+  return ((x1 - x2) ^ 2 + (y1 - y2) ^ 2) ^ 0.5;
 }
