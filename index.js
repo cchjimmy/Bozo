@@ -1,8 +1,8 @@
-const textureSize = 16; // side length of each tile in pixels
-const worldSize = 500; // worldSize^2 textures
+const subTextureSize = 16; // side length of each tile in pixels
+const worldSize = 50; // worldSize^2 subTexture
 const viewportX = 0;
 const viewportY = 0;
-const renderRadius = 10;
+const updateRadius = 10;
 
 var player;
 var cam;
@@ -29,95 +29,141 @@ var entityShadow = true;
 
 var first = true;
 
-var textures = [];
+var subTexture = [];
 var tileIds = [];
 const tileNames = ['Grass', 'Orange thing', 'Person', 'Water', 'Rock', 'Blank'];
 
-function generate() {
-  let id;
-  noiseSeed(800);
-  world = createGraphics(worldSize * textureSize, worldSize * textureSize);
+var i = 0;
+var j = 0;
+var worldGenerated = false;
 
-  for (let j = 0; j < worldSize; j++) {
-    for (let i = 0; i < worldSize; i++) {
+function generate() {
+  // let id;
+  // randomSeed(800);
+  // world = createGraphics(worldSize * subTextureSize, worldSize * subTextureSize);
+
+  // for (let j = 0; j < worldSize; j++) {
+  //   for (let i = 0; i < worldSize; i++) {
+  //     id = 3;
+  //     if (noise(i / 100, j / 100) > 0.5) {
+  //       id = 0;
+  //       if (noise(i / 100, j / 100) > 0.6) {
+  //         id = 4;
+  //       }
+  //     }
+  //     tileIds.push(id);
+
+  //     world.image(subTexture[tileIds[i + j * worldSize]], i * subTextureSize, (worldSize - j - 1) * subTextureSize);
+  //   }
+  // }
+
+  if (worldGenerated == false) {
+    if (j == worldSize && i == 0) {
+      worldGenerated = true;
+      playing = true;
+      console.log('world generated');
+    } else {
+      if (i == 0 && j == 0) {
+        var id;
+        randomSeed(800);
+        world = createGraphics(worldSize * subTextureSize, worldSize * subTextureSize);
+      }
+
       id = 3;
       if (noise(i / 100, j / 100) > 0.5) {
         id = 0;
+        if (noise(i / 100, j / 100) > 0.6) {
+          id = 4;
+        }
       }
       tileIds.push(id);
-      world.image(textures[tileIds[i + j * worldSize]], i * textureSize, (worldSize - j - 1) * textureSize);
+      world.image(subTexture[tileIds[i + j * worldSize]], i * subTextureSize, (worldSize - j - 1) * subTextureSize);
+      // console.log(i + ', ' + j + ', ' + tileIds.length + ', ' + 'world generated ' + ((tileIds.length * 100) / (worldSize * worldSize)) + '%');
+
+      if (j < worldSize && i == worldSize - 1) {
+        i = 0;
+        j++;
+      } else {
+        i++;
+      }
     }
   }
 }
 
 function worldUpdate() {
-  viewport.translate(-cam.pos.x * textureSize, cam.pos.y * textureSize);
+  viewport.translate(-cam.pos.x * subTextureSize, cam.pos.y * subTextureSize);
 
-  if (keyIsDown(87) || keyIsDown(65) || keyIsDown(83) || keyIsDown(68) || first) {
-    for (let j = floor(cam.pos.y) - renderRadius; j < floor(cam.pos.y) + renderRadius; j++) {
-      for (let i = floor(cam.pos.x) - renderRadius; i < floor(cam.pos.x) + renderRadius; i++) {
-        if (dist(cam.pos.x, cam.pos.y, i, j) < renderRadius && i + j * worldSize >= 0 && i + j * worldSize < tileIds.length && rendered[i + j * worldSize] != tileIds[i + j * worldSize]) {
-          // if (first == true) {
-            world.image(textures[tileIds[i + j * worldSize]], i * textureSize, (worldSize - j - 1) * textureSize);
-          // } else {
-            // world.image(textures[1], i * textureSize, (worldSize - j - 1) * textureSize);
-          // }
-          // console.log(first);
-          rendered[i + j * worldSize] = tileIds[i + j * worldSize];
-        }
-      }
-    }
-    first = false;
-  }
+  if (worldGenerated == true) {
+    if (keyIsDown(87) || keyIsDown(65) || keyIsDown(83) || keyIsDown(68) || first) {
+      for (let j = floor(cam.pos.y) - updateRadius; j < floor(cam.pos.y) + updateRadius; j++) {
+        for (let i = floor(cam.pos.x) - updateRadius; i < floor(cam.pos.x) + updateRadius; i++) {
+          if (dist(cam.pos.x, cam.pos.y, i, j) < updateRadius && i + j * worldSize >= 0 && rendered[i + j * worldSize] != tileIds[i + j * worldSize]) {
 
-  entities.forEach(entity => {
-    if (dist(entity.pos.x, entity.pos.y, cam.pos.x, cam.pos.y) <= renderRadius + 2) {
-      for (let j = floor(entity.pos.y) - 1; j < floor(entity.pos.y) + 1 * 2; j++) {
-        for (let i = floor(entity.pos.x) - 1; i < floor(entity.pos.x) + 1 * 2; i++) {
-          if (dist(entity.pos.x, entity.pos.y, i, j) <= 2 && i + j * worldSize >= 0 && i + j * worldSize < tileIds.length) {
-            world.image(textures[tileIds[i + j * worldSize]], i * textureSize, (worldSize - j - 1) * textureSize);
+            // if (first == true) {
+            world.image(subTexture[tileIds[i + j * worldSize]], i * subTextureSize, (worldSize - j - 1) * subTextureSize);
+            // } else {
+            // world.image(subTexture[1], i * subTextureSize, (worldSize - j - 1) * subTextureSize);
+            // }
+            // console.log(first);
+            rendered[i + j * worldSize] = tileIds[i + j * worldSize];
           }
         }
       }
+      first = false;
     }
-  });
-  
-  entities.sort((a, b) => { return - a.pos.y + b.pos.y });
-  entities.forEach(entity => {
-    entity.update();
-  });
 
-  viewport.image(world, 0, -worldSize * textureSize);
+    entities.forEach(entity => {
+      if (dist(entity.pos.x, entity.pos.y, cam.pos.x, cam.pos.y) <= updateRadius + 1) {
+        for (let j = floor(entity.pos.y) - 1; j < floor(entity.pos.y) + 1 * 2; j++) {
+          for (let i = floor(entity.pos.x) - 1; i < floor(entity.pos.x) + 1 * 2; i++) {
+            if (dist(entity.pos.x, entity.pos.y, i, j) <= 2 && i + j * worldSize >= 0 && i + j * worldSize < tileIds.length) {
+              world.image(subTexture[tileIds[i + j * worldSize]], i * subTextureSize, (worldSize - j - 1) * subTextureSize);
+            }
+          }
+        }
+      }
+    });
+
+    entities.sort((a, b) => { return - a.pos.y + b.pos.y });
+    entities.forEach(entity => {
+      entity.update();
+    });
+
+
+  } else {
+    generate();
+  }
+  viewport.image(world, 0, -worldSize * subTextureSize);
 }
 
-function separateTextureAtlas(x, y, textureSize) {
-  let gridArea = { x, y };
+function separateTextureAtlas(subTextureSize) {
+  let textureAtlasSize = { x: texture.width / subTextureSize, y: texture.height / subTextureSize };
   let n = 0;
-  for (let y = 0; y < gridArea.y; y++) {
-    for (let x = 0; x < gridArea.x; x++) {
-      textures[n] = createImage(textureSize, textureSize);
-      textures[n].loadPixels();
+  for (let y = 0; y < textureAtlasSize.y; y++) {
+    for (let x = 0; x < textureAtlasSize.x; x++) {
+      subTexture[n] = createImage(subTextureSize, subTextureSize);
+      subTexture[n].loadPixels();
 
-      for (let j = y * textureSize; j < (1 + y) * textureSize; j++) {
-        for (let i = x * textureSize; i < (1 + x) * textureSize; i++) {
+      for (let j = y * subTextureSize; j < (1 + y) * subTextureSize; j++) {
+        for (let i = x * subTextureSize; i < (1 + x) * subTextureSize; i++) {
           let c = texture.get(i, j);
-          textures[n].set(i - x * textureSize, j - y * textureSize, c);
+          subTexture[n].set(i - x * subTextureSize, j - y * subTextureSize, c);
         }
       }
 
-      textures[n].updatePixels();
+      subTexture[n].updatePixels();
       n++;
     }
   }
 }
 
 // function separateTextureAtlas(x, y) {
-//   let gridArea = createVector(x, y);
+//   let textureAtlasSize = createVector(x, y);
 //   let n = 0;
-//   for (let y = 0; y < gridArea.y; y++) {
-//     for (let x = 0; x < gridArea.x; x++) {
-//       textures[n] = createGraphics(textureSize, textureSize);
-//       textures[n].image(texture, 0, 0, textureSize, textureSize, x * textureSize, y * textureSize, textureSize, textureSize);
+//   for (let y = 0; y < textureAtlasSize.y; y++) {
+//     for (let x = 0; x < textureAtlasSize.x; x++) {
+//       subTexture[n] = createGraphics(subTextureSize, subTextureSize);
+//       subTexture[n].image(texture, 0, 0, subTextureSize, subTextureSize, x * subTextureSize, y * subTextureSize, subTextureSize, subTextureSize);
 //       n++;
 //     }
 //   }
@@ -125,8 +171,8 @@ function separateTextureAtlas(x, y, textureSize) {
 
 function preload() {
   texture = loadImage('textures/texture4832.png');
-  // backdrop = loadImage('textures/sky.jpeg')
-  // texture = loadImage('textures/texture.png');
+  // backdrop = loadImage('subTexture/sky.jpeg')
+  // texture = loadImage('subTexture/texture.png');
   // font = loadFont('fonts/Mulish-VariableFont_wght.ttf');
 
 }
@@ -134,10 +180,11 @@ function preload() {
 function setup() {
   createCanvas(windowWidth, windowHeight);
   viewport = createGraphics(windowWidth, windowHeight);
+  pixelDensity(1);
   // viewport.textFont(font);
-  separateTextureAtlas(3, 2, textureSize); // number of textures (x, y) in texture
+  separateTextureAtlas(subTextureSize);
 
-  noCursor();
+  // change cursor, crosshair looks pretty good imo
   cursor('crosshair');
 
   // main menu
@@ -162,19 +209,14 @@ function setup() {
 }
 
 function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
+  resizeCanvas(windowWidth, windowHeight, false);
+  viewport = null;
   viewport = createGraphics(windowWidth, windowHeight);
 
-  // mainMenu
-  buttons[0] = new Button('Play', viewport.width / 2, viewport.height * 0.60, true, 11, null, null, 100, 35, 10, 10, 10, 10);
-  buttons[1] = new Button('Settings', viewport.width / 2, viewport.height * 0.60 + 40, true, 11, null, null, 100, 35, 10, 10, 10, 10);
-
-  // settingsMenu
-  toggles[0] = new Toggle('Fullscreen', fullsrn, 50, 100);
-  toggles[1] = new Toggle('Debug', debug, 50, 100 + 30);
-  toggles[2] = new Toggle('Entity shadow', entityShadow, 50, 100 + 60);
-
-  buttons[6] = new Button('X', viewport.width - 40, 20, true, 20);
+  // update positions for buttons
+  buttons[0].pos = { x: viewport.width / 2, y: viewport.height * 0.60 }; // play button
+  buttons[1].pos = { x: viewport.width / 2, y: viewport.height * 0.60 + 40 }; // settings button
+  buttons[6].pos = { x: viewport.width - 40, y: 20 }; // x button on settings menu
 
   // if (selection) {
   //   buttons[2] = new Button('', width * 0.25, 110, 150, 40);
@@ -185,14 +227,26 @@ function windowResized() {
 }
 
 function draw() {
-  if (keyIsDown(27)) { // esc
+  if (keyIsDown(27)) { // esc back to main menu
     mainMenu = true;
     playing = false;
     settingsMenu = false;
     selection = false;
+
+    player = null;
+    cam = null;
+    world = null;
+
+    worldGenerated = false;
+
+    tileIds = [];
+    entities = [];
+    rendered = [];
+    i = 0;
+    j = 0;
   }
 
-  if (keyIsDown(82)) { // r
+  if (keyIsDown(82)) { // r clear all entities but not player
     entities = [];
     entities.push(player);
   }
@@ -247,7 +301,7 @@ function draw() {
     worldUpdate();
     viewport.pop();
 
-    if (debug) {
+    if (debug && worldGenerated) {
       viewport.push();
       viewport.noStroke();
       viewport.fill(0, 100);
@@ -298,13 +352,10 @@ function mousePressed() {
 
       first = true;
 
-      tileIds = [];
-      entities = [];
-      rendered = [];
-
-      generate();
       cam = new Camera();
       player = new Entity(2, 0, 0, 1, 1, 0.1, 'player');
+
+      // generate();
     }
 
     if (buttons[1].hover()) { // settings
@@ -319,31 +370,41 @@ function mousePressed() {
     if (toggles[0].hover()) { // fullscreen
       fullscreen(!fullsrn);
       fullsrn = !fullsrn;
+      toggles[0].state = fullsrn
     }
 
     if (toggles[1].hover()) { // debug
       debug = !debug;
+      toggles[1].state = debug;
     }
 
     if (toggles[2].hover()) { // entity shadow
       entityShadow = !entityShadow;
+      toggles[2].state = entityShadow;
+    }
+
+    if (buttons[6].hover()) {
+      mainMenu = true;
+      playing = false;
+      settingsMenu = false;
+      selection = false;
     }
   }
 
   if (selection) {
     // if (buttons[2].hover()) {
-    //   image(textures[2], width * 0.6, 100, 100, 100);
+    //   image(subTexture[2], width * 0.6, 100, 100, 100);
     // }
   }
 
-  if (playing && mousePos != null) {
+  if (playing && mousePos != null && worldGenerated) {
     new Entity(2, mousePos.x, mousePos.y, 1, 1, 0, 'npc');
   }
 }
 
 class Camera {
   constructor() {
-    this.pos = { x: 0 * textureSize, y: 0 * textureSize };
+    this.pos = { x: 0 * subTextureSize, y: 0 * subTextureSize };
     this.scl = 2.5;
   }
 
@@ -352,7 +413,7 @@ class Camera {
     this.pos = player.pos;
 
     fps = 1 / (deltaTime / 1000);
-    mousePos = { x: (mouseX - viewport.width / 2) / (textureSize * this.scl) + this.pos.x, y: -(mouseY - viewport.height / 2) / (textureSize * this.scl) + this.pos.y };
+    mousePos = { x: (mouseX - viewport.width / 2) / (subTextureSize * this.scl) + this.pos.x, y: -(mouseY - viewport.height / 2) / (subTextureSize * this.scl) + this.pos.y };
 
     if (keyIsDown(38)) { // ArrowUp
       this.scl += 0.01;
@@ -426,7 +487,7 @@ class Button {
     viewport.text(this.name, this.pos.x, this.pos.y);
 
     if (this.hover() && this.bool) {
-      viewport.fill(255);
+      viewport.fill(this.col.bc);
       viewport.strokeWeight(10);
       viewport.textSize(20);
       viewport.text('>', this.pos.x - this.size.w / 2 - 15, this.pos.y - 4);
@@ -485,8 +546,9 @@ class Entity {
     this.size = { w: width, h: height };
     this.speed = speed;
     this.type = type;
+    this.texture = subTexture[this.id];
 
-    if (tileId > textures.length || width <= 0 || height <= 0 || speed < 0 || type == null) {
+    if (tileId > subTexture.length || width <= 0 || height <= 0 || speed < 0 || type == null) {
       this.id = 2;
       this.pos = cam.pos;
       this.size = { w: 1, h: 1 };
@@ -499,7 +561,7 @@ class Entity {
   }
 
   update() {
-    let speed = this.speed * textureSize * (1 / fps); // because of delta time this.speed needs to be in the update function
+    let speed = this.speed * subTextureSize * (1 / fps); // because of delta time this.speed needs to be in the update function
 
     if (this.type == 'player') {
       // movement
@@ -533,28 +595,28 @@ class Entity {
       this.pos.y = this.size.h * worldSize - this.size.h / 2;
     }
 
-    if (dist(cam.pos.x, cam.pos.y, this.pos.x, this.pos.y) < renderRadius && this.mesh != null) {
+    if (dist(cam.pos.x, cam.pos.y, this.pos.x, this.pos.y) < updateRadius && this.mesh != null) {
       world.push();
-      world.translate(this.pos.x * textureSize, (-this.pos.y + worldSize) * textureSize);
-      world.image(this.mesh, -this.size.w * textureSize / 2, - this.size.h * textureSize);
+      world.translate(this.pos.x * subTextureSize, (-this.pos.y + worldSize) * subTextureSize);
+      world.image(this.mesh, -this.size.w * subTextureSize / 2, - this.size.h * subTextureSize);
       world.pop();
     }
   }
 
   show() {
-    this.shadowSize = { w: (this.size.w * textureSize / 2 + 5), h: this.size.h * textureSize / 4 }
-    this.mesh = createGraphics(this.size.w * textureSize, this.size.h * textureSize + this.shadowSize.h / 2);
+    this.shadowSize = { w: (this.size.w * subTextureSize / 2 + 5), h: this.size.h * subTextureSize / 4 }
+    this.mesh = createGraphics(this.size.w * subTextureSize, this.size.h * subTextureSize + this.shadowSize.h / 2);
 
     if (entityShadow) {
       if (this.type == 'player' || this.type == 'npc') {
         // shadow
         this.mesh.noStroke();
         this.mesh.fill(0, 50);
-        this.mesh.ellipse(this.size.w * textureSize / 2, this.size.h * textureSize, this.shadowSize.w, this.shadowSize.h);
+        this.mesh.ellipse(this.size.w * subTextureSize / 2, this.size.h * subTextureSize, this.shadowSize.w, this.shadowSize.h);
       }
     }
 
-    this.mesh.image(textures[this.id], 0, 0);
+    this.mesh.image(this.texture, 0, 0);
   }
 }
 
