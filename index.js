@@ -1,17 +1,22 @@
 const subTextureSize = 16; // side length of each tile in pixels
-const worldSize = 50; // worldSize^2 subTexture
+const worldSize = 10; // worldSize^2 subTexture
 const viewportX = 0;
 const viewportY = 0;
-const updateRadius = 10;
+const updateRadius = 5;
 
 var player;
 var cam;
-var texture;
 var font;
 var fps;
 // var backdrop;
-var viewport;
 var mousePos;
+
+var texture;
+var gun;
+
+var viewport;
+var world;
+var shadow;
 
 var buttons = [];
 var toggles = [];
@@ -92,19 +97,21 @@ function generate() {
 
 function worldUpdate() {
   viewport.translate(-cam.pos.x * subTextureSize, cam.pos.y * subTextureSize);
+  if (world != undefined) {
+    viewport.image(world, 0, -worldSize * subTextureSize);
+  }
 
   if (worldGenerated == true) {
     if (keyIsDown(87) || keyIsDown(65) || keyIsDown(83) || keyIsDown(68) || first) {
       for (let j = floor(cam.pos.y) - updateRadius; j < floor(cam.pos.y) + updateRadius; j++) {
         for (let i = floor(cam.pos.x) - updateRadius; i < floor(cam.pos.x) + updateRadius; i++) {
-          let pos = { pos: { x: i, y: j } };
-          if (dist2D(cam, pos) < updateRadius && i + j * worldSize >= 0 && rendered[i + j * worldSize] != tileIds[i + j * worldSize]) {
+          if (dist2D(cam.pos, { x: i, y: j }) < updateRadius && i + j * worldSize >= 0 && rendered[i + j * worldSize] != tileIds[i + j * worldSize]) {
 
-            if (first == true) {
+            // if (first == true) {
             world.image(subTexture[tileIds[i + j * worldSize]], i * subTextureSize, (worldSize - j - 1) * subTextureSize);
-            } else {
-            world.image(subTexture[1], i * subTextureSize, (worldSize - j - 1) * subTextureSize);
-            }
+            // } else {
+            // world.image(subTexture[1], i * subTextureSize, (worldSize - j - 1) * subTextureSize);
+            // }
             // console.log(first);
             rendered[i + j * worldSize] = tileIds[i + j * worldSize];
           }
@@ -113,18 +120,18 @@ function worldUpdate() {
       first = false;
     }
 
-    entities.forEach(entity => {
-      if (dist2D(entity, cam) <= updateRadius + 1) {
-        for (let j = floor(entity.pos.y) - 1; j < floor(entity.pos.y) + 1 * 2; j++) {
-          for (let i = floor(entity.pos.x) - 1; i < floor(entity.pos.x) + 1 * 2; i++) {
-            let pos = { pos: { x: i, y: j } };
-            if (dist2D(entity, pos) <= 2 && i + j * worldSize >= 0 && i + j * worldSize < tileIds.length) {
-              world.image(subTexture[tileIds[i + j * worldSize]], i * subTextureSize, (worldSize - j - 1) * subTextureSize);
-            }
-          }
-        }
-      }
-    });
+    // entities.forEach(entity => { // updates tiles underneath entities so that they dont look weird
+    //   if (dist2D(entity, cam) <= updateRadius + 1) {
+    //     for (let j = floor(entity.pos.y) - 1; j < floor(entity.pos.y) + 2; j++) {
+    //       for (let i = floor(entity.pos.x) - 1; i < floor(entity.pos.x) + 2; i++) {
+    //         // let pos = { pos: { x: i, y: j } };
+    //         if (i + j * worldSize >= 0 && i + j * worldSize < tileIds.length) {
+    //           world.image(subTexture[tileIds[i + j * worldSize]], i * subTextureSize, (worldSize - j - 1) * subTextureSize);
+    //         }
+    //       }
+    //     }
+    //   }
+    // });
 
     entities.sort((a, b) => { return - a.pos.y + b.pos.y });
     entities.forEach(entity => {
@@ -135,7 +142,6 @@ function worldUpdate() {
   } else {
     generate();
   }
-  viewport.image(world, 0, -worldSize * subTextureSize);
 }
 
 function separateTextureAtlas(subTextureSize) {
@@ -159,6 +165,54 @@ function separateTextureAtlas(subTextureSize) {
   }
 }
 
+function makeShadow(size, brightness) {
+  shadow = createImage(size, size);
+  fog = createImage(size, size);
+
+  let n = 0;
+  brightness = map(brightness, 0, 255, 255, 0);
+  shadow.loadPixels();
+  fog.loadPixels();
+  for (let j = -size / 2; j < size / 2; j++) {
+    for (let i = -size / 2; i < size / 2; i++) {
+      dist = dist2D({ x: i, y: j }, { x: 0, y: 0 });
+
+      r = 0;
+      g = 0;
+      b = 0;
+      a = 0;
+
+      if (dist <= size / 2) {
+        a = brightness;
+      }
+
+      shadow.pixels[n] = r;
+      shadow.pixels[n + 1] = g;
+      shadow.pixels[n + 2] = b;
+      shadow.pixels[n + 3] = a;
+
+      // rgb 58, 74, 76 looks creepy with dist * 1
+      r = 0; // 147
+      g = 0; // 189
+      b = 0; // 194
+      a = dist * 0.2;
+
+      if (dist <= size / 2) {
+        // a = 0;
+      }
+
+      fog.pixels[n] = r;
+      fog.pixels[n + 1] = g;
+      fog.pixels[n + 2] = b;
+      fog.pixels[n + 3] = a;
+
+      n += 4;
+    }
+  }
+  fog.updatePixels();
+  shadow.updatePixels();
+}
+
 // function separateTextureAtlas(x, y) {
 //   let textureAtlasSize = createVector(x, y);
 //   let n = 0;
@@ -173,6 +227,7 @@ function separateTextureAtlas(subTextureSize) {
 
 function preload() {
   texture = loadImage('textures/texture4832.png');
+  gun = loadImage('textures/gun.png', img => {img.width *= 0.01; img.height *= 0.01});
   // backdrop = loadImage('subTexture/sky.jpeg')
   // texture = loadImage('subTexture/texture.png');
   // font = loadFont('fonts/Mulish-VariableFont_wght.ttf');
@@ -182,17 +237,19 @@ function preload() {
 function setup() {
   createCanvas(windowWidth, windowHeight);
   viewport = createGraphics(windowWidth, windowHeight);
+
   pixelDensity(1);
   // viewport.textFont(font);
   separateTextureAtlas(subTextureSize);
+  makeShadow(500, 200);
 
   // change cursor, crosshair looks pretty good imo
   cursor('crosshair');
 
   // main menu
   // buttons
-  buttons[0] = new Button('Play', viewport.width / 2, viewport.height * 0.60, true, 11, null, null, 100, 35, 10, 10, 10, 10);
-  buttons[1] = new Button('Settings', viewport.width / 2, viewport.height * 0.60 + 40, true, 11, null, null, 100, 35, 10, 10, 10, 10);
+  buttons[0] = new Button('Play', viewport.width / 2, viewport.height * 0.60, true, 11, undefined, undefined, 100, 35, 10, 10, 10, 10);
+  buttons[1] = new Button('Settings', viewport.width / 2, viewport.height * 0.60 + 40, true, 11, undefined, undefined, 100, 35, 10, 10, 10, 10);
 
   //settings
   // toggles
@@ -211,8 +268,9 @@ function setup() {
 }
 
 function windowResized() {
-  resizeCanvas(windowWidth, windowHeight, false);
-  viewport = null;
+  resizeCanvas(windowWidth, windowHeight, true);
+
+  viewport.remove();
   viewport = createGraphics(windowWidth, windowHeight);
 
   // update positions for buttons
@@ -235,9 +293,10 @@ function draw() {
     settingsMenu = false;
     selection = false;
 
-    player = null;
-    cam = null;
-    world = null;
+    player = undefined;
+    cam = undefined;
+  
+    world.remove();
 
     worldGenerated = false;
 
@@ -248,7 +307,7 @@ function draw() {
     j = 0;
   }
 
-  if (keyIsDown(82)) { // r clear all entities but not player
+  if (keyIsDown(82)) { // r clear all entities but not player    
     entities = [];
     entities.push(player);
   }
@@ -296,12 +355,14 @@ function draw() {
 
   if (playing) {
     // background
-    viewport.background('#93bdc2');
+    viewport.background(147, 189, 194);
 
     viewport.push();
     cam.update();
     worldUpdate();
     viewport.pop();
+
+    viewport.image(fog, 0, 0, viewport.width, viewport.height);
 
     if (debug && worldGenerated) {
       viewport.push();
@@ -341,6 +402,9 @@ function draw() {
   }
 
   image(viewport, viewportX, viewportY);
+  // image(shadow, 0, 0);
+  // image(fog, 0, 0);
+  // image(gun, 0, 0);
 }
 
 function mousePressed() {
@@ -355,7 +419,7 @@ function mousePressed() {
       first = true;
 
       cam = new Camera();
-      player = new Entity(2, 0, 0, 1, 1, 0.1, 'player');
+      player = new Entity(2, 1, 1, 1, 1, 0.1, 'player');
 
       // generate();
     }
@@ -399,8 +463,9 @@ function mousePressed() {
     // }
   }
 
-  if (playing && mousePos != null && worldGenerated) {
+  if (playing && mousePos != undefined && worldGenerated) {
     new Entity(2, mousePos.x, mousePos.y, 1, 1, 0, 'npc');
+
   }
 }
 
@@ -455,25 +520,25 @@ class Button {
     this.col = { tc: textColor, bc: buttonColor };
     this.bool = hasHoverEffect;
 
-    if (name == null) {
+    if (name == undefined) {
       this.name = '';
     }
-    if (hasHoverEffect == null) {
+    if (hasHoverEffect == undefined) {
       this.bool = false;
     }
-    if (textSize == null) {
+    if (textSize == undefined) {
       this.size.ts = 11;
     }
-    if (textColor == null) {
+    if (textColor == undefined) {
       this.col.tc = 0;
     }
-    if (buttonColor == null) {
+    if (buttonColor == undefined) {
       this.col.bc = 255;
     }
-    if (width == null) {
+    if (width == undefined) {
       this.size.w = textWidth(this.name) + 10;
     }
-    if (height == null) {
+    if (height == undefined) {
       this.size.h = 20;
     }
   }
@@ -549,8 +614,16 @@ class Entity {
     this.speed = speed;
     this.type = type;
     this.texture = subTexture[this.id];
+    this.shadowWOff = this.size.w / 3
+    this.shadowSize = { w: (this.size.w - this.shadowWOff) * subTextureSize, h: this.size.h * subTextureSize / 4 };
+    if (type == 'player') {
+      this.weapon = gun;
+    } else {
+      this.weapon = gun;
+    }
+    
 
-    if (tileId > subTexture.length || width <= 0 || height <= 0 || speed < 0 || type == null) {
+    if (tileId > subTexture.length || width <= 0 || height <= 0 || speed < 0 || type == undefined) {
       this.id = 2;
       this.pos = cam.pos;
       this.size = { w: 1, h: 1 };
@@ -558,8 +631,6 @@ class Entity {
       this.type = 'npc';
     }
     entities.push(this);
-
-    this.show();
   }
 
   update() {
@@ -596,34 +667,43 @@ class Entity {
     if (this.pos.y > this.size.h * worldSize - this.size.h / 2) {
       this.pos.y = this.size.h * worldSize - this.size.h / 2;
     }
-
-    if (dist2D(cam, this) < updateRadius && this.mesh != null) {
-      world.push();
-      world.translate(this.pos.x * subTextureSize, (-this.pos.y + worldSize) * subTextureSize);
-      world.image(this.mesh, -this.size.w * subTextureSize / 2, - this.size.h * subTextureSize);
-      world.pop();
-    }
+    this.show();
   }
 
   show() {
-    this.shadowSize = { w: (this.size.w * subTextureSize / 2 + 5), h: this.size.h * subTextureSize / 4 }
-    this.mesh = createGraphics(this.size.w * subTextureSize, this.size.h * subTextureSize + this.shadowSize.h / 2);
-
-    if (entityShadow) {
-      if (this.type == 'player' || this.type == 'npc') {
-        // shadow
-        this.mesh.noStroke();
-        this.mesh.fill(0, 50);
-        this.mesh.ellipse(this.size.w * subTextureSize / 2, this.size.h * subTextureSize, this.shadowSize.w, this.shadowSize.h);
+    if (dist2D(cam.pos, this.pos) < updateRadius && this.texture != undefined) {
+      viewport.push();
+      viewport.translate(this.pos.x * subTextureSize, (-this.pos.y) * subTextureSize);
+      if (entityShadow && this.type == 'player' || this.type == 'npc') {
+        viewport.image(shadow, ((- this.size.w + this.shadowWOff) / 2) * subTextureSize, - this.shadowSize.h / 2, this.shadowSize.w, this.shadowSize.h);
       }
+      viewport.image(this.texture, -this.size.w * subTextureSize / 2, - this.size.h * subTextureSize);
+      
+      let angle = -atan2(mousePos.y - this.pos.y - this.size.h / 2, mousePos.x - this.pos.x)
+      viewport.translate(0, -this.size.h * subTextureSize / 2)
+      viewport.rotate(angle);
+      // viewport.fill('red');
+      viewport.translate(this.size.w * subTextureSize / 4, - this.weapon.height / 2);
+      // viewport.rect(0, 0, this.weapon.width, this.weapon.height);
+      if (-angle > 90 * PI / 180) {
+        viewport.scale(1, -1);
+        viewport.translate(0, -this.weapon.height);
+      } else if (-angle < -90 * PI / 180) {
+        viewport.scale(1, -1);
+        viewport.translate(0, -this.weapon.height);
+      } else {
+        viewport.scale(1);
+      }
+      viewport.image(this.weapon, 0, 0);
+      
+      // console.log(atan2(mousePos.y, mousePos.x));
+      viewport.pop();
     }
-
-    this.mesh.image(this.texture, 0, 0);
   }
 }
 
 function dist2D(a, b) {
-  return ((a.pos.x - b.pos.x) ** 2 + (a.pos.y - b.pos.y) ** 2) ** 0.5;
+  return ((a.x - b.x) ** 2 + (a.y - b.y) ** 2) ** 0.5;
 }
 
 class Slider {
