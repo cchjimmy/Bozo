@@ -97,13 +97,14 @@ function worldUpdate() {
     if (keyIsDown(87) || keyIsDown(65) || keyIsDown(83) || keyIsDown(68) || first) {
       for (let j = floor(cam.pos.y) - updateRadius; j < floor(cam.pos.y) + updateRadius; j++) {
         for (let i = floor(cam.pos.x) - updateRadius; i < floor(cam.pos.x) + updateRadius; i++) {
-          if (dist(cam.pos.x, cam.pos.y, i, j) < updateRadius && i + j * worldSize >= 0 && rendered[i + j * worldSize] != tileIds[i + j * worldSize]) {
+          let pos = { pos: { x: i, y: j } };
+          if (dist2D(cam, pos) < updateRadius && i + j * worldSize >= 0 && rendered[i + j * worldSize] != tileIds[i + j * worldSize]) {
 
-            // if (first == true) {
+            if (first == true) {
             world.image(subTexture[tileIds[i + j * worldSize]], i * subTextureSize, (worldSize - j - 1) * subTextureSize);
-            // } else {
-            // world.image(subTexture[1], i * subTextureSize, (worldSize - j - 1) * subTextureSize);
-            // }
+            } else {
+            world.image(subTexture[1], i * subTextureSize, (worldSize - j - 1) * subTextureSize);
+            }
             // console.log(first);
             rendered[i + j * worldSize] = tileIds[i + j * worldSize];
           }
@@ -113,10 +114,11 @@ function worldUpdate() {
     }
 
     entities.forEach(entity => {
-      if (dist(entity.pos.x, entity.pos.y, cam.pos.x, cam.pos.y) <= updateRadius + 1) {
+      if (dist2D(entity, cam) <= updateRadius + 1) {
         for (let j = floor(entity.pos.y) - 1; j < floor(entity.pos.y) + 1 * 2; j++) {
           for (let i = floor(entity.pos.x) - 1; i < floor(entity.pos.x) + 1 * 2; i++) {
-            if (dist(entity.pos.x, entity.pos.y, i, j) <= 2 && i + j * worldSize >= 0 && i + j * worldSize < tileIds.length) {
+            let pos = { pos: { x: i, y: j } };
+            if (dist2D(entity, pos) <= 2 && i + j * worldSize >= 0 && i + j * worldSize < tileIds.length) {
               world.image(subTexture[tileIds[i + j * worldSize]], i * subTextureSize, (worldSize - j - 1) * subTextureSize);
             }
           }
@@ -595,7 +597,7 @@ class Entity {
       this.pos.y = this.size.h * worldSize - this.size.h / 2;
     }
 
-    if (dist(cam.pos.x, cam.pos.y, this.pos.x, this.pos.y) < updateRadius && this.mesh != null) {
+    if (dist2D(cam, this) < updateRadius && this.mesh != null) {
       world.push();
       world.translate(this.pos.x * subTextureSize, (-this.pos.y + worldSize) * subTextureSize);
       world.image(this.mesh, -this.size.w * subTextureSize / 2, - this.size.h * subTextureSize);
@@ -620,8 +622,8 @@ class Entity {
   }
 }
 
-function dist(x1, y1, x2, y2) {
-  return ((x1 - x2) ^ 2 + (y1 - y2) ^ 2) ^ 0.5;
+function dist2D(a, b) {
+  return ((a.pos.x - b.pos.x) ** 2 + (a.pos.y - b.pos.y) ** 2) ** 0.5;
 }
 
 class Slider {
