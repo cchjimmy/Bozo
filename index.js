@@ -1,8 +1,8 @@
 const subTextureSize = 16; // side length of each tile in pixels
-const worldSize = 10; // worldSize^2 subTexture
+const worldSize = {w: 500, h: 100};
 const viewportX = 0;
 const viewportY = 0;
-const updateRadius = 5;
+const updateRadius = 10;
 
 var player;
 var cam;
@@ -46,40 +46,26 @@ var hoverCellClick = false;
 function generate() {
 
   if (first) {
-    i = 0, j = 0;
     worldGenerated = false;
     randomSeed(800);
     first = false;
   }
 
   if (worldGenerated == false) {
-    if (j == worldSize && i == 0) {
-      worldGenerated = true;
-      console.log('world generated');
-    } else {
-
-      id = 3;
-      if (noise(i / 100, j / 100) > 0.5) {
-        id = 0;
-        if (noise(i / 100, j / 100) > 0.6) {
-          id = 4;
+    for (let j = 0; j < worldSize.h; j++) {
+      for (let i = 0; i < worldSize.w; i++) {
+        id = 3;
+        if (noise(i / 100, j / 100) > 0.5) {
+          id = 0;
+          if (noise(i / 100, j / 100) > 0.6) {
+            id = 4;
+          }
         }
-      }
-
-      tileIds.push(id);
-      rendered[i + j * worldSize] = tileIds[i + j * worldSize];
-
-      // console.log('i: ' + i + ', ' + 'j: ' + j + ', ' + 'tileIds length: ' + tileIds.length + ', ' + 'world generated ' + ((tileIds.length * 100) / (worldSize * worldSize)) + '%');
-
-      world.image(subTexture[tileIds[i + j * worldSize]], i * subTextureSize, (worldSize - j - 1) * subTextureSize);
-
-      if (j < worldSize && i == worldSize - 1) {
-        i = 0;
-        j++;
-      } else {
-        i++;
+        tileIds.push(id);
+        // console.log('i: ' + i + ', ' + 'j: ' + j + ', ' + 'tileIds length: ' + tileIds.length + ', ' + 'world generated ' + ((tileIds.length * 100) / (worldSize.w * worldSize.h)) + '%');
       }
     }
+    worldGenerated = true;
   }
 }
 
@@ -88,24 +74,19 @@ function worldUpdate() {
 
   if (worldGenerated == true) {
 
-    viewport.image(world, 0, -worldSize * subTextureSize);
-
-    if (hoverCellClick == false) {
-      for (let j = floor(cam.pos.y) - updateRadius; j < floor(cam.pos.y) + updateRadius; j++) {
-        for (let i = floor(cam.pos.x) - updateRadius; i < floor(cam.pos.x) + updateRadius; i++) {
-          if (dist2D(cam.pos, { x: i, y: j }) < updateRadius && i + j * worldSize >= 0 && rendered[i + j * worldSize] != tileIds[i + j * worldSize]) {
-
-            // if (first == true) {
-            world.image(subTexture[tileIds[i + j * worldSize]], i * subTextureSize, (worldSize - j - 1) * subTextureSize);
-            // } else {
-            // world.image(subTexture[1], i * subTextureSize, (worldSize - j - 1) * subTextureSize);
-            // }
-            // console.log(first);
-            rendered[i + j * worldSize] = tileIds[i + j * worldSize];
+    if (first) {
+      for (let j = 0; j < worldSize.h; j++) {
+        for (let i = 0; i < worldSize.w; i++) {
+          if (i + j * worldSize.w >= 0 && rendered[i + j * worldSize.w] != tileIds[i + j * worldSize.w]) {
+            world.image(subTexture[tileIds[i + j * worldSize.w]], i * subTextureSize, (worldSize.h - j - 1) * subTextureSize);
+            rendered[i + j * worldSize.w] = tileIds[i + j * worldSize.w];
           }
         }
       }
+      first = false;
     }
+
+    viewport.image(world, 0, -worldSize.h * subTextureSize);
 
     entities.sort((a, b) => { return - a.pos.y + b.pos.y });
     entities.forEach(entity => {
@@ -114,6 +95,7 @@ function worldUpdate() {
 
   } else {
     generate();
+    first = true;
   }
 }
 
@@ -122,7 +104,7 @@ function separateTextureAtlas(textureAtlas, subTextureSize) {
   let n = 0;
   for (let y = 0; y < textureAtlasSize.y; y++) {
     for (let x = 0; x < textureAtlasSize.x; x++) {
-      subTexture[n] = createImage(subTextureSize, subTextureSize);
+      subTexture[n] = createGraphics(subTextureSize, subTextureSize);
       subTexture[n].loadPixels();
 
       for (let j = y * subTextureSize; j < (1 + y) * subTextureSize; j++) {
@@ -200,7 +182,6 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
   viewport = createGraphics(windowWidth, windowHeight);
   debugWindow = createGraphics(210, 180);
-  world = createGraphics(worldSize * subTextureSize, worldSize * subTextureSize);
 
   // this looks amazing with the drawing context but it would be too laggy
   // viewport.drawingContext.shadowOffsetX = 5;
@@ -220,6 +201,48 @@ function setup() {
   defineItems();
 }
 
+function defineItems() {
+  // items
+  items = [
+    new Item(undefined, 'undefined', 'this is nothing'),
+    new Item(texture[1], 'Gun', 'It\'s a gun'),
+    new Item(subTexture[2], 'Person', 'This is a person\n *Press r to remove all')
+  ]
+
+  // inventory cells
+  for (let i = 0; i < 4; i++) {
+
+    if (inventoryItems[i] != undefined) {
+      inventoryCells[i] = new InventoryCell({ x: 10 + 55 * i, y: viewport.height - 60 }, inventoryItems[i], { w: 50, h: 50 }, i);
+    } else {
+      inventoryCells[i] = new InventoryCell({ x: 10 + 55 * i, y: viewport.height - 60 }, items[0], { w: 50, h: 50 }, i);
+    }
+
+  }
+
+  // buttons
+  buttons = [
+    new Button('Play', viewport.width / 2, viewport.height * 0.60, true, 11, undefined, undefined, 100, 35, 10, 10, 10, 10),
+    new Button('Settings', viewport.width / 2, viewport.height * 0.60 + 40, true, 11, undefined, undefined, 100, 35, 10, 10, 10, 10),
+    new Button('X', width - 40, 20, true, 12)
+  ]
+
+  // toggles
+  toggles = [
+    new Toggle('Fullscreen', fullsrn, 50, 100),
+    new Toggle('Debug', debug, 50, 100 + 30),
+    new Toggle('Entity shadow', entityShadow, 50, 100 + 60)
+  ]
+
+  // selection menu
+  // buttons
+  // buttons[2] = new Button('', width * 0.25, 110, 150, 40);
+  // buttons[3] = new Button('', width * 0.25, 160, 150, 40);
+  // buttons[4] = new Button('', width * 0.25, 210, 150, 40);
+  // buttons[5] = new Button('', width * 0.25, 260, 150, 40);
+
+}
+
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight, true);
 
@@ -229,7 +252,7 @@ function windowResized() {
   // update positions for buttons
   buttons[0].pos = { x: viewport.width / 2, y: viewport.height * 0.60 }; // play button
   buttons[1].pos = { x: viewport.width / 2, y: viewport.height * 0.60 + 40 }; // settings button
-  buttons[6].pos = { x: viewport.width - 40, y: 20 }; // x button on settings menu
+  buttons[2].pos = { x: viewport.width - 40, y: 20 }; // x button on settings menu
 
   // if (selection) {
   //   buttons[2] = new Button('', width * 0.25, 110, 150, 40);
@@ -302,7 +325,7 @@ function draw() {
     for (let i = 0; i <= 2; i++) {
       toggles[i].show();
     }
-    buttons[6].show();
+    buttons[2].show();
   }
 
   if (playing) {
@@ -330,7 +353,7 @@ function draw() {
           'player position: ' + floor(player.pos.x) + ', ' + floor(player.pos.y) + '\n' +
           'mouse position: ' + floor(mousePos.x) + ', ' + floor(mousePos.y) + '\n' +
           'camera position: ' + floor(cam.pos.x) + ', ' + floor(cam.pos.y) + '\n' +
-          'currently on: ' + tileNames[tileIds[floor(player.pos.x) + floor(player.pos.y) * worldSize]] + '\n' +
+          'currently on: ' + tileNames[tileIds[floor(player.pos.x) + floor(player.pos.y) * worldSize.w]] + '\n' +
           'entity count: ' + entities.length + '\n' +
           'current item: ' + player.item.name + '\n' +
           'selected inventory cell id: ' + player.selectedInventoryCellId, 10, 10);
@@ -412,7 +435,7 @@ function mousePressed() {
       toggles[2].state = entityShadow;
     }
 
-    if (buttons[6].hover()) {
+    if (buttons[2].hover()) {
       mainMenu = true;
       playing = false;
       settingsMenu = false;
@@ -595,15 +618,6 @@ class Entity {
     this.selectedInventoryCellId = -1;
     this.item = items[0];
 
-
-    if (tileId > subTexture.length || width <= 0 || height <= 0 || speed < 0 || type == undefined) {
-      this.id = 2;
-      this.pos = cam.pos;
-      this.size = { w: 1, h: 1 };
-      this.speed = 1;
-      this.type = 'npc';
-    }
-
     if (this.id > subTexture.length || this.id < subTexture.length) {
       this.id = 2;
     }
@@ -677,11 +691,11 @@ class Entity {
     if (this.pos.y < this.size.h / 2) {
       this.pos.y = this.size.h / 2;
     }
-    if (this.pos.x > this.size.w * worldSize - this.size.w / 2) {
-      this.pos.x = this.size.w * worldSize - this.size.w / 2;
+    if (this.pos.x > this.size.w * worldSize.w - this.size.w / 2) {
+      this.pos.x = this.size.w * worldSize.w - this.size.w / 2;
     }
-    if (this.pos.y > this.size.h * worldSize - this.size.h / 2) {
-      this.pos.y = this.size.h * worldSize - this.size.h / 2;
+    if (this.pos.y > this.size.h * worldSize.h - this.size.h / 2) {
+      this.pos.y = this.size.h * worldSize.h - this.size.h / 2;
     }
     if (dist2D(cam.pos, this.pos) < updateRadius) {
       this.show();
@@ -759,8 +773,11 @@ function dist2D(a, b) {
 
 function reset() {
   if (world != undefined) {
+    world.clear();
     worldGenerated = false;
   }
+
+  world = createGraphics(worldSize.w * subTextureSize, worldSize.h * subTextureSize);
 
   player = undefined;
   cam = undefined;
@@ -841,45 +858,4 @@ class Item {
     this.infoBox.textSize(11);
     this.infoBox.text(this.name + ' -' + '\n' + this.description, 5, 5, this.infoBox.width, this.infoBox.height);
   }
-}
-
-function defineItems() {
-  // items
-  items = [
-    new Item(undefined, 'undefined', 'this is nothing'),
-    new Item(texture[1], 'Gun', 'It\'s a gun'),
-    new Item(subTexture[2], 'Person', 'This is a person\n *Press r to remove all')
-  ]
-
-  // inventory cells
-  for (let i = 0; i < 4; i++) {
-
-    if (inventoryItems[i] != undefined) {
-      inventoryCells[i] = new InventoryCell({ x: 10 + 55 * i, y: viewport.height - 60 }, inventoryItems[i], { w: 50, h: 50 }, i);
-    } else {
-      inventoryCells[i] = new InventoryCell({ x: 10 + 55 * i, y: viewport.height - 60 }, items[0], { w: 50, h: 50 }, i);
-    }
-
-  }
-
-  // main menu
-  // buttons
-  buttons[0] = new Button('Play', viewport.width / 2, viewport.height * 0.60, true, 11, undefined, undefined, 100, 35, 10, 10, 10, 10);
-  buttons[1] = new Button('Settings', viewport.width / 2, viewport.height * 0.60 + 40, true, 11, undefined, undefined, 100, 35, 10, 10, 10, 10);
-
-  //settings
-  // toggles
-  toggles[0] = new Toggle('Fullscreen', fullsrn, 50, 100);
-  toggles[1] = new Toggle('Debug', debug, 50, 100 + 30);
-  toggles[2] = new Toggle('Entity shadow', entityShadow, 50, 100 + 60);
-  // buttons
-  buttons[6] = new Button('X', width - 20, 20, 40, 40);
-
-  // selection menu
-  // buttons
-  // buttons[2] = new Button('', width * 0.25, 110, 150, 40);
-  // buttons[3] = new Button('', width * 0.25, 160, 150, 40);
-  // buttons[4] = new Button('', width * 0.25, 210, 150, 40);
-  // buttons[5] = new Button('', width * 0.25, 260, 150, 40);
-
 }
