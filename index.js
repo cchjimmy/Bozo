@@ -6,7 +6,7 @@ const updateRadius = 5;
 
 var player;
 var cam;
-var font;
+// var font;
 var fps;
 // var backdrop;
 var mousePos;
@@ -156,7 +156,7 @@ function makeShadow(size, brightness) {
       a = 0;
 
       if (dist <= size / 2) {
-        a = brightness;
+        a = brightness * 1.7;
       }
 
       shadow.pixels[n] = r;
@@ -168,7 +168,7 @@ function makeShadow(size, brightness) {
       r = 0; // 147
       g = 0; // 189
       b = 0; // 194
-      a = dist * 0.2;
+      a = dist * 0.5;
 
       if (dist <= size / 2) {
         // a = 0;
@@ -192,7 +192,6 @@ function preload() {
     loadImage('textures/gun.png', img => { img.width *= 0.01; img.height *= 0.01 })
   ]
   // backdrop = loadImage('subTexture/sky.jpeg')
-  // texture = loadImage('subTexture/texture.png');
   // font = loadFont('fonts/Mulish-VariableFont_wght.ttf');
 
 }
@@ -208,7 +207,7 @@ function setup() {
   // viewport.drawingContext.shadowOffsetY = -5;
   // viewport.drawingContext.shadowBlur = 10;
   // viewport.drawingContext.shadowColor = 'black';
-  
+
   pixelDensity(1);
   textWrap(WORD);
   // viewport.textFont(font);
@@ -336,7 +335,7 @@ function draw() {
           'current item: ' + player.item.name + '\n' +
           'selected inventory cell id: ' + player.selectedInventoryCellId, 10, 10);
 
-          viewport.image(debugWindow, 0, 0);
+        viewport.image(debugWindow, 0, 0);
       }
 
       inventoryCells.forEach(inventoryCell => {
@@ -748,15 +747,15 @@ function dist2D(a, b) {
   return ((a.x - b.x) ** 2 + (a.y - b.y) ** 2) ** 0.5;
 }
 
-class Slider {
-  constructor(name, x, y, start, end) {
-    this.name = name;
-    this.pos = { x: x, y: y };
-    this.s = start;
-    this.e = end;
+// class Slider {
+// constructor(name, x, y, start, end) {
+// this.name = name;
+// this.pos = { x: x, y: y };
+// this.s = start;
+// this.e = end;
 
-  }
-}
+// }
+// }
 
 function reset() {
   if (world != undefined) {
@@ -834,13 +833,13 @@ class Item {
     this.texture = texture;
     this.name = name;
     this.description = description;
-    this.infoBox = createGraphics(100, 50);
+    this.infoBox = createGraphics(120, 50);
     this.infoBox.fill(0, 100);
     this.infoBox.stroke(0);
-    this.infoBox.rect(0, 0, 100, 50);
+    this.infoBox.rect(0, 0, this.infoBox.width, this.infoBox.height);
     this.infoBox.fill(255);
     this.infoBox.textSize(11);
-    this.infoBox.text(this.name + ' -' + '\n' + this.description, 0, 0, 100, 50);
+    this.infoBox.text(this.name + ' -' + '\n' + this.description, 5, 5, this.infoBox.width, this.infoBox.height);
   }
 }
 
