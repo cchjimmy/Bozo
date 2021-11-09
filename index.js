@@ -11,17 +11,19 @@ var fps;
 // var backdrop;
 var mousePos;
 
-var texture;
-var gun;
-
 var viewport;
 var world;
 var shadow;
+var debugWindow;
 
+var texture = [];
 var buttons = [];
 var toggles = [];
 var entities = [];
 var rendered = [];
+var inventoryCells = [];
+var inventoryItems = [];
+var items = [];
 
 var playing = false;
 var mainMenu = true;
@@ -38,41 +40,22 @@ var subTexture = [];
 var tileIds = [];
 const tileNames = ['Grass', 'Orange thing', 'Person', 'Water', 'Rock', 'Blank'];
 
-var i = 0;
-var j = 0;
 var worldGenerated = false;
 
 function generate() {
-  // let id;
-  // randomSeed(800);
-  // world = createGraphics(worldSize * subTextureSize, worldSize * subTextureSize);
 
-  // for (let j = 0; j < worldSize; j++) {
-  //   for (let i = 0; i < worldSize; i++) {
-  //     id = 3;
-  //     if (noise(i / 100, j / 100) > 0.5) {
-  //       id = 0;
-  //       if (noise(i / 100, j / 100) > 0.6) {
-  //         id = 4;
-  //       }
-  //     }
-  //     tileIds.push(id);
-
-  //     world.image(subTexture[tileIds[i + j * worldSize]], i * subTextureSize, (worldSize - j - 1) * subTextureSize);
-  //   }
-  // }
+  if (first) {
+    i = 0, j = 0;
+    worldGenerated = false;
+    randomSeed(800);
+    first = false;
+  }
 
   if (worldGenerated == false) {
     if (j == worldSize && i == 0) {
       worldGenerated = true;
-      playing = true;
       console.log('world generated');
     } else {
-      if (i == 0 && j == 0) {
-        var id;
-        randomSeed(800);
-        world = createGraphics(worldSize * subTextureSize, worldSize * subTextureSize);
-      }
 
       id = 3;
       if (noise(i / 100, j / 100) > 0.5) {
@@ -81,9 +64,13 @@ function generate() {
           id = 4;
         }
       }
+
       tileIds.push(id);
+      rendered[i + j * worldSize] = tileIds[i + j * worldSize];
+
+      // console.log('i: ' + i + ', ' + 'j: ' + j + ', ' + 'tileIds length: ' + tileIds.length + ', ' + 'world generated ' + ((tileIds.length * 100) / (worldSize * worldSize)) + '%');
+
       world.image(subTexture[tileIds[i + j * worldSize]], i * subTextureSize, (worldSize - j - 1) * subTextureSize);
-      // console.log(i + ', ' + j + ', ' + tileIds.length + ', ' + 'world generated ' + ((tileIds.length * 100) / (worldSize * worldSize)) + '%');
 
       if (j < worldSize && i == worldSize - 1) {
         i = 0;
@@ -97,12 +84,12 @@ function generate() {
 
 function worldUpdate() {
   viewport.translate(-cam.pos.x * subTextureSize, cam.pos.y * subTextureSize);
-  if (world != undefined) {
-    viewport.image(world, 0, -worldSize * subTextureSize);
-  }
 
   if (worldGenerated == true) {
-    if (keyIsDown(87) || keyIsDown(65) || keyIsDown(83) || keyIsDown(68) || first) {
+
+    viewport.image(world, 0, -worldSize * subTextureSize);
+
+    if (mouseIsPressed) {
       for (let j = floor(cam.pos.y) - updateRadius; j < floor(cam.pos.y) + updateRadius; j++) {
         for (let i = floor(cam.pos.x) - updateRadius; i < floor(cam.pos.x) + updateRadius; i++) {
           if (dist2D(cam.pos, { x: i, y: j }) < updateRadius && i + j * worldSize >= 0 && rendered[i + j * worldSize] != tileIds[i + j * worldSize]) {
@@ -117,35 +104,20 @@ function worldUpdate() {
           }
         }
       }
-      first = false;
     }
-
-    // entities.forEach(entity => { // updates tiles underneath entities so that they dont look weird
-    //   if (dist2D(entity, cam) <= updateRadius + 1) {
-    //     for (let j = floor(entity.pos.y) - 1; j < floor(entity.pos.y) + 2; j++) {
-    //       for (let i = floor(entity.pos.x) - 1; i < floor(entity.pos.x) + 2; i++) {
-    //         // let pos = { pos: { x: i, y: j } };
-    //         if (i + j * worldSize >= 0 && i + j * worldSize < tileIds.length) {
-    //           world.image(subTexture[tileIds[i + j * worldSize]], i * subTextureSize, (worldSize - j - 1) * subTextureSize);
-    //         }
-    //       }
-    //     }
-    //   }
-    // });
 
     entities.sort((a, b) => { return - a.pos.y + b.pos.y });
     entities.forEach(entity => {
       entity.update();
     });
 
-
   } else {
     generate();
   }
 }
 
-function separateTextureAtlas(subTextureSize) {
-  let textureAtlasSize = { x: texture.width / subTextureSize, y: texture.height / subTextureSize };
+function separateTextureAtlas(textureAtlas, subTextureSize) {
+  let textureAtlasSize = { x: textureAtlas.width / subTextureSize, y: textureAtlas.height / subTextureSize };
   let n = 0;
   for (let y = 0; y < textureAtlasSize.y; y++) {
     for (let x = 0; x < textureAtlasSize.x; x++) {
@@ -154,7 +126,7 @@ function separateTextureAtlas(subTextureSize) {
 
       for (let j = y * subTextureSize; j < (1 + y) * subTextureSize; j++) {
         for (let i = x * subTextureSize; i < (1 + x) * subTextureSize; i++) {
-          let c = texture.get(i, j);
+          let c = textureAtlas.get(i, j);
           subTexture[n].set(i - x * subTextureSize, j - y * subTextureSize, c);
         }
       }
@@ -213,21 +185,11 @@ function makeShadow(size, brightness) {
   shadow.updatePixels();
 }
 
-// function separateTextureAtlas(x, y) {
-//   let textureAtlasSize = createVector(x, y);
-//   let n = 0;
-//   for (let y = 0; y < textureAtlasSize.y; y++) {
-//     for (let x = 0; x < textureAtlasSize.x; x++) {
-//       subTexture[n] = createGraphics(subTextureSize, subTextureSize);
-//       subTexture[n].image(texture, 0, 0, subTextureSize, subTextureSize, x * subTextureSize, y * subTextureSize, subTextureSize, subTextureSize);
-//       n++;
-//     }
-//   }
-// }
-
 function preload() {
-  texture = loadImage('textures/texture4832.png');
-  gun = loadImage('textures/gun.png', img => {img.width *= 0.01; img.height *= 0.01});
+  texture = [
+    loadImage('textures/texture4832.png'),
+    loadImage('textures/gun.png', img => { img.width *= 0.01; img.height *= 0.01 })
+  ]
   // backdrop = loadImage('subTexture/sky.jpeg')
   // texture = loadImage('subTexture/texture.png');
   // font = loadFont('fonts/Mulish-VariableFont_wght.ttf');
@@ -237,34 +199,18 @@ function preload() {
 function setup() {
   createCanvas(windowWidth, windowHeight);
   viewport = createGraphics(windowWidth, windowHeight);
+  debugWindow = createGraphics(210, 180);
+  world = createGraphics(worldSize * subTextureSize, worldSize * subTextureSize);
 
   pixelDensity(1);
   // viewport.textFont(font);
-  separateTextureAtlas(subTextureSize);
+  separateTextureAtlas(texture[0], subTextureSize);
   makeShadow(500, 200);
 
   // change cursor, crosshair looks pretty good imo
   cursor('crosshair');
 
-  // main menu
-  // buttons
-  buttons[0] = new Button('Play', viewport.width / 2, viewport.height * 0.60, true, 11, undefined, undefined, 100, 35, 10, 10, 10, 10);
-  buttons[1] = new Button('Settings', viewport.width / 2, viewport.height * 0.60 + 40, true, 11, undefined, undefined, 100, 35, 10, 10, 10, 10);
-
-  //settings
-  // toggles
-  toggles[0] = new Toggle('Fullscreen', fullsrn, 50, 100);
-  toggles[1] = new Toggle('Debug', debug, 50, 100 + 30);
-  toggles[2] = new Toggle('Entity shadow', entityShadow, 50, 100 + 60);
-  // buttons
-  buttons[6] = new Button('X', width - 20, 20, 40, 40);
-
-  // selection menu
-  // buttons
-  // buttons[2] = new Button('', width * 0.25, 110, 150, 40);
-  // buttons[3] = new Button('', width * 0.25, 160, 150, 40);
-  // buttons[4] = new Button('', width * 0.25, 210, 150, 40);
-  // buttons[5] = new Button('', width * 0.25, 260, 150, 40);
+  defineItems();
 }
 
 function windowResized() {
@@ -284,27 +230,26 @@ function windowResized() {
   //   buttons[4] = new Button('', width * 0.25, 210, 150, 40);
   //   buttons[5] = new Button('', width * 0.25, 260, 150, 40);
   // }
+
+  // reposition inventory cells
+
+  for (let i = 0; i < 4; i++) {
+
+    inventoryCells[i].pos = { x: 10 + 55 * i, y: viewport.height - 60 };
+
+  }
+
 }
 
 function draw() {
+
   if (keyIsDown(27)) { // esc back to main menu
     mainMenu = true;
     playing = false;
     settingsMenu = false;
     selection = false;
 
-    player = undefined;
-    cam = undefined;
-  
-    world.remove();
-
-    worldGenerated = false;
-
-    tileIds = [];
-    entities = [];
-    rendered = [];
-    i = 0;
-    j = 0;
+    reset();
   }
 
   if (keyIsDown(82)) { // r clear all entities but not player    
@@ -362,20 +307,33 @@ function draw() {
     worldUpdate();
     viewport.pop();
 
-    viewport.image(fog, 0, 0, viewport.width, viewport.height);
+    if (worldGenerated) {
+      viewport.image(fog, 0, 0, viewport.width, viewport.height);
+      if (debug) {
+        debugWindow.clear();
 
-    if (debug && worldGenerated) {
-      viewport.push();
-      viewport.noStroke();
-      viewport.fill(0, 100);
-      viewport.rect(0, 0, 400, (15 + 1) * 8 + 20);
+        debugWindow.background(0, 0, 0, 100);
 
-      viewport.textAlign(LEFT, TOP);
-      viewport.fill(255);
-      viewport.textSize(15);
+        debugWindow.textAlign(LEFT, TOP);
+        debugWindow.fill(255);
+        debugWindow.textSize(15);
 
-      viewport.text('debug' + '\n' + 'scale: ' + floor(cam.scl) + '\n' + 'player position: ' + floor(player.pos.x) + ', ' + floor(player.pos.y) + '\n' + 'mouse position: ' + floor(mousePos.x) + ', ' + floor(mousePos.y) + '\n' + 'camera position: ' + floor(cam.pos.x) + ', ' + floor(cam.pos.y) + '\n' + 'currently on: ' + tileNames[tileIds[floor(player.pos.x) + floor(player.pos.y) * worldSize]] + '\n' + 'entity count: ' + entities.length, 10, 5)
-      viewport.pop();
+        debugWindow.text('debug' + '\n' +
+          'scale: ' + floor(cam.scl) + '\n' +
+          'player position: ' + floor(player.pos.x) + ', ' + floor(player.pos.y) + '\n' +
+          'mouse position: ' + floor(mousePos.x) + ', ' + floor(mousePos.y) + '\n' +
+          'camera position: ' + floor(cam.pos.x) + ', ' + floor(cam.pos.y) + '\n' +
+          'currently on: ' + tileNames[tileIds[floor(player.pos.x) + floor(player.pos.y) * worldSize]] + '\n' +
+          'entity count: ' + entities.length + '\n' +
+          'current item: ' + player.item.name + '\n' +
+          'selected inventory cell id: ' + player.selectedInventoryCellId, 10, 10);
+
+          viewport.image(debugWindow, 0, 0);
+      }
+
+      inventoryCells.forEach(inventoryCell => {
+        inventoryCell.update();
+      });
     }
   }
 
@@ -416,12 +374,10 @@ function mousePressed() {
       mainMenu = false;
       selection = false;
 
-      first = true;
+      reset();
 
       cam = new Camera();
       player = new Entity(2, 1, 1, 1, 1, 0.1, 'player');
-
-      // generate();
     }
 
     if (buttons[1].hover()) { // settings
@@ -464,9 +420,22 @@ function mousePressed() {
   }
 
   if (playing && mousePos != undefined && worldGenerated) {
-    new Entity(2, mousePos.x, mousePos.y, 1, 1, 0, 'npc');
+    let hoverCellClick = false;
 
+    inventoryCells.forEach(cell => {
+      if (cell.hover()) {
+        hoverCellClick = true;
+        player.item = cell.item;
+        player.selectedInventoryCellId = cell.id;
+      }
+    });
+
+    if (player.item == items[2] && hoverCellClick == false) {
+      new Entity(2, mousePos.x, mousePos.y, 1, 1, 0, 'npc');
+    }
+    // console.log(hoverCellClick);
   }
+
 }
 
 class Camera {
@@ -616,12 +585,9 @@ class Entity {
     this.texture = subTexture[this.id];
     this.shadowWOff = this.size.w / 3
     this.shadowSize = { w: (this.size.w - this.shadowWOff) * subTextureSize, h: this.size.h * subTextureSize / 4 };
-    if (type == 'player') {
-      this.weapon = gun;
-    } else {
-      this.weapon = gun;
-    }
-    
+    this.selectedInventoryCellId = -1;
+    this.item = items[0];
+
 
     if (tileId > subTexture.length || width <= 0 || height <= 0 || speed < 0 || type == undefined) {
       this.id = 2;
@@ -629,6 +595,28 @@ class Entity {
       this.size = { w: 1, h: 1 };
       this.speed = 1;
       this.type = 'npc';
+    }
+
+    if (this.id > subTexture.length || this.id < subTexture.length) {
+      this.id = 2;
+    }
+    if (this.size.w <= 0) {
+      this.size.w = 1;
+    }
+    if (this.size.h <= 0) {
+      this.size.h = 1;
+    }
+    if (this.speed < 0) {
+      this.speed = abs(this.speed);
+    }
+    if (this.type == undefined) {
+      this.type = 'npc';
+    }
+    if (this.pos.x == undefined) {
+      this.pos.x = cam.pos.x;
+    }
+    if (this.pos.y == undefined) {
+      this.pos.y = cam.pos.y;
     }
     entities.push(this);
   }
@@ -653,6 +641,27 @@ class Entity {
       if (keyIsDown(68)) { // d
         this.pos.x += speed;
       }
+
+      if (keyIsDown(49)) { // 1
+        this.item = inventoryItems[0];
+        this.selectedInventoryCellId = 0;
+      }
+      if (keyIsDown(50)) { // 2
+        this.item = inventoryItems[1];
+        this.selectedInventoryCellId = 1;
+      }
+      if (keyIsDown(51)) { // 3
+        this.item = inventoryItems[2];
+        this.selectedInventoryCellId = 2;
+      }
+      if (keyIsDown(52)) { // 4
+        this.item = inventoryItems[3];
+        this.selectedInventoryCellId = 3;
+      }
+
+      if (this.item == undefined) {
+        this.item = items[0];
+      }
     }
 
     if (this.pos.x < this.size.w / 2) {
@@ -667,38 +676,63 @@ class Entity {
     if (this.pos.y > this.size.h * worldSize - this.size.h / 2) {
       this.pos.y = this.size.h * worldSize - this.size.h / 2;
     }
-    this.show();
+    if (dist2D(cam.pos, this.pos) < updateRadius) {
+      this.show();
+    }
   }
 
   show() {
-    if (dist2D(cam.pos, this.pos) < updateRadius && this.texture != undefined) {
-      viewport.push();
-      viewport.translate(this.pos.x * subTextureSize, (-this.pos.y) * subTextureSize);
-      if (entityShadow && this.type == 'player' || this.type == 'npc') {
+    viewport.push();
+    viewport.translate(this.pos.x * subTextureSize, (-this.pos.y) * subTextureSize);
+    if (entityShadow) {
+      if (this.type == 'player' || this.type == 'npc') {
         viewport.image(shadow, ((- this.size.w + this.shadowWOff) / 2) * subTextureSize, - this.shadowSize.h / 2, this.shadowSize.w, this.shadowSize.h);
       }
-      viewport.image(this.texture, -this.size.w * subTextureSize / 2, - this.size.h * subTextureSize);
-      
-      let angle = -atan2(mousePos.y - this.pos.y - this.size.h / 2, mousePos.x - this.pos.x)
-      viewport.translate(0, -this.size.h * subTextureSize / 2)
-      viewport.rotate(angle);
-      // viewport.fill('red');
-      viewport.translate(this.size.w * subTextureSize / 4, - this.weapon.height / 2);
-      // viewport.rect(0, 0, this.weapon.width, this.weapon.height);
-      if (-angle > 90 * PI / 180) {
-        viewport.scale(1, -1);
-        viewport.translate(0, -this.weapon.height);
-      } else if (-angle < -90 * PI / 180) {
-        viewport.scale(1, -1);
-        viewport.translate(0, -this.weapon.height);
-      } else {
-        viewport.scale(1);
-      }
-      viewport.image(this.weapon, 0, 0);
-      
-      // console.log(atan2(mousePos.y, mousePos.x));
-      viewport.pop();
     }
+
+    let angle = -atan2(mousePos.y - this.pos.y - this.size.h / 2, mousePos.x - this.pos.x);
+
+    if (-angle > 90 * PI / 180 || -angle < -90 * PI / 180) {
+
+      viewport.image(this.texture, -this.size.w * subTextureSize / 2, - this.size.h * subTextureSize);
+
+      if (this.item.texture != undefined) {
+
+        viewport.translate(0, -this.size.h * subTextureSize / 2)
+        viewport.rotate(angle);
+        // viewport.fill('red');
+        viewport.translate(this.size.w * subTextureSize / 4, - this.item.texture.height / 2);
+        // viewport.rect(0, 0, this.item.width, this.item.height);
+        viewport.scale(1, -1);
+        viewport.translate(0, -this.item.texture.height);
+        viewport.image(this.item.texture, 0, 0);
+
+      }
+
+    } else {
+
+      viewport.push();
+      if (this.type == 'player') {
+        viewport.scale(-1, 1);
+      }
+      viewport.image(this.texture, -this.size.w * subTextureSize / 2, - this.size.h * subTextureSize);
+      viewport.pop();
+
+      if (this.item != items[0]) {
+
+        viewport.translate(0, -this.size.h * subTextureSize / 2)
+        viewport.rotate(angle);
+        // viewport.fill('red');
+        viewport.translate(this.size.w * subTextureSize / 4, - this.item.texture.height / 2);
+        // viewport.rect(0, 0, this.item.width, this.item.height);
+        viewport.image(this.item.texture, 0, 0);
+
+      }
+
+    }
+
+    viewport.pop();
+
   }
 }
 
@@ -714,4 +748,131 @@ class Slider {
     this.e = end;
 
   }
+}
+
+function reset() {
+  if (world != undefined) {
+    worldGenerated = false;
+  }
+
+  player = undefined;
+  cam = undefined;
+  tileIds = [];
+  entities = [];
+  rendered = [];
+  inventoryItems = [items[1], items[2]];
+
+  for (let i = 0; i < 4; i++) {
+
+    if (inventoryItems[i] != undefined) {
+      inventoryCells[i].item = inventoryItems[i];
+    } else {
+      inventoryCells[i].item = items[0];
+    }
+
+  }
+
+  first = true;
+}
+
+class InventoryCell {
+  constructor(pos, item, cellSize, id) {
+    this.pos = { x: pos.x, y: pos.y };
+    this.item = item;
+    this.cellSize = { w: cellSize.w, h: cellSize.h };
+    this.id = id;
+  }
+
+  update() {
+    viewport.push();
+
+    if (this.hover()) {
+
+      if (this.item != items[0]) {
+        viewport.image(this.item.infoBox, this.pos.x, this.pos.y - this.item.infoBox.height - 5);
+      }
+
+      viewport.fill(0, 0, 0, 50);
+    } else {
+      viewport.fill(0, 0, 0, 100);
+    }
+
+    viewport.rect(this.pos.x, this.pos.y, this.cellSize.w, this.cellSize.h);
+
+    if (player.item == this.item && player.selectedInventoryCellId == this.id) {
+      viewport.noFill();
+      viewport.strokeWeight(5);
+      viewport.stroke('red');
+      viewport.rect(this.pos.x, this.pos.y, this.cellSize.w, this.cellSize.h);
+    }
+
+    if (this.item != items[0]) {
+      viewport.image(this.item.texture, this.pos.x, this.pos.y);
+    }
+
+    viewport.pop();
+  }
+
+  hover() {
+    if (mouseX <= this.pos.x + this.cellSize.w && mouseX >= this.pos.x && mouseY <= this.pos.y + this.cellSize.h && mouseY >= this.pos.y) {
+      return true;
+    }
+    return false;
+  }
+}
+
+class Item {
+  constructor(texture, name, description) {
+    this.texture = texture;
+    this.name = name;
+    this.description = description;
+    this.infoBox = createGraphics(100, 50);
+    this.infoBox.fill(0, 100);
+    this.infoBox.stroke(0);
+    this.infoBox.rect(0, 0, 100, 50);
+    this.infoBox.fill(255);
+    this.infoBox.textSize(11);
+    this.infoBox.text(this.name + ' -' + '\n' + this.description, 0, 0, 100, 50);
+  }
+}
+
+function defineItems() {
+  // items
+  items = [
+    new Item(undefined, 'undefined', 'this is nothing'),
+    new Item(texture[1], 'Gun', 'It\'s a gun'),
+    new Item(subTexture[2], 'Person', 'This is a person')
+  ]
+
+  // inventory cells
+  for (let i = 0; i < 4; i++) {
+
+    if (inventoryItems[i] != undefined) {
+      inventoryCells[i] = new InventoryCell({ x: 10 + 55 * i, y: viewport.height - 60 }, inventoryItems[i], { w: 50, h: 50 }, i);
+    } else {
+      inventoryCells[i] = new InventoryCell({ x: 10 + 55 * i, y: viewport.height - 60 }, items[0], { w: 50, h: 50 }, i);
+    }
+
+  }
+
+  // main menu
+  // buttons
+  buttons[0] = new Button('Play', viewport.width / 2, viewport.height * 0.60, true, 11, undefined, undefined, 100, 35, 10, 10, 10, 10);
+  buttons[1] = new Button('Settings', viewport.width / 2, viewport.height * 0.60 + 40, true, 11, undefined, undefined, 100, 35, 10, 10, 10, 10);
+
+  //settings
+  // toggles
+  toggles[0] = new Toggle('Fullscreen', fullsrn, 50, 100);
+  toggles[1] = new Toggle('Debug', debug, 50, 100 + 30);
+  toggles[2] = new Toggle('Entity shadow', entityShadow, 50, 100 + 60);
+  // buttons
+  buttons[6] = new Button('X', width - 20, 20, 40, 40);
+
+  // selection menu
+  // buttons
+  // buttons[2] = new Button('', width * 0.25, 110, 150, 40);
+  // buttons[3] = new Button('', width * 0.25, 160, 150, 40);
+  // buttons[4] = new Button('', width * 0.25, 210, 150, 40);
+  // buttons[5] = new Button('', width * 0.25, 260, 150, 40);
+
 }
