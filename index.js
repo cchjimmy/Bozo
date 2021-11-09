@@ -1,7 +1,7 @@
 const subTextureSize = 16; // side length of each tile in pixels
 const worldSize = { w: 500, h: 100 };
-const viewportX = 50;
-const viewportY = 50;
+const viewportX = 0;
+const viewportY = 0;
 const updateRadius = 10;
 
 var player;
@@ -48,7 +48,7 @@ function generate() {
 
   if (first) {
     worldGenerated = false;
-    randomSeed(800);
+    console.log(noiseSeed());
     first = false;
   }
 
@@ -352,7 +352,7 @@ function draw() {
           'player position: ' + floor(player.pos.x) + ', ' + floor(player.pos.y) + '\n' +
           'mouse position: ' + floor(mousePos.x) + ', ' + floor(mousePos.y) + '\n' +
           'camera position: ' + floor(cam.pos.x) + ', ' + floor(cam.pos.y) + '\n' +
-          'currently on: ' + tileNames[tileIds[floor(player.pos.x) + floor(player.pos.y) * worldSize.w]] + '\n' +
+          'currently on: ' + tileNames[player.currentlyOnTile] + '\n' +
           'entity count: ' + entities.length + '\n' +
           'current item: ' + player.item.name + '\n' +
           'selected inventory cell id: ' + player.selectedInventoryCellId, 10, 10);
@@ -460,7 +460,7 @@ function mousePressed() {
       }
     });
 
-    if (player.item == items[2] && hoverCellClick == false) {
+    if (player.item == items[2] && hoverCellClick == false && player.inWater == false) {
       new Entity(subTexture[2], mousePos.x, mousePos.y, 1, 1, 0, 'npc');
     }
     // console.log(hoverCellClick);
@@ -616,9 +616,11 @@ class Entity {
     this.shadowSize = { w: (this.size.w - this.shadowWOff) * subTextureSize, h: this.size.h * subTextureSize / 4 };
     this.selectedInventoryCellId = -1;
     this.item = items[0];
+    this.currentlyOnTile;
+    this.angle = 0;
 
     isNewEntity = true;
-    
+
     if (typeof this.texture == 'number' || typeof this.texture == 'string' || typeof this.texture == 'boolean' || typeof this.texture == undefined) {
       this.texture = subTexture[2];
     }
@@ -665,19 +667,19 @@ class Entity {
       }
 
       if (keyIsDown(49)) { // 1
-        this.item = inventoryItems[0];
+        this.item = inventoryCells[0].item;
         this.selectedInventoryCellId = 0;
       }
       if (keyIsDown(50)) { // 2
-        this.item = inventoryItems[1];
+        this.item = inventoryCells[1].item;
         this.selectedInventoryCellId = 1;
       }
       if (keyIsDown(51)) { // 3
-        this.item = inventoryItems[2];
+        this.item = inventoryCells[2].item;
         this.selectedInventoryCellId = 2;
       }
       if (keyIsDown(52)) { // 4
-        this.item = inventoryItems[3];
+        this.item = inventoryCells[3].item;
         this.selectedInventoryCellId = 3;
       }
     }
@@ -702,41 +704,51 @@ class Entity {
   show() {
     viewport.push();
     viewport.translate(this.pos.x * subTextureSize, (-this.pos.y) * subTextureSize);
+
+    this.inWater = false;
+
+    this.currentlyOnTile = tileIds[floor(this.pos.x) + floor(this.pos.y) * worldSize.w];
+
     if (entityShadow) {
       if (this.type == 'player' || this.type == 'npc') {
         viewport.image(shadow, ((- this.size.w + this.shadowWOff) / 2) * subTextureSize, - this.shadowSize.h / 2, this.shadowSize.w, this.shadowSize.h);
       }
     }
 
-    let angle;
-
-    viewport.push();
     if (this.type == 'player') {
-      angle = atan2(mousePos.y - this.pos.y - this.size.h / 2, mousePos.x - this.pos.x);
-      if (angle > 90 * PI / 180 || angle < -90 * PI / 180) {
-        viewport.scale(-1, 1);
-      }
-    } else {
-      angle = 0;
+      this.angle = atan2(mousePos.y - this.pos.y - this.size.h / 2, mousePos.x - this.pos.x);
     }
 
+    if (this.currentlyOnTile == 3) {
+      this.inWater = true;
+      this.texture.height = 0.5 * subTextureSize;
+      viewport.translate(0, this.texture.height);
+    } else {
+      this.texture.height = subTextureSize;
+    }
+
+    viewport.push();
+    if (this.angle > 90 * PI / 180 || this.angle < -90 * PI / 180) {
+      viewport.scale(-1, 1);
+    }
     viewport.image(this.texture, -this.size.w * subTextureSize / 2, - this.size.h * subTextureSize);
     viewport.pop();
 
     if (this.item != items[0]) {
 
       viewport.translate(0, -this.size.h * subTextureSize / 2)
-      viewport.rotate(-angle);
+      viewport.rotate(-this.angle);
       // viewport.fill('red');
       viewport.translate(this.size.w * subTextureSize / 4, - this.item.texture.height / 2);
       // viewport.rect(0, 0, this.item.width, this.item.height);
-      if (angle > 90 * PI / 180 || angle < -90 * PI / 180) {
+      if (this.angle > 90 * PI / 180 || this.angle < -90 * PI / 180) {
         viewport.translate(0, this.item.texture.height);
         viewport.scale(1, -1);
       }
 
-      viewport.image(this.item.texture, 0, 0);
-
+      if (this.inWater == false) {
+        viewport.image(this.item.texture, 0, 0);
+      }
     }
 
     viewport.pop();
