@@ -1,7 +1,7 @@
 const subTextureSize = 16; // side length of each tile in pixels
-const worldSize = {w: 500, h: 100};
-const viewportX = 0;
-const viewportY = 0;
+const worldSize = { w: 500, h: 100 };
+const viewportX = 50;
+const viewportY = 50;
 const updateRadius = 10;
 
 var player;
@@ -42,6 +42,7 @@ const tileNames = ['Grass', 'Orange thing', 'Person', 'Water', 'Rock', 'Blank'];
 
 var worldGenerated = false;
 var hoverCellClick = false;
+var isNewEntity = false;
 
 function generate() {
 
@@ -88,7 +89,9 @@ function worldUpdate() {
 
     viewport.image(world, 0, -worldSize.h * subTextureSize);
 
-    entities.sort((a, b) => { return - a.pos.y + b.pos.y });
+    if (isMoving() || isNewEntity) {
+      entities.sort((a, b) => { return - a.pos.y + b.pos.y });
+    }
     entities.forEach(entity => {
       entity.update();
     });
@@ -212,11 +215,7 @@ function defineItems() {
   // inventory cells
   for (let i = 0; i < 4; i++) {
 
-    if (inventoryItems[i] != undefined) {
-      inventoryCells[i] = new InventoryCell({ x: 10 + 55 * i, y: viewport.height - 60 }, inventoryItems[i], { w: 50, h: 50 }, i);
-    } else {
-      inventoryCells[i] = new InventoryCell({ x: 10 + 55 * i, y: viewport.height - 60 }, items[0], { w: 50, h: 50 }, i);
-    }
+    inventoryCells[i] = new InventoryCell({ x: 10 + 55 * i, y: viewport.height - 60 }, items[0], { w: 50, h: 50 }, i);
 
   }
 
@@ -407,7 +406,7 @@ function mousePressed() {
       reset();
 
       cam = new Camera();
-      player = new Entity(2, 1, 1, 1, 1, 0.1, 'player');
+      player = new Entity(subTexture[2], 1, 1, 1, 1, 0.1, 'player');
     }
 
     if (buttons[1].hover()) { // settings
@@ -451,6 +450,7 @@ function mousePressed() {
 
   if (playing && mousePos != undefined && worldGenerated) {
     hoverCellClick = false;
+    isNewEntity = false;
 
     inventoryCells.forEach(cell => {
       if (cell.hover()) {
@@ -461,7 +461,7 @@ function mousePressed() {
     });
 
     if (player.item == items[2] && hoverCellClick == false) {
-      new Entity(2, mousePos.x, mousePos.y, 1, 1, 0, 'npc');
+      new Entity(subTexture[2], mousePos.x, mousePos.y, 1, 1, 0, 'npc');
     }
     // console.log(hoverCellClick);
   }
@@ -479,7 +479,7 @@ class Camera {
     this.pos = player.pos;
 
     fps = 1 / (deltaTime / 1000);
-    mousePos = { x: (mouseX - viewport.width / 2) / (subTextureSize * this.scl) + this.pos.x, y: -(mouseY - viewport.height / 2) / (subTextureSize * this.scl) + this.pos.y };
+    mousePos = { x: (mouseX - viewport.width / 2 - viewportX) / (subTextureSize * this.scl) + this.pos.x, y: -(mouseY - viewport.height / 2 - viewportY) / (subTextureSize * this.scl) + this.pos.y };
 
     if (keyIsDown(38)) { // ArrowUp
       this.scl += 0.01;
@@ -519,25 +519,25 @@ class Button {
     this.col = { tc: textColor, bc: buttonColor };
     this.bool = hasHoverEffect;
 
-    if (name == undefined) {
+    if (this.name == undefined) {
       this.name = '';
     }
-    if (hasHoverEffect == undefined) {
+    if (this.bool == undefined) {
       this.bool = false;
     }
-    if (textSize == undefined) {
+    if (this.size.ts == undefined) {
       this.size.ts = 11;
     }
-    if (textColor == undefined) {
+    if (this.col.tc == undefined) {
       this.col.tc = 0;
     }
-    if (buttonColor == undefined) {
+    if (this.col.bc == undefined) {
       this.col.bc = 255;
     }
-    if (width == undefined) {
+    if (this.size.w == undefined) {
       this.size.w = textWidth(this.name) + 10;
     }
-    if (height == undefined) {
+    if (this.size.h == undefined) {
       this.size.h = 20;
     }
   }
@@ -606,20 +606,21 @@ class Toggle {
 }
 
 class Entity {
-  constructor(tileId, x, y, width, height, speed, type) {
-    this.id = tileId;
+  constructor(texture, x, y, width, height, speed, type) {
     this.pos = { x: x, y: y };
     this.size = { w: width, h: height };
     this.speed = speed;
     this.type = type;
-    this.texture = subTexture[this.id];
+    this.texture = texture;
     this.shadowWOff = this.size.w / 3
     this.shadowSize = { w: (this.size.w - this.shadowWOff) * subTextureSize, h: this.size.h * subTextureSize / 4 };
     this.selectedInventoryCellId = -1;
     this.item = items[0];
 
-    if (this.id > subTexture.length || this.id < subTexture.length) {
-      this.id = 2;
+    isNewEntity = true;
+    
+    if (typeof this.texture == 'number' || typeof this.texture == 'string' || typeof this.texture == 'boolean' || typeof this.texture == undefined) {
+      this.texture = subTexture[2];
     }
     if (this.size.w <= 0) {
       this.size.w = 1;
@@ -630,13 +631,13 @@ class Entity {
     if (this.speed < 0) {
       this.speed = abs(this.speed);
     }
-    if (this.type == undefined) {
+    if (typeof this.type == undefined) {
       this.type = 'npc';
     }
-    if (this.pos.x == undefined) {
+    if (typeof this.pos.x == undefined) {
       this.pos.x = cam.pos.x;
     }
-    if (this.pos.y == undefined) {
+    if (typeof this.pos.y == undefined) {
       this.pos.y = cam.pos.y;
     }
     entities.push(this);
@@ -679,10 +680,6 @@ class Entity {
         this.item = inventoryItems[3];
         this.selectedInventoryCellId = 3;
       }
-
-      if (this.item == undefined) {
-        this.item = items[0];
-      }
     }
 
     if (this.pos.x < this.size.w / 2) {
@@ -711,44 +708,34 @@ class Entity {
       }
     }
 
-    let angle = -atan2(mousePos.y - this.pos.y - this.size.h / 2, mousePos.x - this.pos.x);
+    let angle;
 
-    if (-angle > 90 * PI / 180 || -angle < -90 * PI / 180) {
-
-      viewport.image(this.texture, -this.size.w * subTextureSize / 2, - this.size.h * subTextureSize);
-
-      if (this.item.texture != undefined) {
-
-        viewport.translate(0, -this.size.h * subTextureSize / 2)
-        viewport.rotate(angle);
-        // viewport.fill('red');
-        viewport.translate(this.size.w * subTextureSize / 4, - this.item.texture.height / 2);
-        // viewport.rect(0, 0, this.item.width, this.item.height);
-        viewport.scale(1, -1);
-        viewport.translate(0, -this.item.texture.height);
-        viewport.image(this.item.texture, 0, 0);
-
-      }
-
-    } else {
-
-      viewport.push();
-      if (this.type == 'player') {
+    viewport.push();
+    if (this.type == 'player') {
+      angle = atan2(mousePos.y - this.pos.y - this.size.h / 2, mousePos.x - this.pos.x);
+      if (angle > 90 * PI / 180 || angle < -90 * PI / 180) {
         viewport.scale(-1, 1);
       }
-      viewport.image(this.texture, -this.size.w * subTextureSize / 2, - this.size.h * subTextureSize);
-      viewport.pop();
+    } else {
+      angle = 0;
+    }
 
-      if (this.item != items[0]) {
+    viewport.image(this.texture, -this.size.w * subTextureSize / 2, - this.size.h * subTextureSize);
+    viewport.pop();
 
-        viewport.translate(0, -this.size.h * subTextureSize / 2)
-        viewport.rotate(angle);
-        // viewport.fill('red');
-        viewport.translate(this.size.w * subTextureSize / 4, - this.item.texture.height / 2);
-        // viewport.rect(0, 0, this.item.width, this.item.height);
-        viewport.image(this.item.texture, 0, 0);
+    if (this.item != items[0]) {
 
+      viewport.translate(0, -this.size.h * subTextureSize / 2)
+      viewport.rotate(-angle);
+      // viewport.fill('red');
+      viewport.translate(this.size.w * subTextureSize / 4, - this.item.texture.height / 2);
+      // viewport.rect(0, 0, this.item.width, this.item.height);
+      if (angle > 90 * PI / 180 || angle < -90 * PI / 180) {
+        viewport.translate(0, this.item.texture.height);
+        viewport.scale(1, -1);
       }
+
+      viewport.image(this.item.texture, 0, 0);
 
     }
 
@@ -786,7 +773,7 @@ function reset() {
   rendered = [];
   inventoryItems = [items[1], items[2]];
 
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < inventoryCells.length; i++) {
 
     if (inventoryItems[i] != undefined) {
       inventoryCells[i].item = inventoryItems[i];
@@ -838,7 +825,7 @@ class InventoryCell {
   }
 
   hover() {
-    if (mouseX <= this.pos.x + this.cellSize.w && mouseX >= this.pos.x && mouseY <= this.pos.y + this.cellSize.h && mouseY >= this.pos.y) {
+    if (mouseX <= this.pos.x + this.cellSize.w + viewportX && mouseX >= this.pos.x + viewportX && mouseY <= this.pos.y + viewportY + this.cellSize.h && mouseY >= this.pos.y + viewportY) {
       return true;
     }
     return false;
@@ -858,4 +845,14 @@ class Item {
     this.infoBox.textSize(11);
     this.infoBox.text(this.name + ' -' + '\n' + this.description, 5, 5, this.infoBox.width, this.infoBox.height);
   }
+}
+
+function isMoving() {
+  if (keyIsDown(87) ||
+    keyIsDown(65) ||
+    keyIsDown(83) ||
+    keyIsDown(68)) {
+    return true;
+  }
+  return false;
 }
