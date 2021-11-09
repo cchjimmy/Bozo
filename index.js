@@ -41,6 +41,7 @@ var tileIds = [];
 const tileNames = ['Grass', 'Orange thing', 'Person', 'Water', 'Rock', 'Blank'];
 
 var worldGenerated = false;
+var hoverCellClick = false;
 
 function generate() {
 
@@ -89,7 +90,7 @@ function worldUpdate() {
 
     viewport.image(world, 0, -worldSize * subTextureSize);
 
-    if (mouseIsPressed) {
+    if (hoverCellClick == false) {
       for (let j = floor(cam.pos.y) - updateRadius; j < floor(cam.pos.y) + updateRadius; j++) {
         for (let i = floor(cam.pos.x) - updateRadius; i < floor(cam.pos.x) + updateRadius; i++) {
           if (dist2D(cam.pos, { x: i, y: j }) < updateRadius && i + j * worldSize >= 0 && rendered[i + j * worldSize] != tileIds[i + j * worldSize]) {
@@ -202,7 +203,14 @@ function setup() {
   debugWindow = createGraphics(210, 180);
   world = createGraphics(worldSize * subTextureSize, worldSize * subTextureSize);
 
+  // this looks amazing with the drawing context but it would be too laggy
+  // viewport.drawingContext.shadowOffsetX = 5;
+  // viewport.drawingContext.shadowOffsetY = -5;
+  // viewport.drawingContext.shadowBlur = 10;
+  // viewport.drawingContext.shadowColor = 'black';
+  
   pixelDensity(1);
+  textWrap(WORD);
   // viewport.textFont(font);
   separateTextureAtlas(texture[0], subTextureSize);
   makeShadow(500, 200);
@@ -420,7 +428,7 @@ function mousePressed() {
   }
 
   if (playing && mousePos != undefined && worldGenerated) {
-    let hoverCellClick = false;
+    hoverCellClick = false;
 
     inventoryCells.forEach(cell => {
       if (cell.hover()) {
@@ -841,7 +849,7 @@ function defineItems() {
   items = [
     new Item(undefined, 'undefined', 'this is nothing'),
     new Item(texture[1], 'Gun', 'It\'s a gun'),
-    new Item(subTexture[2], 'Person', 'This is a person')
+    new Item(subTexture[2], 'Person', 'This is a person\n *Press r to remove all')
   ]
 
   // inventory cells
