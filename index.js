@@ -1,14 +1,12 @@
 const subTextureSize = 16; // side length of each tile in pixels
-const worldSize = { w: 500, h: 100 };
+const worldSize = { w: 100, h: 100 };
 const viewportX = 0;
 const viewportY = 0;
-const updateRadius = 10;
+const updateRadius = 5;
 
 var player;
 var cam;
-// var font;
 var fps;
-// var backdrop;
 var mousePos;
 
 var viewport;
@@ -42,14 +40,16 @@ const tileNames = ['Grass', 'Orange thing', 'Person', 'Water', 'Rock', 'Blank'];
 
 var worldGenerated = false;
 var hoverCellClick = false;
-var isNewEntity = false;
+var mouseDown = false;
+
 
 function generate() {
 
   if (first) {
     worldGenerated = false;
-    console.log(noiseSeed());
+    noiseSeed();
     first = false;
+    world = createGraphics(worldSize.w * subTextureSize, worldSize.h * subTextureSize);
   }
 
   if (worldGenerated == false) {
@@ -73,7 +73,7 @@ function generate() {
 function worldUpdate() {
   viewport.translate(-cam.pos.x * subTextureSize, cam.pos.y * subTextureSize);
 
-  if (worldGenerated == true) {
+  if (worldGenerated) {
 
     if (first) {
       for (let j = 0; j < worldSize.h; j++) {
@@ -89,11 +89,15 @@ function worldUpdate() {
 
     viewport.image(world, 0, -worldSize.h * subTextureSize);
 
-    if (isMoving() || isNewEntity) {
-      entities.sort((a, b) => { return - a.pos.y + b.pos.y });
-    }
+    entities.sort((a, b) => { return - a.pos.y + b.pos.y });
+
     entities.forEach(entity => {
       entity.update();
+    });
+
+
+    projectiles.forEach(projectile => {
+      projectile.update();
     });
 
   } else {
@@ -176,9 +180,6 @@ function preload() {
     loadImage('textures/texture4832.png'),
     loadImage('textures/gun.png', img => { img.width *= 0.01; img.height *= 0.01 })
   ]
-  // backdrop = loadImage('subTexture/sky.jpeg')
-  // font = loadFont('fonts/Mulish-VariableFont_wght.ttf');
-
 }
 
 function setup() {
@@ -186,7 +187,7 @@ function setup() {
   viewport = createGraphics(windowWidth, windowHeight);
   debugWindow = createGraphics(210, 180);
 
-  // this looks amazing with the drawing context but it would be too laggy
+  // it looks amazing with the drawing context but too laggy
   // viewport.drawingContext.shadowOffsetX = 5;
   // viewport.drawingContext.shadowOffsetY = -5;
   // viewport.drawingContext.shadowBlur = 10;
@@ -194,7 +195,7 @@ function setup() {
 
   pixelDensity(1);
   textWrap(WORD);
-  // viewport.textFont(font);
+
   separateTextureAtlas(texture[0], subTextureSize);
   makeShadow(500, 200);
 
@@ -207,9 +208,9 @@ function setup() {
 function defineItems() {
   // items
   items = [
-    new Item(undefined, 'undefined', 'this is nothing'),
-    new Item(texture[1], 'Gun', 'It\'s a gun'),
-    new Item(subTexture[2], 'Person', 'This is a person\n *Press r to remove all')
+    new Item(texture[5], 'Undefined', 'this is nothing', 'undefined'),
+    new Item(texture[1], 'Gun', 'It\'s a gun', 'weapon'),
+    new Item(subTexture[2], 'Person', 'This is a person\n *Press r to remove all', 'entity')
   ]
 
   // inventory cells
@@ -395,6 +396,8 @@ function draw() {
 }
 
 function mousePressed() {
+  mouseDown = true;
+
   // buttons, toggles functionality definition
   if (mainMenu) {
     if (buttons[0].hover()) { // play
@@ -406,7 +409,7 @@ function mousePressed() {
       reset();
 
       cam = new Camera();
-      player = new Entity(subTexture[2], 1, 1, 1, 1, 0.1, 'player');
+      player = new Entity(subTexture[2], 1, 1, 3, 3, 0.1, 'player');
     }
 
     if (buttons[1].hover()) { // settings
@@ -450,7 +453,6 @@ function mousePressed() {
 
   if (playing && mousePos != undefined && worldGenerated) {
     hoverCellClick = false;
-    isNewEntity = false;
 
     inventoryCells.forEach(cell => {
       if (cell.hover()) {
@@ -459,13 +461,13 @@ function mousePressed() {
         player.selectedInventoryCellId = cell.id;
       }
     });
-
-    if (player.item == items[2] && hoverCellClick == false && player.inWater == false) {
-      new Entity(subTexture[2], mousePos.x, mousePos.y, 1, 1, 0, 'npc');
-    }
     // console.log(hoverCellClick);
   }
 
+}
+
+function mouseReleased() {
+  mouseDown = false;
 }
 
 class Camera {
@@ -612,14 +614,15 @@ class Entity {
     this.speed = speed;
     this.type = type;
     this.texture = texture;
-    this.shadowWOff = this.size.w / 3
-    this.shadowSize = { w: (this.size.w - this.shadowWOff) * subTextureSize, h: this.size.h * subTextureSize / 4 };
+
+    // optional attributes
+    this.shadowWOff = this.texture.width / 3
+    this.shadowSize = { w: (this.texture.width - this.shadowWOff), h: this.texture.height / 4 };
     this.selectedInventoryCellId = -1;
     this.item = items[0];
     this.currentlyOnTile;
     this.angle = 0;
-
-    isNewEntity = true;
+    this.health = 5;
 
     if (typeof this.texture == 'number' || typeof this.texture == 'string' || typeof this.texture == 'boolean' || typeof this.texture == undefined) {
       this.texture = subTexture[2];
@@ -646,6 +649,7 @@ class Entity {
   }
 
   update() {
+
     let speed = this.speed * subTextureSize * (1 / fps); // because of delta time this.speed needs to be in the update function
 
     if (this.type == 'player') {
@@ -696,8 +700,42 @@ class Entity {
     if (this.pos.y > this.size.h * worldSize.h - this.size.h / 2) {
       this.pos.y = this.size.h * worldSize.h - this.size.h / 2;
     }
-    if (dist2D(cam.pos, this.pos) < updateRadius) {
+
+    this.distFromCam = dist2D(cam.pos, this.pos);
+
+    if (this.distFromCam <= updateRadius) {
+
       this.show();
+
+    }
+
+    // interactions with environment
+    if (this.currentlyOnTile == 3) {
+      this.inWater = true;
+    } else {
+      this.inWater = false;
+    }
+
+    // interactions with items
+    if (this.item == items[2] && hoverCellClick == false && this.inWater == false && mouseDown) {
+      new Entity(subTexture[2], mousePos.x, mousePos.y, 1, 1, 0, 'npc');
+      mouseDown = false;
+      // console.log('clicked');
+    }
+
+    if (this.item == items[1] && hoverCellClick == false && this.inWater == false && mouseDown) {
+      // console.log('bam');
+      // viewport.push();
+
+      // viewport.translate(this.pos.x * subTextureSize, (-this.pos.y - this.size.h / 2 ) * subTextureSize);
+      // viewport.rotate(-this.angle);
+      // viewport.translate(this.item.texture.width, -this.item.bullet.texture.height / 2);
+
+      // viewport.image(this.item.bullet.texture, 0, 0);
+
+      projectiles.push(new Particle(this.pos.x, -this.pos.y, this.item.bullet.texture, this.item.bullet.speed, -this.angle, this.item.bullet.range, this));
+      // console.log(projectiles);
+      // viewport.pop();
     }
   }
 
@@ -705,13 +743,14 @@ class Entity {
     viewport.push();
     viewport.translate(this.pos.x * subTextureSize, (-this.pos.y) * subTextureSize);
 
-    this.inWater = false;
-
     this.currentlyOnTile = tileIds[floor(this.pos.x) + floor(this.pos.y) * worldSize.w];
 
     if (entityShadow) {
       if (this.type == 'player' || this.type == 'npc') {
-        viewport.image(shadow, ((- this.size.w + this.shadowWOff) / 2) * subTextureSize, - this.shadowSize.h / 2, this.shadowSize.w, this.shadowSize.h);
+        viewport.push();
+        viewport.scale(this.size.w, this.size.h);
+        viewport.image(shadow, (- this.texture.width + this.shadowWOff) / 2, - this.shadowSize.h / 2, this.shadowSize.w, this.shadowSize.h);
+        viewport.pop();
       }
     }
 
@@ -719,10 +758,12 @@ class Entity {
       this.angle = atan2(mousePos.y - this.pos.y - this.size.h / 2, mousePos.x - this.pos.x);
     }
 
-    if (this.currentlyOnTile == 3) {
-      this.inWater = true;
+    if (this.inWater) {
       this.texture.height = 0.5 * subTextureSize;
+      viewport.push();
+      viewport.scale(this.size.w, this.size.h);
       viewport.translate(0, this.texture.height);
+      viewport.pop();
     } else {
       this.texture.height = subTextureSize;
     }
@@ -731,15 +772,17 @@ class Entity {
     if (this.angle > 90 * PI / 180 || this.angle < -90 * PI / 180) {
       viewport.scale(-1, 1);
     }
-    viewport.image(this.texture, -this.size.w * subTextureSize / 2, - this.size.h * subTextureSize);
+    viewport.scale(this.size.w, this.size.h);
+    viewport.image(this.texture, -this.texture.width / 2, - this.texture.height);
     viewport.pop();
 
     if (this.item != items[0]) {
 
-      viewport.translate(0, -this.size.h * subTextureSize / 2)
+      viewport.scale(this.size.w, this.size.h);
+      viewport.translate(0, -this.texture.height / 2)
       viewport.rotate(-this.angle);
       // viewport.fill('red');
-      viewport.translate(this.size.w * subTextureSize / 4, - this.item.texture.height / 2);
+      viewport.translate(this.texture.width / 4, - this.item.texture.height / 2);
       // viewport.rect(0, 0, this.item.width, this.item.height);
       if (this.angle > 90 * PI / 180 || this.angle < -90 * PI / 180) {
         viewport.translate(0, this.item.texture.height);
@@ -747,6 +790,7 @@ class Entity {
       }
 
       if (this.inWater == false) {
+        
         viewport.image(this.item.texture, 0, 0);
       }
     }
@@ -771,18 +815,15 @@ function dist2D(a, b) {
 // }
 
 function reset() {
-  if (world != undefined) {
-    world.clear();
-    worldGenerated = false;
-  }
 
-  world = createGraphics(worldSize.w * subTextureSize, worldSize.h * subTextureSize);
+  worldGenerated = false;
 
   player = undefined;
   cam = undefined;
   tileIds = [];
   entities = [];
   rendered = [];
+  projectiles = [];
   inventoryItems = [items[1], items[2]];
 
   for (let i = 0; i < inventoryCells.length; i++) {
@@ -815,9 +856,9 @@ class InventoryCell {
         viewport.image(this.item.infoBox, this.pos.x, this.pos.y - this.item.infoBox.height - 5);
       }
 
-      viewport.fill(0, 0, 0, 50);
-    } else {
       viewport.fill(0, 0, 0, 100);
+    } else {
+      viewport.fill(0, 0, 0, 200);
     }
 
     viewport.rect(this.pos.x, this.pos.y, this.cellSize.w, this.cellSize.h);
@@ -845,10 +886,22 @@ class InventoryCell {
 }
 
 class Item {
-  constructor(texture, name, description) {
+  constructor(texture, name, description, type) {
     this.texture = texture;
     this.name = name;
     this.description = description;
+    this.type = type;
+    if (this.type == 'weapon' && this.name == 'Gun') {
+      this.ammoCount = Infinity;
+
+      this.bullet =
+      {
+        texture: subTexture[1],
+        damage: 5,
+        speed: 0.1,
+        range: updateRadius
+      };
+    }
     this.infoBox = createGraphics(120, 50);
     this.infoBox.fill(0, 100);
     this.infoBox.stroke(0);
@@ -867,4 +920,41 @@ function isMoving() {
     return true;
   }
   return false;
+}
+
+var projectiles = [];
+
+class Particle {
+  constructor(x, y, texture, speed, angle, range, emitter) {
+    this.texture = texture;
+    this.pos = { x: x, y: y };
+    this.startPos = { x: x, y: y };
+    this.speed = speed;
+    this.angle = angle;
+    this.range = range;
+    this.emitter = emitter;
+    projectiles.push(this);
+  }
+
+  update() {
+    let speed = this.speed * subTextureSize * 1 / fps;
+    let emitterSize = {w: this.emitter.texture.width * this.emitter.size.w,h: this.emitter.texture.height * this.emitter.size.h}
+
+    viewport.push();
+
+    viewport.translate(this.pos.x * subTextureSize, (this.pos.y) * subTextureSize - emitterSize.h / 2);
+    viewport.rotate(this.angle);
+    viewport.translate(emitterSize.w, 0);
+
+    this.pos.x += speed * cos(this.angle);
+    this.pos.y += speed * sin(this.angle);
+    
+    // viewport.translate(this.pos.x, this.pos.y);
+    if (dist2D(this.pos, this.startPos) <= this.range) {
+      viewport.image(this.texture, 0, 0);
+    } else {
+      projectiles.splice(this, 1);
+    }
+    viewport.pop();
+  }
 }
