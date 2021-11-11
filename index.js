@@ -71,8 +71,6 @@ function generate() {
 }
 
 function worldUpdate() {
-  viewport.translate(-cam.pos.x * subTextureSize, cam.pos.y * subTextureSize);
-
   if (worldGenerated) {
 
     if (first) {
@@ -87,6 +85,8 @@ function worldUpdate() {
       first = false;
     }
 
+    viewport.translate(-cam.pos.x * subTextureSize, cam.pos.y * subTextureSize);
+
     viewport.image(world, 0, -worldSize.h * subTextureSize);
 
     entities.sort((a, b) => { return - a.pos.y + b.pos.y });
@@ -94,7 +94,6 @@ function worldUpdate() {
     entities.forEach(entity => {
       entity.update();
     });
-
 
     projectiles.forEach(projectile => {
       projectile.update();
