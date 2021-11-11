@@ -944,7 +944,7 @@ class Particle {
 
     viewport.translate(this.pos.x * subTextureSize, (this.pos.y) * subTextureSize - emitterSize.h / 2);
     viewport.rotate(this.angle);
-    viewport.translate(emitterSize.w, 0);
+    viewport.translate( emitterSize.w * 2 - this.texture.width / 2, - this.texture.height / 2)
 
     this.pos.x += speed * cos(this.angle);
     this.pos.y += speed * sin(this.angle);
