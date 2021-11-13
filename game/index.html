@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="HandheldFriendly" content="true" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>notAVirus</title>
+  <style>
+    * {
+      margin: 0;
+      overflow: hidden;
+    }
+  </style>
+
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
+  <link rel="manifest" href="icons/site.webmanifest">
+
+  <!-- <script src="libraries/p5.js"></script> -->
+  <script src="libraries/p5.min.js"></script>
+  <!-- <script src="../addons/p5.sound.js"></script> -->
+  <script src="index.js"></script>
+  
+  <script>
+    document.addEventListener('gesturestart', function (e) {
+      e.preventDefault();
+      // special hack to prevent zoom-to-tabs gesture in safari
+      document.body.style.zoom = 0.99;
+    });
+
+    document.addEventListener('gesturechange', function (e) {
+      e.preventDefault();
+      // special hack to prevent zoom-to-tabs gesture in safari
+      document.body.style.zoom = 0.99;
+    });
+
+    document.addEventListener('gestureend', function (e) {
+      e.preventDefault();
+      // special hack to prevent zoom-to-tabs gesture in safari
+      document.body.style.zoom = 0.99;
+    });
+  </script>
+  </head>
+
+<body>
+</body>
+
+</html>
