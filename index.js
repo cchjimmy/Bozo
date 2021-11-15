@@ -23,6 +23,7 @@ var rendered = [];
 var inventoryCells = [];
 var inventoryItems = [];
 var items = [];
+var infoBoxes = [];
 
 var playing = false;
 var mainMenu = true;
@@ -51,6 +52,7 @@ function generate() {
     noiseSeed();
     first = false;
     world = createGraphics(worldSize.w * subTextureSize, worldSize.h * subTextureSize);
+    entities.push(player);
   }
 
   if (worldGenerated == false) {
@@ -207,13 +209,18 @@ function setup() {
 }
 
 function defineItems() {
+  infoBoxes = [
+    new InfoBox('Empty', 'There is nothing'),
+    new InfoBox('Gun', 'It\'s a gun'),
+    new InfoBox('NPC', 'This is an NPC\n *Press r to remove all'),
+    new InfoBox('Player', 'This is you')
+  ]
+  
   // items
   items = [
-    new Entity(texture[5], 0, 0, 1, 1, 0, 'empty', 'Empty', 'There is nothing'),
-    new Entity(texture[1], 0, 0, 1, 1, 0, 'weapon', 'Gun', 'It\'s a gun'),
-    new Entity(subTexture[2], 0, 0, 1, 1, 0, 'entity', 'Person', 'This is a person\n *Press r to remove all')
-
-
+    new Entity(subTexture[5], 0, 0, 1, 1, 0, 'empty', infoBoxes[0]),
+    new Entity(texture[1], 0, 0, 1, 1, 0, 'weapon', infoBoxes[1]),
+    new Entity(subTexture[2], 0, 0, 1, 1, 0, 'entity', infoBoxes[2])
   ]
 
   // inventory cells
@@ -244,6 +251,8 @@ function defineItems() {
   // buttons[4] = new Button('', width * 0.25, 210, 150, 40);
   // buttons[5] = new Button('', width * 0.25, 260, 150, 40);
 
+  cam = new Camera();
+  player = new Entity(subTexture[2], 0, 0, 1, 1, 0.1, 'player', infoBoxes[3], 0);
 }
 
 function windowResized() {
@@ -336,6 +345,7 @@ function draw() {
 
   if (playing) {
     // background
+    debugWindow.clear();
     UI.clear();
     viewport.background(147, 189, 194);
 
@@ -347,15 +357,13 @@ function draw() {
     if (worldGenerated) {
       viewport.image(fog, 0, 0, viewport.width, viewport.height);
       if (debug) {
-        debugWindow.clear();
-
         debugWindow.background(0, 0, 0, 100);
 
         debugWindow.textAlign(LEFT, TOP);
         debugWindow.fill(255);
         debugWindow.textSize(15);
 
-        debugWindow.text('debug' + '\n' +
+        debugWindow.text('- debug -' + '\n' +
           'scale: ' + floor(cam.scl) + '\n' +
           'player position: ' + floor(player.pos.x) + ', ' + floor(player.pos.y) + '\n' +
           'mouse position: ' + floor(mousePos.x) + ', ' + floor(mousePos.y) + '\n' +
@@ -417,9 +425,6 @@ function mousePressed() {
       selection = false;
 
       reset();
-
-      cam = new Camera();
-      player = new Entity(subTexture[2], 1, 1, 1, 1, 0.1, 'player', 'Player', 'This is you');
     }
 
     if (buttons[1].hover()) { // settings
@@ -618,15 +623,21 @@ class Toggle {
 }
 
 class Entity {
-  constructor(texture, x, y, width, height, speed, type, name, description, id) {
+  constructor(texture, x, y, width, height, speed, type, infoBox, id) {
     this.pos = { x: x, y: y };
     this.size = { w: width, h: height };
     this.speed = speed;
     this.type = type;
     this.texture = texture;
-    this.name = name;
-    this.description = description;
     this.id = id;
+    this.infoBox = infoBox;
+
+    this.shadowWOff = this.texture.width / 3
+    this.shadowSize = { w: (this.texture.width - this.shadowWOff), h: this.texture.height / 4 };
+    this.selectedInventoryCellId = -1;
+    this.item = items[0];
+    this.currentlyOnTile;
+    this.angle = 0;
 
     if (this.type == 'player' || this.type == 'npc') {
       this.health = 5;
@@ -659,14 +670,8 @@ class Entity {
     if (typeof this.pos.y == undefined) {
       this.pos.y = cam.pos.y;
     }
-    if (this.name == undefined) {
-      this.name = 'Entity';
-    }
-    if (this.description == undefined) {
-      this.description = 'This is an entity';
-    }
 
-    if (this.type == 'weapon' && this.name == 'Gun') {
+    if (this.type == 'weapon' && this.infoBox.name == 'Gun') {
       this.ammoCount = Infinity;
 
       this.bullet =
@@ -677,23 +682,6 @@ class Entity {
         range: 20
       };
     }
-
-    this.infoBox = createGraphics(120, 50);
-    this.infoBox.fill(0, 100);
-    this.infoBox.stroke(0);
-    this.infoBox.rect(0, 0, this.infoBox.width, this.infoBox.height);
-    this.infoBox.fill(255);
-    this.infoBox.textSize(11);
-    this.infoBox.text(this.name + ' -\n' + this.description, 5, 5, this.infoBox.width, this.infoBox.height);
-
-    this.shadowWOff = this.texture.width / 3
-    this.shadowSize = { w: (this.texture.width - this.shadowWOff), h: this.texture.height / 4 };
-    this.selectedInventoryCellId = -1;
-    this.item = items[0];
-    this.currentlyOnTile;
-    this.angle = 0;
-
-    entities.push(this);
   }
 
   update() {
@@ -718,6 +706,12 @@ class Entity {
         this.pos.x += speed;
       }
 
+      // remove entity if not player
+      if (keyIsDown(69) && this.type != 'player') { // r
+        entities.splice(this, 1);
+      }
+
+      // inventory cells selection
       if (keyIsDown(49)) { // 1
         this.item = inventoryCells[0].item;
         this.selectedInventoryCellId = 0;
@@ -766,7 +760,9 @@ class Entity {
 
     // interactions with items
     if (this.item == items[2] && hoverCellClick == false && this.inWater == false && mouseDown) {
-      new Entity(subTexture[2], mousePos.x, mousePos.y, 1, 1, 0, 'entity', 'NPC', 'This is an NPC');
+
+      entities.push(new Entity(subTexture[2], mousePos.x, mousePos.y, 1, 1, 0, 'entity', infoBoxes[2]));
+
       mouseDown = false;
       // console.log('clicked');
     }
@@ -838,9 +834,9 @@ class Entity {
       UI.push();
 
       // UI.scale(1 / cam.scl);
-      UI.translate(mouseX, mouseY - this.infoBox.height);
+      UI.translate(mouseX, mouseY - this.infoBox.infoBox.height);
 
-      UI.image(this.infoBox, 0, 0);
+      UI.image(this.infoBox.infoBox, 0, 0);
       UI.pop();
     }
 
@@ -873,8 +869,8 @@ function reset() {
 
   worldGenerated = false;
 
-  player = undefined;
-  cam = undefined;
+  player.pos = { x: 1, y: 1 };
+
   tileIds = [];
   entities = [];
   rendered = [];
@@ -907,7 +903,7 @@ class InventoryCell {
 
     if (this.hover()) {
 
-        UI.image(this.item.infoBox, this.pos.x, this.pos.y - this.item.infoBox.height - 5);
+      UI.image(this.item.infoBox.infoBox, this.pos.x, this.pos.y - this.item.infoBox.infoBox.height - 5);
 
       UI.fill(0, 0, 0, 100);
     } else {
@@ -1009,5 +1005,19 @@ class Particle {
       projectiles.splice(this, 1);
     }
     viewport.pop();
+  }
+}
+
+class InfoBox {
+  constructor(name, description) {
+    this.name = name;
+    this.description = description;
+    this.infoBox = createGraphics(120, 50);
+    this.infoBox.fill(0, 100);
+    this.infoBox.stroke(0);
+    this.infoBox.rect(0, 0, this.infoBox.width, this.infoBox.height);
+    this.infoBox.fill(255);
+    this.infoBox.textSize(11);
+    this.infoBox.text(this.name + ' -\n' + this.description, 5, 5, this.infoBox.width, this.infoBox.height);
   }
 }
