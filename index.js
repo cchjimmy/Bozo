@@ -108,22 +108,22 @@ function worldUpdate() {
   }
 }
 
-function separateTextureAtlas(textureAtlas, subTextureSize) {
+function separateTextureAtlas(textureAtlas, subTextureSize, arrayName) {
   let textureAtlasSize = { x: textureAtlas.width / subTextureSize, y: textureAtlas.height / subTextureSize };
   let n = 0;
   for (let y = 0; y < textureAtlasSize.y; y++) {
     for (let x = 0; x < textureAtlasSize.x; x++) {
-      subTexture[n] = createGraphics(subTextureSize, subTextureSize);
-      subTexture[n].loadPixels();
+      arrayName[n] = createGraphics(subTextureSize, subTextureSize);
+      arrayName[n].loadPixels();
 
       for (let j = y * subTextureSize; j < (1 + y) * subTextureSize; j++) {
         for (let i = x * subTextureSize; i < (1 + x) * subTextureSize; i++) {
           let c = textureAtlas.get(i, j);
-          subTexture[n].set(i - x * subTextureSize, j - y * subTextureSize, c);
+          arrayName[n].set(i - x * subTextureSize, j - y * subTextureSize, c);
         }
       }
 
-      subTexture[n].updatePixels();
+      arrayName[n].updatePixels();
       n++;
     }
   }
@@ -199,7 +199,7 @@ function setup() {
   pixelDensity(1);
   textWrap(WORD);
 
-  separateTextureAtlas(texture[0], subTextureSize);
+  separateTextureAtlas(texture[0], subTextureSize, subTexture);
   makeShadow(500, 200);
 
   // change cursor, crosshair looks pretty good imo
