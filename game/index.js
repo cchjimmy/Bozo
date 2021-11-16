@@ -43,6 +43,7 @@ var worldGenerated = false;
 var hoverCellClick = false;
 var mouseDown = false;
 
+// window.scrollTo(0,1);
 
 function generate() {
 
