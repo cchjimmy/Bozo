@@ -19,7 +19,6 @@ var texture = [];
 var buttons = [];
 var toggles = [];
 var entities = [];
-var rendered = [];
 var inventoryCells = [];
 var inventoryItems = [];
 var items = [];
@@ -28,7 +27,6 @@ var infoBoxes = [];
 var playing = false;
 var mainMenu = true;
 var settingsMenu = false;
-var selection = false;
 
 var debug = true;
 var fullsrn = false;
@@ -44,9 +42,10 @@ var worldGenerated = false;
 var hoverCellClick = false;
 var mouseDown = false;
 
-
+// var save;
+// const delimiter = ';';
+// const writer = createWriter("");
 function generate() {
-
   if (first) {
     worldGenerated = false;
     noiseSeed();
@@ -56,6 +55,8 @@ function generate() {
   }
 
   if (worldGenerated == false) {
+    // let previousId = 0;
+    // let count = 0;
     for (let j = 0; j < worldSize.h; j++) {
       for (let i = 0; i < worldSize.w; i++) {
         id = 3;
@@ -66,31 +67,38 @@ function generate() {
           }
         }
         tileIds.push(id);
-        // console.log('i: ' + i + ', ' + 'j: ' + j + ', ' + 'tileIds length: ' + tileIds.length + ', ' + 'world generated ' + ((tileIds.length * 100) / (worldSize.w * worldSize.h)) + '%');
+        // if (previousId != id)
+        // {
+        //   save.concat(id);
+        //   previousId = id;
+        //   if (count != 0)
+        //   {
+        //     save.concat(count);
+        //     count = 0;
+        //   }
+        // } else {
+        //   count++;
+        // }
       }
     }
     worldGenerated = true;
+    for (let j = 0; j < worldSize.h; j++) {
+      for (let i = 0; i < worldSize.w; i++) {
+        if (i + j * worldSize.w >= 0) {
+          world.image(subTexture[tileIds[i + j * worldSize.w]], i * subTextureSize, (worldSize.h - j - 1) * subTextureSize);
+        }
+      }
+    }
   }
 }
 
 function worldUpdate() {
   if (worldGenerated) {
+    viewport.push();
+    viewport.translate(0, - worldSize.h * subTextureSize);
 
-    if (first) {
-      for (let j = 0; j < worldSize.h; j++) {
-        for (let i = 0; i < worldSize.w; i++) {
-          if (i + j * worldSize.w >= 0 && rendered[i + j * worldSize.w] != tileIds[i + j * worldSize.w]) {
-            world.image(subTexture[tileIds[i + j * worldSize.w]], i * subTextureSize, (worldSize.h - j - 1) * subTextureSize);
-            rendered[i + j * worldSize.w] = tileIds[i + j * worldSize.w];
-          }
-        }
-      }
-      first = false;
-    }
-
-    viewport.translate(-cam.pos.x * subTextureSize, cam.pos.y * subTextureSize);
-
-    viewport.image(world, 0, -worldSize.h * subTextureSize);
+    viewport.image(world, 0, 0);
+    viewport.pop();
 
     entities.sort((a, b) => { return - a.pos.y + b.pos.y });
 
@@ -104,7 +112,6 @@ function worldUpdate() {
 
   } else {
     generate();
-    first = true;
   }
 }
 
@@ -113,16 +120,14 @@ function separateTextureAtlas(textureAtlas, subTextureSize, arrayName) {
   let n = 0;
   for (let y = 0; y < textureAtlasSize.y; y++) {
     for (let x = 0; x < textureAtlasSize.x; x++) {
-      arrayName[n] = createGraphics(subTextureSize, subTextureSize);
+      arrayName[n] = createImage(subTextureSize, subTextureSize);
       arrayName[n].loadPixels();
-
       for (let j = y * subTextureSize; j < (1 + y) * subTextureSize; j++) {
         for (let i = x * subTextureSize; i < (1 + x) * subTextureSize; i++) {
           let c = textureAtlas.get(i, j);
           arrayName[n].set(i - x * subTextureSize, j - y * subTextureSize, c);
         }
       }
-
       arrayName[n].updatePixels();
       n++;
     }
@@ -175,6 +180,9 @@ function makeShadow(size, brightness) {
   }
   fog.updatePixels();
   shadow.updatePixels();
+
+  fog.resize(subTextureSize, 0);
+  shadow.resize(subTextureSize, 0);
 }
 
 function preload() {
@@ -215,44 +223,32 @@ function defineItems() {
     new InfoBox('NPC', 'This is an NPC\n *Press r to remove all'),
     new InfoBox('Player', 'This is you')
   ]
-  
-  // items
+
   items = [
-    new Entity(subTexture[5], 0, 0, 1, 1, 0, 'empty', infoBoxes[0]),
+    new Entity(subTexture[5], 0, 0, 1, 1, 0, 'typeEmpty', infoBoxes[0]),
     new Entity(texture[1], 0, 0, 1, 1, 0, 'weapon', infoBoxes[1]),
     new Entity(subTexture[2], 0, 0, 1, 1, 0, 'entity', infoBoxes[2])
   ]
 
   // inventory cells
   for (let i = 0; i < 4; i++) {
-
     inventoryCells[i] = new InventoryCell({ x: 10 + 55 * i, y: viewport.height - 60 }, items[0], { w: 50, h: 50 }, i);
-
   }
 
-  // buttons
   buttons = [
     new Button('Play', viewport.width / 2, viewport.height * 0.60, true, 11, undefined, undefined, 100, 35, 10, 10, 10, 10),
     new Button('Settings', viewport.width / 2, viewport.height * 0.60 + 40, true, 11, undefined, undefined, 100, 35, 10, 10, 10, 10),
     new Button('X', width - 40, 20, true, 12)
   ]
 
-  // toggles
   toggles = [
     new Toggle('Fullscreen', fullsrn, 50, 100),
     new Toggle('Debug', debug, 50, 100 + 30),
     new Toggle('Entity shadow', entityShadow, 50, 100 + 60)
   ]
 
-  // selection menu
-  // buttons
-  // buttons[2] = new Button('', width * 0.25, 110, 150, 40);
-  // buttons[3] = new Button('', width * 0.25, 160, 150, 40);
-  // buttons[4] = new Button('', width * 0.25, 210, 150, 40);
-  // buttons[5] = new Button('', width * 0.25, 260, 150, 40);
-
   cam = new Camera();
-  player = new Entity(subTexture[2], 0, 0, 1, 1, 0.1, 'player', infoBoxes[3], 0);
+  player = new Entity(subTexture[2], 0, 0, 1, 1, 2, 'player', infoBoxes[3], 0);
 }
 
 function windowResized() {
@@ -269,35 +265,22 @@ function windowResized() {
   buttons[1].pos = { x: viewport.width / 2, y: viewport.height * 0.60 + 40 }; // settings button
   buttons[2].pos = { x: viewport.width - 40, y: 20 }; // x button on settings menu
 
-  // if (selection) {
-  //   buttons[2] = new Button('', width * 0.25, 110, 150, 40);
-  //   buttons[3] = new Button('', width * 0.25, 160, 150, 40);
-  //   buttons[4] = new Button('', width * 0.25, 210, 150, 40);
-  //   buttons[5] = new Button('', width * 0.25, 260, 150, 40);
-  // }
-
   // reposition inventory cells
-
   for (let i = 0; i < 4; i++) {
-
     inventoryCells[i].pos = { x: 10 + 55 * i, y: viewport.height - 60 };
-
   }
-
 }
 
 function draw() {
-
   if (keyIsDown(27)) { // esc back to main menu
     mainMenu = true;
     playing = false;
     settingsMenu = false;
-    selection = false;
 
     reset();
   }
 
-  if (keyIsDown(82)) { // r clear all entities but not player    
+  if (keyIsDown(82)) { // r clear all entities but not player
     entities = [];
     entities.push(player);
   }
@@ -370,7 +353,7 @@ function draw() {
           'camera position: ' + floor(cam.pos.x) + ', ' + floor(cam.pos.y) + '\n' +
           'currently on: ' + tileNames[player.currentlyOnTile] + '\n' +
           'entity count: ' + entities.length + '\n' +
-          'current item: ' + player.item.name + '\n' +
+          'current item: ' + player.item.infoBox.name + '\n' +
           'selected inventory cell id: ' + player.selectedInventoryCellId + '\n' +
           'fps: ' + fps.toFixed(0), 10, 10);
 
@@ -380,37 +363,10 @@ function draw() {
       inventoryCells.forEach(inventoryCell => {
         inventoryCell.update();
       });
-
       viewport.image(UI, 0, 0);
     }
   }
-
-  if (selection) {
-    viewport.push();
-    // background
-    viewport.fill(59, 52, 59);
-    viewport.noStroke();
-    viewport.rect(0, 0, windowWidth, windowHeight);
-
-    // title
-    viewport.fill(255);
-    viewport.textSize(32);
-    viewport.text('Select', 100, 30);
-
-    viewport.fill(49, 42, 49);
-    viewport.noStroke();
-    viewport.rect(width * 0.25 + 100, 90, width * 0.45, height * 0.7, 10, 10, 10, 10);
-
-    for (let i = 2; i <= 5; i++) {
-      buttons[i].show();
-    }
-    viewport.pop();
-  }
-
   image(viewport, viewportX, viewportY);
-  // image(shadow, 0, 0);
-  // image(fog, 0, 0);
-  // image(gun, 0, 0);
 }
 
 function mousePressed() {
@@ -460,15 +416,8 @@ function mousePressed() {
     }
   }
 
-  if (selection) {
-    // if (buttons[2].hover()) {
-    //   image(subTexture[2], width * 0.6, 100, 100, 100);
-    // }
-  }
-
   if (playing && mousePos != undefined && worldGenerated) {
     hoverCellClick = false;
-
     inventoryCells.forEach(cell => {
       if (cell.hover()) {
         hoverCellClick = true;
@@ -476,9 +425,7 @@ function mousePressed() {
         player.selectedInventoryCellId = cell.id;
       }
     });
-    // console.log(hoverCellClick);
   }
-
 }
 
 function mouseReleased() {
@@ -488,7 +435,7 @@ function mouseReleased() {
 class Camera {
   constructor() {
     this.pos = { x: 0 * subTextureSize, y: 0 * subTextureSize };
-    this.scl = 2.5;
+    this.scl = 1;
   }
 
   update() {
@@ -524,6 +471,7 @@ class Camera {
     // translate -> rotate -> scale
     viewport.translate(viewport.width / 2, viewport.height / 2);
     viewport.scale(this.scl);
+    viewport.translate(- this.pos.x * subTextureSize, this.pos.y * subTextureSize);
   }
 }
 
@@ -632,15 +580,17 @@ class Entity {
     this.id = id;
     this.infoBox = infoBox;
 
-    this.shadowWOff = this.texture.width / 3
-    this.shadowSize = { w: (this.texture.width - this.shadowWOff), h: this.texture.height / 4 };
+    this.shadowSize = { w: 3 / 4, h: 1 / 4 };
     this.selectedInventoryCellId = -1;
     this.item = items[0];
     this.currentlyOnTile;
     this.angle = 0;
 
-    if (this.type == 'player' || this.type == 'npc') {
+    if (this.type == 'entity') {
       this.health = 5;
+    }
+    if (this.type == 'player') {
+      this.health = Infinity;
     }
 
     if (this.pos.x == undefined) {
@@ -662,7 +612,7 @@ class Entity {
       this.speed = abs(this.speed);
     }
     if (typeof this.type == undefined) {
-      this.type = 'npc';
+      this.type = 'entity';
     }
     if (typeof this.pos.x == undefined) {
       this.pos.x = cam.pos.x;
@@ -676,19 +626,51 @@ class Entity {
 
       this.bullet =
       {
-        texture: subTexture[1],
+        texture: subTexture[2],
         damage: 5,
         speed: 2,
-        range: 20
+        range: 6
       };
     }
   }
 
   update() {
+    let speed;
 
-    let speed = this.speed * subTextureSize * (1 / fps); // because of delta time this.speed needs to be in the update function
+    // checks what the entity is standing on
+    if (tileIds[floor(this.pos.x) + floor(this.pos.y) * worldSize.w] != undefined) {
+      this.currentlyOnTile = tileIds[floor(this.pos.x) + floor(this.pos.y) * worldSize.w];
+    } else {
+      this.currentlyOnTile = 5;
+    }
+
+    // only show entity if it is within a certain distance
+    // if (dist2D(cam.pos, this.pos) <= updateRadius) {
+      this.show();
+    // }
+
+    // interactions with environment
+    if (this.currentlyOnTile == 3) { // 3 is water
+      speed = this.speed * (1 / fps) * 0.8; // because of delta time this.speed needs to be in the update function
+      this.inWater = true;
+    } else {
+      speed = this.speed * (1 / fps);
+      this.inWater = false;
+    }
+
+    // interactions with items
+    if (this.item == items[2] && hoverCellClick == false && this.inWater == false && mouseDown) {
+      entities.push(new Entity(subTexture[2], mousePos.x, mousePos.y, 1, 1, 0, 'entity', infoBoxes[2]));
+      mouseDown = false;
+    }
+
+    if (this.item == items[1] && hoverCellClick == false && this.inWater == false && mouseDown) {
+      projectiles.push(new Particle(this.pos.x, -this.pos.y, this.item.bullet.texture, this.item.bullet.speed, -this.angle, this.item.bullet.range, this));
+    }
 
     if (this.type == 'player') {
+      this.angle = atan2(mousePos.y - this.pos.y - this.size.h / 2, mousePos.x - this.pos.x);
+
       // movement
       if (keyIsDown(87)) { // w
         this.pos.y += speed;
@@ -704,11 +686,6 @@ class Entity {
 
       if (keyIsDown(68)) { // d
         this.pos.x += speed;
-      }
-
-      // remove entity if not player
-      if (keyIsDown(69) && this.type != 'player') { // r
-        entities.splice(this, 1);
       }
 
       // inventory cells selection
@@ -730,112 +707,65 @@ class Entity {
       }
     }
 
-    if (this.pos.x < this.size.w / 2) {
-      this.pos.x = this.size.w / 2;
-    }
-    if (this.pos.y < this.size.h / 2) {
-      this.pos.y = this.size.h / 2;
-    }
-    if (this.pos.x > this.size.w * worldSize.w - this.size.w / 2) {
-      this.pos.x = this.size.w * worldSize.w - this.size.w / 2;
-    }
-    if (this.pos.y > this.size.h * worldSize.h - this.size.h / 2) {
-      this.pos.y = this.size.h * worldSize.h - this.size.h / 2;
-    }
-
-    this.distFromCam = dist2D(cam.pos, this.pos);
-
-    if (this.distFromCam <= updateRadius) {
-
-      this.show();
-
-    }
-
-    // interactions with environment
-    if (this.currentlyOnTile == 3) {
-      this.inWater = true;
-    } else {
-      this.inWater = false;
-    }
-
-    // interactions with items
-    if (this.item == items[2] && hoverCellClick == false && this.inWater == false && mouseDown) {
-
-      entities.push(new Entity(subTexture[2], mousePos.x, mousePos.y, 1, 1, 0, 'entity', infoBoxes[2]));
-
-      mouseDown = false;
-      // console.log('clicked');
-    }
-
-    if (this.item == items[1] && hoverCellClick == false && this.inWater == false && mouseDown) {
-
-      projectiles.push(new Particle(this.pos.x, -this.pos.y, this.item.bullet.texture, this.item.bullet.speed, -this.angle, this.item.bullet.range, this));
-
-    }
+    // limits movement within world
+    // if (this.pos.x < this.size.w / 2) {
+    //   this.pos.x = this.size.w / 2;
+    // }
+    // if (this.pos.y < this.size.h / 2) {
+    //   this.pos.y = this.size.h / 2;
+    // }
+    // if (this.pos.x > this.size.w * worldSize.w - this.size.w / 2) {
+    //   this.pos.x = this.size.w * worldSize.w - this.size.w / 2;
+    // }
+    // if (this.pos.y > this.size.h * worldSize.h - this.size.h / 2) {
+    //   this.pos.y = this.size.h * worldSize.h - this.size.h / 2;
+    // }
   }
 
   show() {
     viewport.push();
-    viewport.translate(this.pos.x * subTextureSize, (-this.pos.y) * subTextureSize);
-
-    this.currentlyOnTile = tileIds[floor(this.pos.x) + floor(this.pos.y) * worldSize.w];
+    viewport.translate(this.pos.x * subTextureSize - this.texture.width * this.size.w / 2, -this.pos.y * subTextureSize - this.texture.height * this.size.h);
+    viewport.scale(this.size.w, this.size.h);
 
     if (entityShadow) {
-
       viewport.push();
-      viewport.scale(this.size.w, this.size.h);
-      viewport.image(shadow, (- this.texture.width + this.shadowWOff) / 2, - this.shadowSize.h / 2, this.shadowSize.w, this.shadowSize.h);
+      viewport.translate(this.texture.width / 2 - this.shadowSize.w * subTextureSize / 2, this.texture.height - this.shadowSize.h * subTextureSize / 2);
+      viewport.scale(this.shadowSize.w, this.shadowSize.h);
+      viewport.image(shadow, 0, 0);
       viewport.pop();
-
-    }
-
-    if (this.type == 'player') {
-      this.angle = atan2(mousePos.y - this.pos.y - this.size.h / 2, mousePos.x - this.pos.x);
-    }
-
-    if (this.inWater) {
-      this.texture.height = 0.5 * subTextureSize;
-      viewport.push();
-      viewport.scale(this.size.w, this.size.h);
-      viewport.translate(0, this.texture.height);
-      viewport.pop();
-    } else {
-      this.texture.height = subTextureSize;
     }
 
     viewport.push();
+    if (this.inWater) {
+      this.texture.height = 0.5 * subTextureSize;
+    } else {
+      this.texture.height = subTextureSize;
+    }
     if (this.angle > 90 * PI / 180 || this.angle < -90 * PI / 180) {
+      viewport.translate(this.texture.width, 0);
       viewport.scale(-1, 1);
     }
-    viewport.scale(this.size.w, this.size.h);
-    viewport.image(this.texture, -this.texture.width / 2, - this.texture.height);
+    viewport.image(this.texture, 0, 0);
     viewport.pop();
 
     if (this.item != items[0]) {
-
-      viewport.scale(this.size.w, this.size.h);
-      viewport.translate(0, -this.texture.height / 2)
+      viewport.push();
+      viewport.translate(this.texture.width / 2, this.texture.height / 2)
       viewport.rotate(-this.angle);
-      // viewport.fill('red');
       viewport.translate(this.texture.width / 4, - this.item.texture.height / 2);
-      // viewport.rect(0, 0, this.item.width, this.item.height);
       if (this.angle > 90 * PI / 180 || this.angle < -90 * PI / 180) {
         viewport.translate(0, this.item.texture.height);
         viewport.scale(1, -1);
       }
-
-      if (this.inWater == false) {
-
+      if (!this.inWater) {
         viewport.image(this.item.texture, 0, 0);
       }
+      viewport.pop();
     }
 
     if (this.hover()) {
       UI.push();
-
-      // UI.scale(1 / cam.scl);
       UI.translate(mouseX, mouseY - this.infoBox.infoBox.height);
-
       UI.image(this.infoBox.infoBox, 0, 0);
       UI.pop();
     }
@@ -855,38 +785,23 @@ function dist2D(a, b) {
   return ((a.x - b.x) ** 2 + (a.y - b.y) ** 2) ** 0.5;
 }
 
-// class Slider {
-// constructor(name, x, y, start, end) {
-// this.name = name;
-// this.pos = { x: x, y: y };
-// this.s = start;
-// this.e = end;
-
-// }
-// }
-
 function reset() {
-
   worldGenerated = false;
 
-  player.pos = { x: 1, y: 1 };
+  player.pos = { x: 0, y: 0 };
 
   tileIds = [];
   entities = [];
-  rendered = [];
   projectiles = [];
   inventoryItems = [items[1], items[2]];
 
   for (let i = 0; i < inventoryCells.length; i++) {
-
     if (inventoryItems[i] != undefined) {
       inventoryCells[i].item = inventoryItems[i];
     } else {
       inventoryCells[i].item = items[0];
     }
-
   }
-
   first = true;
 }
 
@@ -900,16 +815,12 @@ class InventoryCell {
 
   update() {
     UI.push();
-
     if (this.hover()) {
-
       UI.image(this.item.infoBox.infoBox, this.pos.x, this.pos.y - this.item.infoBox.infoBox.height - 5);
-
-      UI.fill(0, 0, 0, 100);
+      UI.fill(0, 100);
     } else {
-      UI.fill(0, 0, 0, 200);
+      UI.fill(0, 200);
     }
-
     UI.rect(this.pos.x, this.pos.y, this.cellSize.w, this.cellSize.h);
 
     if (player.item == this.item && player.selectedInventoryCellId == this.id) {
@@ -933,33 +844,6 @@ class InventoryCell {
     return false;
   }
 }
-
-// class Item {
-//   constructor(texture, name, description, type) {
-//     this.texture = texture;
-//     this.name = name;
-//     this.description = description;
-//     this.type = type;
-//     if (this.type == 'weapon' && this.name == 'Gun') {
-//       this.ammoCount = Infinity;
-
-//       this.bullet =
-//       {
-//         texture: subTexture[1],
-//         damage: 5,
-//         speed: 0.1,
-//         range: updateRadius
-//       };
-//     }
-//     this.infoBox = createGraphics(120, 50);
-//     this.infoBox.fill(0, 100);
-//     this.infoBox.stroke(0);
-//     this.infoBox.rect(0, 0, this.infoBox.width, this.infoBox.height);
-//     this.infoBox.fill(255);
-//     this.infoBox.textSize(11);
-//     this.infoBox.text(this.name + ' -' + '\n' + this.description, 5, 5, this.infoBox.width, this.infoBox.height);
-//   }
-// }
 
 function isMoving() {
   if (keyIsDown(87) ||
@@ -990,7 +874,6 @@ class Particle {
     let emitterSize = { w: this.emitter.texture.width * this.emitter.size.w, h: this.emitter.texture.height * this.emitter.size.h }
 
     viewport.push();
-
     viewport.translate(this.pos.x * subTextureSize, (this.pos.y) * subTextureSize - emitterSize.h / 2);
     viewport.rotate(this.angle);
     viewport.translate(emitterSize.w * 2 - this.texture.width / 2, - this.texture.height / 2)
@@ -998,10 +881,10 @@ class Particle {
     this.pos.x += speed * cos(this.angle);
     this.pos.y += speed * sin(this.angle);
 
-    // viewport.translate(this.pos.x, this.pos.y);
     if (dist2D(this.pos, this.startPos) <= this.range) {
       viewport.image(this.texture, 0, 0);
     } else {
+      entities.push(new Entity(this.texture, this.pos.x, -this.pos.y, 1, 1, 0, 'entity', infoBoxes[2]));
       projectiles.splice(this, 1);
     }
     viewport.pop();
