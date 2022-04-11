@@ -1,4 +1,4 @@
-import { dragElement, elementFullscreen } from "./eventHandler.js";
+import { docking, dragElement, elementFullscreen } from "./eventHandler.js";
 
 export var guis = [];
 
@@ -27,23 +27,15 @@ export default class GuiHandler {
     return;
   }
 
-  /**
-   * 
-   * @param {string} id id to a gui.
-   * @param {HTMLelement} element element to be displayed.
-   * @param {int} x define x position of the element.
-   * @param {int} y define y position of the element.
-   * @returns void
-   */
   display(id, content, x = 0, y = 0) {
     let gui = this.get(id + "container");
-    
+
     if (gui) {
       if (typeof content == typeof "") {
         gui.innerText = content;
         return;
       }
-  
+
       if (typeof content == typeof gui) {
         if (content.classList.contains("container")) {
           return console.trace("Cannot display a container within another container.");
@@ -113,6 +105,7 @@ export default class GuiHandler {
     document.body.appendChild(empty);
 
     dragElement(empty);
+    // empty.setAttribute("draggable", true);
     elementFullscreen(empty);
 
     this.title(id, id);
@@ -156,7 +149,7 @@ export default class GuiHandler {
   }
 
   title(id = "", title = "") {
-    let header = document.getElementById(id + "header");
+    let header = this.get(id + "header");
     if (header) {
       header.innerText = title;
     }
@@ -164,7 +157,7 @@ export default class GuiHandler {
   }
 
   removeTitle(id = "") {
-    let header = document.getElementById(id + "header");
+    let header = this.get(id + "header");
     if (header) {
       header.innerText = "";
     }
@@ -186,18 +179,34 @@ export default class GuiHandler {
   }
 
   get(id = "") {
-    return document.getElementById(id);
+    return document.querySelector("#" + id);
   }
 
   createDockBoxes() {
+    let wrapper = document.createElement("div");
+    document.body.appendChild(wrapper);
+    wrapper.classList.add("dock-box-container");
+
     let box = document.createElement("div");
-    document.body.appendChild(box);
-    box.id = "dockTop";
-    box.classList.add("dockBox")
+    box.classList.add("dock-box");
+    wrapper.appendChild(box);
+
+    let resizer = document.createElement("div");
+    resizer.classList.add("resizer");
+    resizer.id = "dragMe";
+    wrapper.appendChild(resizer);
+
+    box = document.createElement("div");
+    box.classList.add("dock-box");
+    box.style.flex = "1 1 0%";
+    wrapper.appendChild(box);
+
+    docking(resizer);
+    return;
   }
 
   init() {
-    this.setTheme("dak");
+    this.setTheme("dark");
     this.create("test");
     this.draw("test");
     this.display("test", `What is Lorem Ipsum?

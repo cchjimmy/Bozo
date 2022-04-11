@@ -1,5 +1,6 @@
 import { guis } from "./GuiHandler.js";
 
+// https://htmldom.dev/make-a-draggable-element/
 export function dragElement(elmnt) {
   var pos1 = 0;
   var pos2 = 0;
@@ -26,7 +27,7 @@ export function dragElement(elmnt) {
     // if present, the header is where you move the DIV from:
     document.getElementById(elmnt.id + "header").onmousedown = dragMouseDown;
     document.getElementById(elmnt.id + "header").classList.add("draggable");
-    
+
   } else {
     // otherwise, move the DIV from anywhere inside the DIV:
     elmnt.onmousedown = dragMouseDown;
@@ -67,7 +68,7 @@ export function dragElement(elmnt) {
       elmnt.style.height = `${parentHeight}px`;
     }
 
-    drawDockBoxes();
+    // drawDockBoxes();
   }
 
   function elementDrag(e) {
@@ -97,7 +98,7 @@ export function dragElement(elmnt) {
       elmnt.style.maxHeight -= titleBarHeight;
     }
 
-    hideDockBoxes();
+    // hideDockBoxes();
   }
 
   function checkEdges(elmnt) {
@@ -210,7 +211,7 @@ function getParent(elmnt) {
 }
 
 function drawDockBoxes() {
-  let dockBoxes = document.querySelectorAll(".dockBox");
+  let dockBoxes = document.querySelectorAll(".dock-box");
   if (dockBoxes) {
     for (let box of dockBoxes) {
       box.style.display = "block";
@@ -225,7 +226,7 @@ function drawDockBoxes() {
 }
 
 function hideDockBoxes() {
-  let dockBoxes = document.querySelectorAll(".dockBox");
+  let dockBoxes = document.querySelectorAll(".dock-box");
   if (dockBoxes) {
     for (let box of dockBoxes) {
       box.style.display = "none";
@@ -233,4 +234,69 @@ function hideDockBoxes() {
   }
   console.log("hideDockBoxes");
   return;
+}
+
+// https://htmldom.dev/create-resizable-split-views/
+export function docking(separator) {
+  // Query the element
+  const resizer = separator;
+  const leftSide = resizer.previousElementSibling;
+  const rightSide = resizer.nextElementSibling;
+
+  console.log(resizer, leftSide, rightSide);
+
+  // // The current position of mouse
+  let x = 0;
+  let y = 0;
+
+  // Width of left side
+  let leftWidth = 0;
+
+  // Handle the mousedown event
+  // that's triggered when user drags the resizer
+  const mouseDownHandler = function (e) {
+    // Get the current mouse position
+    x = e.clientX;
+    y = e.clientY;
+    leftWidth = leftSide.getBoundingClientRect().width;
+
+    // Attach the listeners to `document`
+    document.addEventListener('mousemove', mouseMoveHandler);
+    document.addEventListener('mouseup', mouseUpHandler);
+  };
+
+  // Attach the handler
+  resizer.addEventListener('mousedown', mouseDownHandler);
+
+  const mouseMoveHandler = function (e) {
+    // How far the mouse has been moved
+    const dx = e.clientX - x;
+    const dy = e.clientY - y;
+
+    const newLeftWidth = ((leftWidth + dx) * 100) / resizer.parentNode.getBoundingClientRect().width;
+    leftSide.style.width = `${newLeftWidth}%`;
+
+    document.body.style.cursor = 'col-resize';
+
+    leftSide.style.userSelect = 'none';
+    leftSide.style.pointerEvents = 'none';
+
+    rightSide.style.userSelect = 'none';
+    rightSide.style.pointerEvents = 'none';
+  };
+
+  const mouseUpHandler = function () {
+    resizer.style.removeProperty('cursor');
+    document.body.style.removeProperty('cursor');
+
+    leftSide.style.removeProperty('user-select');
+    leftSide.style.removeProperty('pointer-events');
+
+    rightSide.style.removeProperty('user-select');
+    rightSide.style.removeProperty('pointer-events');
+
+    // Remove the handlers of `mousemove` and `mouseup`
+    document.removeEventListener('mousemove', mouseMoveHandler);
+    document.removeEventListener('mouseup', mouseUpHandler);
+  };
 }

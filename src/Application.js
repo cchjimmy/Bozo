@@ -1,4 +1,4 @@
-import GuiHandler from "./GuiHandler.js"
+import GuiHandler from "./gui/GuiHandler.js"
 
 export default class Application {
   constructor() {
