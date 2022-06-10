@@ -5,7 +5,6 @@ export var guis = [];
 export default class GuiHandler {
 
   constructor() {
-    this.createDockBoxes();
     this.init();
   }
 
@@ -27,23 +26,35 @@ export default class GuiHandler {
     return;
   }
 
-  display(id, content, x = 0, y = 0) {
-    let gui = this.get(id + "container");
+  display(id = "", content = []) {
+    let mainContainer = this.get(id + "container");
 
-    if (gui) {
-      if (typeof content == typeof "") {
-        gui.innerText = content;
-        return;
-      }
+    if (mainContainer) {
+      if (content == []) return;
 
-      if (typeof content == typeof gui) {
-        if (content.classList.contains("container")) {
-          return console.trace("Cannot display a container within another container.");
-        }
+      let contentContainer = document.createElement("div");
 
-        content.style.position = "absolute";
-        content.style.transform = `transform(${Math.floor(x)}px, ${Math.floor(y)}px)`;
-        gui.appendChild(content);
+      switch (typeof content) {
+        case typeof "":
+          console.log(typeof "");
+          contentContainer.innerText = content;
+          mainContainer.appendChild(contentContainer);
+          break;
+
+        case typeof mainContainer:
+          console.log(typeof mainContainer, "mc");
+          if (content.classList.contains("empty")) {
+            console.warn("Cannot display a container within another container.");
+          } else {
+            contentContainer.appendChild(content);
+            mainContainer.appendChild(contentContainer);
+          }
+          break;
+
+        default:
+          contentContainer.appendChild(content);
+          mainContainer.appendChild(contentContainer);
+          break;
       }
     }
     return;
@@ -70,7 +81,8 @@ export default class GuiHandler {
     empty.style.width = `${width}px`;
     empty.style.height = `${height + titleBarHeight}px`
     empty.id = id;
-    empty.classList.add("empty");
+    empty.classList.add("empty", "draggable");
+    empty.setAttribute("draggable", true);
 
     let container = document.createElement("div");
     container.id = id + "container";
@@ -105,11 +117,12 @@ export default class GuiHandler {
     document.body.appendChild(empty);
 
     dragElement(empty);
-    // empty.setAttribute("draggable", true);
     elementFullscreen(empty);
 
     this.title(id, id);
     guis.push(empty);
+
+    this.reposition(id, 0, 0);
     return;
   }
 
@@ -186,9 +199,11 @@ export default class GuiHandler {
     let wrapper = document.createElement("div");
     document.body.appendChild(wrapper);
     wrapper.classList.add("dock-box-container");
+    wrapper.style.opacity = 0;
 
     let box = document.createElement("div");
     box.classList.add("dock-box");
+    box.style.width = "50%";
     wrapper.appendChild(box);
 
     let resizer = document.createElement("div");
@@ -198,14 +213,39 @@ export default class GuiHandler {
 
     box = document.createElement("div");
     box.classList.add("dock-box");
-    box.style.flex = "1 1 0%";
+    box.style.flex = "1";
     wrapper.appendChild(box);
 
-    docking(resizer);
+    docking(wrapper);
     return;
   }
 
+  addOption(id = "", name = "", callback) {
+    let wrapper = document.createElement("div");
+    wrapper.style.display = "flex";
+    wrapper.style.alignItems = "center";
+    wrapper.style.padding = "2px"
+    wrapper.style.boxSizing = "border-box";
+
+    let button = document.createElement("button");
+    button.addEventListener("click", callback);
+    button.style.height = "20px";
+    button.style.width = "20px";
+
+    let title = document.createElement("div");
+    title.style.paddingRight = "20px";
+    title.innerText = name;
+
+    wrapper.appendChild(title);
+    wrapper.appendChild(button);
+    
+    this.display(id, wrapper);
+  }
+
   init() {
+    console.log(g("hi").html());
+    this.createDockBoxes();
+
     this.setTheme("dark");
     this.create("test");
     this.draw("test");
@@ -223,6 +263,27 @@ export default class GuiHandler {
     
     Where can I get some?
     There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't anything embarrassing hidden in the middle of text. All the Lorem Ipsum generators on the Internet tend to repeat predefined chunks as necessary, making this the first true generator on the Internet. It uses a dictionary of over 200 Latin words, combined with a handful of model sentence structures, to generate Lorem Ipsum which looks reasonable. The generated Lorem Ipsum is therefore always free from repetition, injected humour, or non-characteristic words etc.`);
+    this.create("main");
+    this.draw("main");
+    this.reposition("main", 100);
+    this.display("main", this.get("test"));
+    this.display("main", "Demo Settings\n\n");
+    for(let i = 0; i < 10; i ++) {
+      this.addOption("main", "test", () => {
+        console.log("test");
+      });
+    }
+    
     return;
   }
+}
+
+export function g(className = "") {
+  const element = document.createElement("div");
+  element.classList.add(className);
+  const self = {
+    element: element,
+    html: ()=>self.element,
+  }
+  return self;
 }

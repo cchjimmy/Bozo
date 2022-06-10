@@ -26,12 +26,10 @@ export function dragElement(elmnt) {
     titleBarHeight = parseInt(document.getElementById(elmnt.id + "header").style.height);
     // if present, the header is where you move the DIV from:
     document.getElementById(elmnt.id + "header").onmousedown = dragMouseDown;
-    document.getElementById(elmnt.id + "header").classList.add("draggable");
 
   } else {
     // otherwise, move the DIV from anywhere inside the DIV:
     elmnt.onmousedown = dragMouseDown;
-    elmnt.classList.add("draggable");
   }
 
   function dragMouseDown(e) {
@@ -68,6 +66,10 @@ export function dragElement(elmnt) {
       elmnt.style.height = `${parentHeight}px`;
     }
 
+    // if docked undock.
+    if (getParent(elmnt).classList.contains("dock-box")) {
+      document.body.appendChild(elmnt);
+    }
     // drawDockBoxes();
   }
 
@@ -110,7 +112,7 @@ export function dragElement(elmnt) {
       }
     } else {
       // fullscreen detection
-      if (!document.getElementById(parent.id + "header").onmousedown) {
+      if (document.getElementById(parent.id+"header") && !document.getElementById(parent.id + "header").onmousedown) {
         parentHeight = window.innerHeight;
         parentWidth = innerWidth;
       }
@@ -237,13 +239,11 @@ function hideDockBoxes() {
 }
 
 // https://htmldom.dev/create-resizable-split-views/
-export function docking(separator) {
+export function docking(elmnt) {
   // Query the element
-  const resizer = separator;
+  const resizer = elmnt.querySelector(".resizer");
   const leftSide = resizer.previousElementSibling;
   const rightSide = resizer.nextElementSibling;
-
-  console.log(resizer, leftSide, rightSide);
 
   // // The current position of mouse
   let x = 0;
@@ -299,4 +299,24 @@ export function docking(separator) {
     document.removeEventListener('mousemove', mouseMoveHandler);
     document.removeEventListener('mouseup', mouseUpHandler);
   };
+
+  let dockBoxes = document.querySelectorAll(".dock-box");
+  dockBoxes.forEach(dockBox => {
+    dockBox.addEventListener("dragover", () => {
+      const currentDraggable = document.querySelector(".dragging");
+      dockBox.appendChild(currentDraggable);
+    })
+  })
+
+  let draggables = document.querySelectorAll(".draggable");
+  draggables.forEach(draggable => {
+    draggable.addEventListener("dragstart", () => {
+      draggable.classList.add("dragging");
+    })
+
+    draggable.addEventListener("dragend", ()=> {
+      draggable.classList.remove("dragging");
+    })
+  })  
+
 }

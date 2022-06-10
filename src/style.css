@@ -40,7 +40,7 @@
   --secondary-text-color: #B3B3B3;
 }
 
-body {
+html, body {
   --scrollbar-width: 14px;
   --title-bar-height: 25px;
 
@@ -49,9 +49,7 @@ body {
   --header-color: white;
   --primary-text-color: black;
   --secondary-text-color: gray;
-  width: 100%;
-  height: 100%;
-  margin: 0%;
+  margin: 0px;
   background-color: var(--body-background-color);
   overflow: hidden;
 }
@@ -132,26 +130,30 @@ body {
 }
 
 .dock-box {
-  border: 1px solid orange;
-  min-width: 100px;
   background-color: gray;
   display: flex;
+  transition: background-color 0.3s;
 }
 
 .dock-box-container {
   display: flex;
-  height: 100px;
+  height: 100%;
   width: 100%;
   border: 1px solid orange;
+  box-sizing: border-box;
 }
 
 .resizer {
   background-color: #cbd5e0;
-  cursor: ew-resize;
+  cursor: col-resize;
   height: 100%;
-  width: 2px;
+  width: 5px;
+}
+
+.draggable.dragging {
+  opacity: 0.5;
 }
 
 .draggable {
-  cursor: move;
+  cursor: pointer;
 }

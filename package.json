@@ -1,7 +1,6 @@
 {
-  "name": "jsgameengine",
+  "name": "js2dengine",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "directories": {
     "lib": "lib"
@@ -108,7 +107,7 @@
         {
           "name": "@electron-forge/maker-squirrel",
           "config": {
-            "name": "jsgameengine"
+            "name": "js2dengine"
           }
         },
         {
@@ -127,5 +126,6 @@
         }
       ]
     }
-  }
+  },
+  "description": ""
 }
