@@ -4,27 +4,33 @@ export default class EntitiesHandler {
   constructor(context) {
     this.c = context;
     this.entities = [];
-    this.entity = {
-      position: new Vec2,
-      width: undefined,
-      height: undefined,
-      velocity: new Vec2,
-    }
   }
 
   update() {
-    this.entities.forEach((entity) => {
-      this.c.fillRect(entity.position.x, entity.position.y, entity.width, entity.height);
-      this.entity.position.add(entity.velocity);
+    this.entities.forEach(entity => {
+      this.c.fillRect(entity.position.x, -entity.position.y, entity.size.x, entity.size.y);
+      entity.position = entity.position.add(entity.velocity);
     })
   }
 
-  addEntity(x = 0, y = 0, width = 10, height = 10) {
-    this.entity.position.x = x;
-    this.entity.position.y = y;
-    this.entity.width = width;
-    this.entity.height = height;
-    // this.entity.velocity.x = 1;
-    this.entities.push(this.entity);
+  /**
+   * adds an entity into entity handler
+   * @param {*} params {position: vec2, size: vec2, velocity: vec2}
+   */
+  addEntity(params) {
+    let p = {
+      position: new Vec2,
+      size: new Vec2(10, 10),
+      velocity: new Vec2
+    }
+
+    if (params != undefined) {
+      for (let param in params) {
+        p[param] = params[param];
+      }
+    }
+
+    let entity = p;
+    this.entities.push(p);
   }
 }

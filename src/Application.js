@@ -2,6 +2,7 @@
 
 import Canvas2D from "./Canvas.js";
 import EntitiesHandler from "./EntitiesHandler.js";
+import Vec2 from "./Vec2.js";
 
 export default class Application {
   constructor() {
@@ -16,8 +17,6 @@ export default class Application {
       console.log("Cannot initialize canvas context 2d");
       return;
     } else {
-      this.EH.addEntity();
-
       this.run();
     }
     return;
@@ -25,7 +24,7 @@ export default class Application {
 
   run() {
     requestAnimationFrame(() => {this.run();});
-    this.canvas.background("blue");
+    this.canvas.background();
     this.EH.update();
 
 
