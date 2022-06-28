@@ -1,10 +1,9 @@
-import Application from "./Application.js";
+import Engine from "./Engine.js";
 
-var app;
+const engine = new Engine;
 
 const init = () => {
-  app = new Application();
-  app.init();
+  engine.init();
   return;
 }
 

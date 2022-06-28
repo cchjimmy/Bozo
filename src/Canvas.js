@@ -5,22 +5,20 @@ export default class Canvas2D {
     this.context = this.canvas.getContext("2d");
   }
 
-  expandCanvas() {
-    this.canvas.width = innerWidth;
-    this.canvas.height = innerHeight;
-  }
-
+  /**
+   * customise the size of canvas
+   * @param {Number} width 
+   * @param {Number} height 
+   */
   setSize(width, height) {
     this.canvas.width = width;
     this.canvas.height = height;
   }
 
-  background(color) {
-    this.context.save();
-    if (color != undefined) {
-      this.context.fillStyle = color;
-    }
-    this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
-    this.context.restore();
+  /**
+   * clears all pixels
+   */
+  clear() {
+    this.context.clearRect(0, 0, canvas.width, canvas.height);
   }
 }

@@ -243,7 +243,6 @@ export default class GuiHandler {
   }
 
   init() {
-    console.log(g("hi").html());
     this.createDockBoxes();
 
     this.setTheme("dark");
@@ -276,14 +275,4 @@ export default class GuiHandler {
     
     return;
   }
-}
-
-export function g(className = "") {
-  const element = document.createElement("div");
-  element.classList.add(className);
-  const self = {
-    element: element,
-    html: ()=>self.element,
-  }
-  return self;
 }
