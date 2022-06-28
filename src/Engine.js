@@ -16,6 +16,9 @@ export default class Engine {
 
     this.c.setSize(innerWidth, innerHeight);
 
+    this.eh.addEntity();
+    console.log(this.eh.getEntities());
+
     // credit: https://stackoverflow.com/questions/63301553/debounce-function-not-working-in-javascript
     let timer;
     function debounce(func, timeout = 300){

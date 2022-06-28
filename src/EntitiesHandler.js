@@ -1,3 +1,4 @@
+import uuidv4 from "./uuid.js";
 import Vec2 from "./Vec2.js";
 
 export default class EntitiesHandler {
@@ -19,7 +20,8 @@ export default class EntitiesHandler {
     let p = {
       position: new Vec2,
       halfSize: new Vec2(0.5, 0.5),
-      velocity: new Vec2
+      velocity: new Vec2,
+      id: uuidv4()
     }
 
     if (params) {
