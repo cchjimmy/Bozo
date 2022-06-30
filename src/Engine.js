@@ -33,7 +33,6 @@ export default class Engine {
       debounce(() => {
         this.c.setSize(innerWidth, innerHeight);
         this.isLooping = true;
-        this.loop();
       }, 200);
     }
 
@@ -42,8 +41,10 @@ export default class Engine {
   }
 
   loop() {
+    this.eh.update();
     if (this.isLooping) {
-      requestAnimationFrame(() => { this.loop(); });
+      
     }
+    requestAnimationFrame(() => { this.loop();});
   }
 }

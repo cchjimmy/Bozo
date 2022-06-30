@@ -14,7 +14,7 @@ export default class EntitiesHandler {
 
   /**
    * adds an entity into entity handler
-   * @param {*} params {position: vec2, halfSize: vec2, velocity: vec2}
+   * @param {Object} params {position: vec2, halfSize: vec2, velocity: vec2}
    */
   addEntity(params) {
     let p = {
