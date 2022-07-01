@@ -1,23 +1,19 @@
-import Canvas2D from "./Canvas.js";
-import EntitiesHandler from "./EntitiesHandler.js";
+import Renderer2D from "./Renderer2D.js";
+import Scene from "./Scene.js";
 
 export default class Engine {
   constructor() {
-    this.c = new Canvas2D;
-    this.eh = new EntitiesHandler;
-    this.isLooping = false;
+    this.scene = new Scene;
+    this.renderer = new Renderer2D;
   }
 
   init() {
-    if (!this.c.context) {
+    if (!this.renderer.context) {
       console.log("Unable to initialize CanvasRenderingContext2D")
       return;
     }
 
-    this.c.setSize(innerWidth, innerHeight);
-
-    this.eh.addEntity();
-    console.log(this.eh.getEntities());
+    this.renderer.setSize(innerWidth, innerHeight);
 
     // credit: https://stackoverflow.com/questions/63301553/debounce-function-not-working-in-javascript
     let timer;
@@ -31,7 +27,7 @@ export default class Engine {
     window.onresize = () => {
       this.isLooping = false;
       debounce(() => {
-        this.c.setSize(innerWidth, innerHeight);
+        this.renderer.setSize(innerWidth, innerHeight);
         this.isLooping = true;
       }, 200);
     }
@@ -41,7 +37,6 @@ export default class Engine {
   }
 
   loop() {
-    this.eh.update();
     if (this.isLooping) {
       
     }
