@@ -1,3 +1,4 @@
+import Vec2 from "./Vec2.js";
 import Renderer2D from "./Renderer2D.js";
 import Scene from "./Scene.js";
 
@@ -9,15 +10,17 @@ export default class Engine {
 
   init() {
     if (!this.renderer.context) {
-      console.log("Unable to initialize CanvasRenderingContext2D")
+      console.error("Unable to initialize CanvasRenderingContext2D")
       return;
     }
 
     this.renderer.setSize(innerWidth, innerHeight);
 
+    this.scene.addEntity({entityComponents: { transformComponent: { position: new Vec2(10, 10) }, imageComponent: { size: new Vec2(10, 10) } }});
+
     // credit: https://stackoverflow.com/questions/63301553/debounce-function-not-working-in-javascript
     let timer;
-    function debounce(func, timeout = 300){
+    function debounce(func, timeout = 300) {
       return ((...args) => {
         clearTimeout(timer);
         timer = setTimeout(() => { func.apply(this, args); }, timeout);
@@ -37,9 +40,17 @@ export default class Engine {
   }
 
   loop() {
+    this.update();
+
+    // draw only when not resizing
     if (this.isLooping) {
-      
+      // this.renderer.draw();
     }
-    requestAnimationFrame(() => { this.loop();});
+
+    requestAnimationFrame(() => { this.loop(); });
+  }
+
+  update() {
+
   }
 }

@@ -1,6 +1,6 @@
 export default class TransformComponent {
   constructor() {
-    this.transforms = [];
+    this.transforms = {};
   }
 
   /**
@@ -9,13 +9,13 @@ export default class TransformComponent {
    * @param {Vec2} position use Vec2 class to define position
    * @param {Number} rotation measure in radians
    */
-  addTransform({ id, position, rotation }) {
-    this.transforms.push({ id: id, position: position, rotation: rotation });
+  addTransform({ id, position, rotation = 0 }) {
+    this.transforms[id] = { position: position, rotation: rotation };
   }
 
   /**
-   * returns an array of transforms
-   * @returns an array
+   * returns an Object containing all transforms
+   * @returns an Object
    */
   getTransforms() {
     return this.transforms;

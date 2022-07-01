@@ -1,10 +1,14 @@
 export default class ImageComponent {
   constructor() {
-    this.images = [];
+    this.images = {};
   }
 
   addImage({ id, image, size }) {
-    this.images.push({ id: id, image: image, size: size })
+    if (!image) {
+      image = new Image(size.x, size.y);
+      image.src = "../../res/gun.png";
+    }
+    this.images[id] = { image: image, size: size };
   }
 
   getImages() {
