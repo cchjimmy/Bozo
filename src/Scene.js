@@ -11,11 +11,11 @@ export default class Scene {
     let id = uuidv4();
     let scene = {id: id, name: name, EntityHandler: new EntitiesHandler};
     this.scenes[id] = scene;
-    return scene;
+    return this.scenes[id];
   }
 
   addEntity({sceneId = this.currentScene.id, entityComponents}) {
-    if (!sceneId) {
+    if (!sceneId || this.scenes[sceneId] == undefined) {
       console.warn("Please select a valid scene");
       return;
     }
@@ -33,5 +33,10 @@ export default class Scene {
 
   getScenes() {
     return this.scenes;
+  }
+  
+  getEntities(sceneId = this.currentScene.id) {
+    let entities = this.scenes[sceneId].EntityHandler.getEntities();
+    return entities;
   }
 }

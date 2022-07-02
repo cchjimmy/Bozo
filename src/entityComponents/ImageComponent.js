@@ -8,7 +8,7 @@ export default class ImageComponent {
       image = new Image(size.x, size.y);
       image.src = "../../res/gun.png";
     }
-    this.images[id] = { image: image, size: size };
+    this.images[id] = { id: id, image: image, size: size };
   }
 
   getImages() {

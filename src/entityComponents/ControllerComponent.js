@@ -1,6 +1,6 @@
 export default class ControllerComponent {
   constructor() {
-    this.entitiesWithController = [];
+    this.entitiesWithController = {};
 
     // credit: https://www.gavsblog.com/blog/detect-single-and-multiple-keypress-events-javascript
     this.keys = {};
@@ -13,7 +13,7 @@ export default class ControllerComponent {
   }
 
   addController(entity) {
-    this.entitiesWithController.push(entity);
+    this.entitiesWithController[entity.id] = entity;
   }
 
   update() {

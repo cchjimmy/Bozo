@@ -5,7 +5,7 @@ import uuidv4 from "./uuidv4.js";
 
 export default class EntitiesHandler {
   constructor() {
-    this.entities = [];
+    this.entities = {};
     this.IC = new ImageComponent;
     this.TC = new TransformComponent;
     this.CC = new ControllerComponent;
@@ -16,27 +16,33 @@ export default class EntitiesHandler {
    * @param {*} param0 imageComponent: { image, size }, transformComponent: { position, rotation }, controllerComponent: boolean
    */
   addEntity({ imageComponent, transformComponent, controllerComponent }) {
-    let entity = {id: uuidv4()};
+    let id = uuidv4();
+    let entity = {id: id};
 
     if (imageComponent) {
-      this.IC.addImage({ id: entity.id, image: imageComponent.image, size: imageComponent.size});
+      imageComponent["id"] = id;
+      this.IC.addImage(imageComponent);
+      entity["imageComponent"] = this.IC.images[id];
     }
 
     if (transformComponent) {
-      this.TC.addTransform({ id: entity.id, position: transformComponent.position, rotation: transformComponent.rotation});
+      transformComponent["id"] = id;
+      this.TC.addTransform(transformComponent);
+      entity["transformComponent"] = this.TC.transforms[id];
     }
 
     if (controllerComponent) {
       this.CC.addController(entity);
+      entity["controllerComponent"] = this.CC.entitiesWithController[id];
     }
 
-    this.entities.push(entity);
+    this.entities[id] = entity;
     return entity;
   }
 
   /**
-   * returns an array of all entities
-   * @returns an array
+   * returns an Object containing all entities
+   * @returns an Object
    */
   getEntities() {
     return this.entities;
