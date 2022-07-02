@@ -1,4 +1,4 @@
-import Vec2 from "./Vec2.js";
+import Vec2 from "./utilities/Vec2.js";
 import Renderer2D from "./Renderer2D.js";
 import Scene from "./Scene.js";
 

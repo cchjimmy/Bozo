@@ -1,7 +1,7 @@
 import ControllerComponent from "./entityComponents/ControllerComponent.js";
 import ImageComponent from "./entityComponents/ImageComponent.js";
 import TransformComponent from "./entityComponents/TransformComponent.js";
-import uuidv4 from "./uuidv4.js";
+import uuidv4 from "./utilities/uuidv4.js";
 
 export default class EntitiesHandler {
   constructor() {

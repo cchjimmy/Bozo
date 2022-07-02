@@ -1,5 +1,5 @@
 import EntitiesHandler from "./EntitiesHandler.js";
-import uuidv4 from "./uuidv4.js";
+import uuidv4 from "./utilities/uuidv4.js";
 
 export default class Scene {
   constructor() {
