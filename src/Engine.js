@@ -18,6 +18,8 @@ export default class Engine {
 
     this.scene.addEntity({entityComponents: { transformComponent: { position: new Vec2(10, 10) }, imageComponent: { size: new Vec2(10, 10) } }});
 
+    console.log(this.scene.getEntities());
+
     // credit: https://stackoverflow.com/questions/63301553/debounce-function-not-working-in-javascript
     let timer;
     function debounce(func, timeout = 300) {

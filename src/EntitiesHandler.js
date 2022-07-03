@@ -13,7 +13,7 @@ export default class EntitiesHandler {
 
   /**
    * adds an entity into entity handler
-   * @param {*} param0 imageComponent: { image, size }, transformComponent: { position, rotation }, controllerComponent: boolean
+   * @param {Object} param0 imageComponent: { image, size }, transformComponent: { position, rotation }, controllerComponent: boolean
    */
   addEntity({ imageComponent, transformComponent, controllerComponent }) {
     let id = uuidv4();
