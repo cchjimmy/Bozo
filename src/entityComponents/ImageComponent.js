@@ -5,7 +5,7 @@ export default class ImageComponent {
 
   addImage({ id, imageId, size }) {
     if (!imageId) {
-      imageId = 0
+      imageId = 0;
     }
     this.images[id] = { imageId: imageId, size: size };
   }
