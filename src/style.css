@@ -1,6 +1,7 @@
 @import "gui/guiStyle.css";
 
-html, body {
+html,
+body {
   font-family: 'Menlo', sans-serif;
 
   -moz-user-select: none;
@@ -8,11 +9,16 @@ html, body {
   -ms-user-select: none;
   user-select: none;
 
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
-  image-rendering: -moz-crisp-edges;
-
   margin: 0px;
   background-color: black;
-  overflow: hidden;
+  /* overflow: hidden; */
+}
+
+* {
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -webkit-crisp-edges;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+
+  position: absolute;
 }

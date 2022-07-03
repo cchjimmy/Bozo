@@ -19,6 +19,6 @@ export default class Canvas2D {
    * clears all pixels
    */
   clear() {
-    this.context.clearRect(0, 0, canvas.width, canvas.height);
+    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
 }

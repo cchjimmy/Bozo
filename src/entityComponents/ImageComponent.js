@@ -3,12 +3,11 @@ export default class ImageComponent {
     this.images = {};
   }
 
-  addImage({ id, image, size }) {
-    if (!image) {
-      image = new Image(size.x, size.y);
-      image.src = "../../res/gun.png";
+  addImage({ id, imageId, size }) {
+    if (!imageId) {
+      imageId = 0
     }
-    this.images[id] = { id: id, image: image, size: size };
+    this.images[id] = { imageId: imageId, size: size };
   }
 
   getImages() {

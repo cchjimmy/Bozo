@@ -10,15 +10,27 @@ export default class Engine {
 
   init() {
     if (!this.renderer.context) {
-      console.error("Unable to initialize CanvasRenderingContext2D")
+      console.error("Unable to initialize CanvasRenderingContext2D");
       return;
     }
 
+    this.scene.createScene();
+
     this.renderer.setSize(innerWidth, innerHeight);
 
-    this.scene.addEntity({entityComponents: { transformComponent: { position: new Vec2(10, 10) }, imageComponent: { size: new Vec2(10, 10) } }});
+    for (let i = 0; i < 2; i++) {
+      this.scene.addEntity({entityComponents: { transformComponent: { position: new Vec2(10, 10) }, imageComponent: { size: new Vec2(10, 10) } }});
+    }
 
-    console.log(this.scene.getEntities());
+    console.log(this.scene.getEntityIds());
+
+    let atlas = new Image(48, 32);
+    atlas.src = "../res/texture.png";
+
+    atlas.onload = () => {
+      console.log(this.renderer.separateTextureAtlas(atlas, 16, 16));
+    }
+    
 
     // credit: https://stackoverflow.com/questions/63301553/debounce-function-not-working-in-javascript
     let timer;
@@ -38,7 +50,7 @@ export default class Engine {
     }
 
     this.isLooping = true;
-    this.loop();
+    // this.loop();
   }
 
   loop() {
@@ -46,7 +58,7 @@ export default class Engine {
 
     // draw only when not resizing
     if (this.isLooping) {
-      // this.renderer.draw();
+      this.renderer.draw();
     }
 
     requestAnimationFrame(() => { this.loop(); });
