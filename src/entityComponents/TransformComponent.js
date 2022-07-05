@@ -10,7 +10,7 @@ export default class TransformComponent {
    * @param {Number} rotation measure in radians
    */
   addTransform({ id, position, rotation = 0 }) {
-    this.transforms[id] = { position: position, rotation: rotation };
+    this.transforms[id] = { position, rotation };
   }
 
   /**

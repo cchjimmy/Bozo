@@ -7,7 +7,7 @@ export default class ImageComponent {
     if (!imageId) {
       imageId = 0;
     }
-    this.images[id] = { imageId: imageId, size: size };
+    this.images[id] = { imageId, size };
   }
 
   getImages() {

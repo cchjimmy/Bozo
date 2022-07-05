@@ -50,7 +50,7 @@ export default class Engine {
     }
 
     this.isLooping = true;
-    // this.loop();
+    this.loop();
   }
 
   loop() {
@@ -61,7 +61,7 @@ export default class Engine {
       this.renderer.draw();
     }
 
-    requestAnimationFrame(() => { this.loop(); });
+    // requestAnimationFrame(() => { this.loop(); });
   }
 
   update() {
