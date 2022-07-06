@@ -21,6 +21,8 @@ export default class Engine {
     for (let i = 0; i < 2; i++) {
       this.scene.addEntity({ position: new Vec2(10, 10), size: new Vec2(10, 10) });
     }
+
+    console.log(this.scene.getEntityIds());
     
     // credit: https://stackoverflow.com/questions/63301553/debounce-function-not-working-in-javascript
     let timer;

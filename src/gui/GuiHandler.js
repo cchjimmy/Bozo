@@ -13,8 +13,6 @@ export default class GuiHandler {
       document.body.classList.add("dark");
     } else if (document.body.classList.contains("dark")) {
       document.body.classList.remove("dark");
-    } else {
-      return;
     }
   }
 
@@ -23,7 +21,6 @@ export default class GuiHandler {
     if (gui) {
       gui.style.backgroundColor = color;
     }
-    return;
   }
 
   display(id = "", content = []) {
@@ -57,7 +54,6 @@ export default class GuiHandler {
           break;
       }
     }
-    return;
   }
 
   resize(id = "", width = 100, height = 100) {
@@ -66,7 +62,6 @@ export default class GuiHandler {
       gui.style.width = `${width}px`;
       gui.style.height = `${height}px`;
     }
-    return;
   }
 
   create(id = "", width = 100, height = 100) {
@@ -123,7 +118,6 @@ export default class GuiHandler {
     guis.push(empty);
 
     this.reposition(id, 0, 0);
-    return;
   }
 
   remove(id = "") {
@@ -132,7 +126,6 @@ export default class GuiHandler {
       guis.splice(guis.indexOf(gui), 1);
       document.body.removeChild(gui);
     }
-    return;
   }
 
   reposition(id = "", x = this.get(id).style.left, y = this.get(id).style.top) {
@@ -141,7 +134,6 @@ export default class GuiHandler {
       gui.style.top = `${y}px`;
       gui.style.left = `${x}px`;
     }
-    return;
   }
 
   draw(id = "", x = this.get(id).style.left, y = this.get(id).style.top) {
@@ -150,7 +142,6 @@ export default class GuiHandler {
       gui.style.display = "block";
       this.reposition(id, x, y);
     }
-    return;
   }
 
   hide(id = "") {
@@ -158,7 +149,6 @@ export default class GuiHandler {
     if (gui) {
       gui.style.display = "none";
     }
-    return;
   }
 
   title(id = "", title = "") {
@@ -166,7 +156,6 @@ export default class GuiHandler {
     if (header) {
       header.innerText = title;
     }
-    return;
   }
 
   removeTitle(id = "") {
@@ -174,7 +163,6 @@ export default class GuiHandler {
     if (header) {
       header.innerText = "";
     }
-    return;
   }
 
   removeHeader(id = "") {
@@ -188,7 +176,6 @@ export default class GuiHandler {
 
       gui.style.height = `${parseInt(gui.style.height) - parseInt(header.style.height)}px`;
     }
-    return;
   }
 
   get(id = "") {
@@ -217,7 +204,6 @@ export default class GuiHandler {
     wrapper.appendChild(box);
 
     docking(wrapper);
-    return;
   }
 
   addOption(id = "", name = "", callback) {
@@ -272,7 +258,5 @@ export default class GuiHandler {
         console.log("test");
       });
     }
-    
-    return;
   }
 }

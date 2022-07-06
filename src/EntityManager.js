@@ -4,7 +4,6 @@ export default class EntitiesManager {
   constructor() {
     this.entities = {};
   }
-
   /**
    * adds an entity into entity handler
    * @param {Object} entityComponents
@@ -22,10 +21,14 @@ export default class EntitiesManager {
   }
 
   /**
-   * returns an Object containing all entities
-   * @returns an Object
+   * returns an array containing all entity ids
+   * @returns an array
    */
-  getEntities() {
-    return this.entities;
+  getEntityIds() {
+    let ids = [];
+    for (let entity in this.entities) {
+      ids.push(entity);
+    }
+    return ids;
   }
 }

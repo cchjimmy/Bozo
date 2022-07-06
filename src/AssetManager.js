@@ -18,7 +18,6 @@ export default class AssetManager {
 
     this.textureCoordinates[img.id] = { id: img.id, sourceCoordinates };
 
-    console.log(this.getImageIds());
     return { id: img.id, sourceCoordinates };
   }
 
