@@ -1,4 +1,4 @@
-@import "gui/guiStyle.css";
+@import "./src/gui/guiStyle.css";
 
 html,
 body {
