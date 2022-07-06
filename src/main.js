@@ -1,4 +1,4 @@
-import Engine from "./src/Engine.js";
+import Engine from "./Engine.js";
 
 const engine = new Engine;
 
