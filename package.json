@@ -127,5 +127,16 @@
       ]
     }
   },
-  "description": ""
+  "description": "js2dengine",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cchjimmy/Game.git"
+  },
+  "keywords": [
+    "js2dengine"
+  ],
+  "bugs": {
+    "url": "https://github.com/cchjimmy/Game/issues"
+  },
+  "homepage": "https://github.com/cchjimmy/Game#readme"
 }
