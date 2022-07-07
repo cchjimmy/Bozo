@@ -1,7 +1,6 @@
-import EntityManager from "./EntityManager.js";
 import uuidv4 from "./utilities/uuidv4.js";
 
-export default class SceneManager extends EntityManager{
+export default class SceneManager{
   constructor() {
     super();
     this.scenes = {};
@@ -13,7 +12,7 @@ export default class SceneManager extends EntityManager{
       name = "emptyScene";
     }
     let id = uuidv4();
-    let scene = { id, name, entities: this.entities[id] };
+    let scene = { id, name };
     this.scenes[id] = scene;
     return scene;
   }

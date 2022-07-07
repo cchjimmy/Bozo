@@ -2,12 +2,14 @@ import Vec2 from "./utilities/Vec2.js";
 import Renderer2D from "./Renderer2D.js";
 import SceneManager from "./SceneManager.js";
 import AssetManager from "./AssetManager.js";
+import EntityManager from "./EntityManager.js";
 
 export default class Engine {
   constructor() {
-    this.scene = new SceneManager;
+    this.sceneManager = new SceneManager;
     this.renderer = new Renderer2D;
     this.assetManager = new AssetManager;
+    this.entityManager = new EntityManager;
   }
 
   init() {
@@ -17,12 +19,6 @@ export default class Engine {
     }
 
     this.renderer.setSize(innerWidth, innerHeight);
-
-    for (let i = 0; i < 2; i++) {
-      this.scene.addEntity({ position: new Vec2(10, 10), size: new Vec2(10, 10) });
-    }
-
-    console.log(this.scene.getEntityIds());
     
     // credit: https://stackoverflow.com/questions/63301553/debounce-function-not-working-in-javascript
     let timer;
