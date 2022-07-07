@@ -2,10 +2,11 @@ import uuidv4 from "./utilities/uuidv4.js";
 
 export default class EntitiesManager {
   constructor() {
-    this.entities = {};
+    this.entityPools = {};
+    this.currentEntityPool = null;
   }
   /**
-   * adds an entity into entity handler
+   * adds an entity into current entity pool
    * @param {Object} entityComponents
    */
   addEntity(entityComponents) {
@@ -16,7 +17,7 @@ export default class EntitiesManager {
       entity[component] = entityComponents[component];
     }
 
-    this.entities[id] = entity;
+    this.currentEntityPool.entities[id] = entity;
     return entity;
   }
 
@@ -26,9 +27,15 @@ export default class EntitiesManager {
    */
   getEntityIds() {
     let ids = [];
-    for (let entity in this.entities) {
+    for (let entity in this.currentEntityPool) {
       ids.push(entity);
     }
     return ids;
+  }
+  
+  addEntityPool(id) {
+    let pool = { id, entities: {} }
+    this.entityPools[id] = pool;
+    return pool;
   }
 }
