@@ -6,7 +6,7 @@ export default class Vec2 {
 
   /**
    * adds input vec2 to current vec2
-   * @param {*} vec2 
+   * @param {Vec2} vec2 
    * @returns a vec2
    */
   add(vec2) {
@@ -15,34 +15,24 @@ export default class Vec2 {
 
   /**
    * multiplies current vec2 with input vec2
-   * @param {*} vec2 
+   * @param {Vec2} vec2 
    * @returns a vec2
    */
-  multVec(vec2) {
+  mult(vec2) {
     return new Vec2(this.x * vec2.x, this.y * vec2.y);
   }
 
   /**
-   * multiplies current vec2 with input scalar value
-   * @param {*} scalar 
-   * @returns a vec2
-   */
-  multScal(scalar) {
-    return new Vec2(this.x * scalar, this.y * scalar);
-  }
-
-  /**
    * sets magnitude of current vec2
-   * @param {*} scalar desire magnitude
+   * @param {Number} scalar desire magnitude
    * @returns a vec2
    */
   setMag(scalar) {
-    if (this.x == 0 && this.y == 0) {
+    if (this.mag() == 0) {
       // creates an unit vector
       this.x = 1;
     }
-    let result = this.normalize().multScal(scalar);
-    return result;
+    return this.normalize().mult(new Vec2(scalar, scalar));
   }
 
   /**
@@ -64,7 +54,7 @@ export default class Vec2 {
 
   /**
    * calculates direction of current vec2 relative to positive x-axis
-   * @returns a scalar in radians
+   * @returns an angle in radians
    */
   dirn() {
     return Math.atan2(this.y, this.x);
@@ -72,7 +62,7 @@ export default class Vec2 {
 
   /**
    * sets direction of vec2 from positive x-axis in radians, regardless of original direction
-   * @param {*} rad input angle in radians
+   * @param {Number} rad input angle in radians
    * @returns a vec2
    */
   setDirn(rad) {
@@ -82,18 +72,17 @@ export default class Vec2 {
 
   /**
    * calculates distance between current vec2 and input vec2
-   * @param {*} vec2 
+   * @param {Vec2} vec2 
    * @returns a scalar value
    */
   dist(vec2) {
     let vec = new Vec2(this.x, this.y);
-    vec.sub(vec2);
-    return vec.mag();
+    return vec.sub(vec2).mag();
   }
 
   /**
    * subtracts current vec2 with input vec2
-   * @param {*} vec2 
+   * @param {Vec2} vec2 
    * @returns a vec2
    */
   sub(vec2) {
@@ -102,7 +91,7 @@ export default class Vec2 {
 
   /**
    * calculates dot product between current vec2 and input vec2
-   * @param {*} vec2 
+   * @param {Vec2} vec2 
    * @returns a scalar value
    */
   dot(vec2) {
@@ -111,8 +100,8 @@ export default class Vec2 {
   }
 
   /**
-   * calculates cross product between current vec2 and input vec2
-   * @param {*} vec2 
+   * calculates cross product between current vec2 and input vec2 -> the determinant
+   * @param {Vec2} vec2 
    * @returns a scalar value -> magnitude of vector in z-plane
    */
   cross(vec2) {
