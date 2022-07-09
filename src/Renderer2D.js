@@ -13,7 +13,7 @@ export default class Renderer2D extends Canvas2D {
         this.options[option] = options[option];
       }
     }
-    this.timeStep = null;
+    this.timeStep = 0;
     this.qtree = new Quadtree({centerX: this.canvas.width / 2, centerY: this.canvas.height / 2, halfWidth: this.canvas.width / 2, halfHeight: this.canvas.height / 2});
   }
   
@@ -24,8 +24,7 @@ export default class Renderer2D extends Canvas2D {
   }
   
   draw(objects) {
-    let start = window.performance.now();
-    
+    const start = performance.now();
     this.context.save();
     
     this.context.fillStyle = "white";
@@ -44,20 +43,18 @@ export default class Renderer2D extends Canvas2D {
       this.context.fillRect(object.centerX - object.halfWidth, object.centerY - object.halfHeight, object.halfWidth * 2, object.halfHeight *2);
     })
     
-    this.context.restore();
-    
-    let end = window.performance.now();
-    
-    this.timeStep = (end - start)/1000;
-    
-    if (this.options.showFps) {
-      this.context.strokeStyle = 'white';
-      this.context.strokeText(`fps: ${(1/this.timeStep).toFixed(0)}`, 10, 10);
+    if (this.options.showFps && this.timeStep) {
+      this.context.strokeStyle = "white";
+      this.context.strokeText(`fps: ${(1000/this.timeStep).toFixed(0)}`, 10, 10);
     }
     
     if (this.options.showQuadtree) {
       this.qtree.show(this.context);
     }
+    
+    this.context.restore();
+    const end = performance.now();
+    this.timeStep = end - start;
   }
   
   getTimeStep() {

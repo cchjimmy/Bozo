@@ -49,12 +49,12 @@ export default class Engine {
       this.renderer.draw(this.sceneManager.currentEntityPool.entities);
     }
     
-    this.update();
+    this.update(this.renderer.getTimeStep());
 
     requestAnimationFrame(() => { this.loop(); });
   }
 
-  update() {
-    this.sceneManager.update();
+  update(timeStep) {
+    this.sceneManager.update(timeStep);
   }
 }

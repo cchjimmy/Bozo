@@ -1,5 +1,6 @@
 import uuidv4 from "./utilities/uuidv4.js";
 import EntityManager from "./EntityManager.js";
+import Vec2 from "./utilities/Vec2.js";
 
 export default class SceneManager extends EntityManager{
   constructor() {
@@ -17,12 +18,12 @@ export default class SceneManager extends EntityManager{
     return scene;
   }
 
-  update() {
+  update(timeStep) {
     let entities = this.currentEntityPool.entities;
     
     for (let entity in entities) {
       if (entities[entity].velocity) {
-        entities[entity].position.add(entities[entity].velocity);
+        entities[entity].position = entities[entity].position.add(entities[entity].velocity.mult(new Vec2(timeStep/1000, timeStep/1000)));
       }
     }
   }
