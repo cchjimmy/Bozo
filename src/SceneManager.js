@@ -20,10 +20,10 @@ export default class SceneManager extends EntityManager{
 
   update(timeStep) {
     let entities = this.currentEntityPool.entities;
-    
+    let deltaTime = new Vec2(timeStep, timeStep);
     for (let entity in entities) {
       if (entities[entity].velocity) {
-        entities[entity].position = entities[entity].position.add(entities[entity].velocity.mult(new Vec2(timeStep, timeStep)));
+        entities[entity].position = entities[entity].position.add(entities[entity].velocity.mult(deltaTime));
       }
     }
   }
