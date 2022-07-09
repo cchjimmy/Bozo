@@ -11,7 +11,7 @@ body {
 
   margin: 0px;
   background-color: black;
-  /* overflow: hidden; */
+  overflow: hidden;
 }
 
 * {
@@ -19,6 +19,4 @@ body {
   image-rendering: -webkit-crisp-edges;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
-
-  position: absolute;
 }
