@@ -2,6 +2,7 @@ import Vec2 from "./utilities/Vec2.js";
 import Renderer2D from "./Renderer2D.js";
 import SceneManager from "./SceneManager.js";
 import AssetManager from "./AssetManager.js";
+import randomRange from "./utilities/randomRange.js";
 
 export default class Engine {
   constructor() {
@@ -19,9 +20,9 @@ export default class Engine {
 
     this.renderer.setSize(innerWidth, innerHeight);
     
-    this.sceneManager.addEntity({position: new Vec2(10, 50), size: new Vec2(10, 10), velocity: new Vec2(384, 0)});
-    
-    this.sceneManager.addEntity({position: new Vec2(60, 50), size: new Vec2(10, 20)});
+    for (let i = 0; i < 10000; i++) {
+      this.sceneManager.addEntity({position: new Vec2(randomRange(0, innerWidth), randomRange(0, innerHeight)), size: new Vec2(10, 10), velocity: new Vec2(randomRange(-50,50), randomRange(-50,50))});
+    }
     
     // credit: https://stackoverflow.com/questions/63301553/debounce-function-not-working-in-javascript
     let timer;
