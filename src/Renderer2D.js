@@ -4,10 +4,15 @@ import Quadtree from "./utilities/Quadtree.js";
 export default class Renderer2D extends Canvas2D {
   constructor() {
     super();
-    this.boundary = {centerX: this.canvas.width / 2, centerY: this.canvas.height / 2, halfWidth: this.canvas.width / 2, halfHeight: this.canvas.height / 2}
-    this.qtree = new Quadtree(this.boundary);
+    this.qtree = new Quadtree({centerX: this.canvas.width / 2, centerY: this.canvas.height / 2, halfWidth: this.canvas.width / 2, halfHeight: this.canvas.height / 2});
   }
-
+  
+  setSize(width, height) {
+    this.canvas.width = width;
+    this.canvas.height = height;
+    this.qtree.newBoundary({centerX: this.canvas.width / 2, centerY: this.canvas.height / 2, halfWidth: this.canvas.width / 2, halfHeight: this.canvas.height / 2});
+  }
+  
   draw(objects) {
     this.context.fillStyle = "white";
     
