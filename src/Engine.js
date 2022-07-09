@@ -22,8 +22,6 @@ export default class Engine {
     
     this.sceneManager.addEntity({position: new Vec2(60, 50), size: new Vec2(10, 20)});
     
-    console.log(this.sceneManager);
-    
     // credit: https://stackoverflow.com/questions/63301553/debounce-function-not-working-in-javascript
     let timer;
     function debounce(func, timeout = 300) {
@@ -46,12 +44,12 @@ export default class Engine {
   }
 
   loop() {
-    this.update();
-
     // draw only when not resizing
     if (this.isLooping) {
       this.renderer.draw(this.sceneManager.currentEntityPool.entities);
     }
+    
+    this.update();
 
     requestAnimationFrame(() => { this.loop(); });
   }

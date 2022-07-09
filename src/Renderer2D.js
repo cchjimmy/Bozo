@@ -24,8 +24,10 @@ export default class Renderer2D extends Canvas2D {
   }
   
   draw(objects) {
-    this.context.save();
     let start = window.performance.now();
+    
+    this.context.save();
+    
     this.context.fillStyle = "white";
     
     this.clear();
@@ -42,6 +44,8 @@ export default class Renderer2D extends Canvas2D {
       this.context.fillRect(object.centerX - object.halfWidth, object.centerY - object.halfHeight, object.halfWidth * 2, object.halfHeight *2);
     })
     
+    this.context.restore();
+    
     let end = window.performance.now();
     
     this.timeStep = (end - start)/1000;
@@ -54,7 +58,6 @@ export default class Renderer2D extends Canvas2D {
     if (this.options.showQuadtree) {
       this.qtree.show(this.context);
     }
-    this.context.restore();
   }
   
   getTimeStep() {
