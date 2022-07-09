@@ -23,7 +23,7 @@ export default class SceneManager extends EntityManager{
     
     for (let entity in entities) {
       if (entities[entity].velocity) {
-        entities[entity].position = entities[entity].position.add(entities[entity].velocity.mult(new Vec2(timeStep/1000, timeStep/1000)));
+        entities[entity].position = entities[entity].position.add(entities[entity].velocity.mult(new Vec2(timeStep, timeStep)));
       }
     }
   }

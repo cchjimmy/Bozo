@@ -8,6 +8,7 @@ export default class Engine {
     this.sceneManager = new SceneManager;
     this.renderer = new Renderer2D;
     this.assetManager = new AssetManager;
+    
   }
 
   init() {
@@ -18,7 +19,7 @@ export default class Engine {
 
     this.renderer.setSize(innerWidth, innerHeight);
     
-    this.sceneManager.addEntity({position: new Vec2(10, 50), size: new Vec2(10, 10), velocity: new Vec2(1, 0)});
+    this.sceneManager.addEntity({position: new Vec2(10, 50), size: new Vec2(10, 10), velocity: new Vec2(384, 0)});
     
     this.sceneManager.addEntity({position: new Vec2(60, 50), size: new Vec2(10, 20)});
     
@@ -49,8 +50,10 @@ export default class Engine {
       this.renderer.draw(this.sceneManager.currentEntityPool.entities);
     }
     
-    this.update(this.renderer.getTimeStep());
-
+    if (this.renderer.getTimeStep()) {
+      this.update(this.renderer.getTimeStep());
+    }
+    
     requestAnimationFrame(() => { this.loop(); });
   }
 
