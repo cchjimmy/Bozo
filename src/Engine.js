@@ -60,8 +60,10 @@ export default class Engine {
 
     this.renderer.clear();
 
-    for (let object in this.sceneManager.currentEntityPool.entities) {
-      this.update(this.timeStep, this.sceneManager.currentEntityPool.entities[object]);
+    let entityIds = this.sceneManager.getEntityIds();
+    let deltaTime = new Vec2(this.timeStep, this.timeStep);
+    for (let i = 0; i < entityIds.length; i ++) {
+      this.update(deltaTime, entityIds[i], this.sceneManager.components);
     }
 
     requestAnimationFrame(() => { this.loop(); });
@@ -84,11 +86,11 @@ export default class Engine {
     }
   }
 
-  update(timeStep, object) {
+  update(timeStep, id, components) {
     // draw only when not resizing
     if (this.isLooping) {
-      this.renderer.draw(object);
+      this.renderer.draw(components, id);
     }
-    this.sceneManager.update(timeStep, object);
+    this.sceneManager.update(timeStep, id);
   }
 }

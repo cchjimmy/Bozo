@@ -4,6 +4,7 @@ export default class EntitiesManager {
   constructor() {
     this.entityPools = {};
     this.currentEntityPool = null;
+    this.components = {};
   }
 
   /**
@@ -15,8 +16,16 @@ export default class EntitiesManager {
     let entity = { id };
 
     for (let component in entityComponents) {
-      entity[component] = entityComponents[component];
+      if (!this.components[component]) {
+        this.components[component] = {};
+      }
+
+      this.components[component][id] = entityComponents[component];
     }
+
+    // for (let component in entityComponents) {
+    //   entity[component] = entityComponents[component];
+    // }
 
     this.currentEntityPool.entities[id] = entity;
     return entity;
@@ -28,12 +37,12 @@ export default class EntitiesManager {
    */
   getEntityIds() {
     let ids = [];
-    for (let entity in this.currentEntityPool) {
+    for (let entity in this.currentEntityPool.entities) {
       ids.push(entity);
     }
     return ids;
   }
-  
+
   addEntityPool(id) {
     let pool = { id, entities: {} }
     this.entityPools[id] = pool;

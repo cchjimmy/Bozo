@@ -18,10 +18,8 @@ export default class SceneManager extends EntityManager {
     return scene;
   }
 
-  update(timeStep, object) {
-    if (!object) return;
-    const deltaTime = new Vec2(timeStep, timeStep);
-    object.position = object.position.add(object.velocity.mult(deltaTime));
+  update(timeStep, id) {
+    this.components.position[id] = this.components.position[id].add(this.components.velocity[id].mult(timeStep));
   }
 
   setCurrentScene(id) {

@@ -17,10 +17,10 @@ export default class Renderer2D extends Canvas2D {
     this.qtree.newBoundary({ centerX: this.canvas.width / 2, centerY: this.canvas.height / 2, halfWidth: this.canvas.width / 2, halfHeight: this.canvas.height / 2 });
   }
 
-  draw(object) {
-    if (this.qtree.insert({ centerX: object.position.x, centerY: object.position.y, halfWidth: object.size.x / 2, halfHeight: object.size.y / 2 })) {
-      this.context.fillStyle = object.color;
-      this.context.fillRect(object.position.x - object.size.x / 2, object.position.y - object.size.y / 2, object.size.x, object.size.y);
+  draw(components, id) {
+    if (this.qtree.insert({ centerX: components.position[id].x, centerY: components.position[id].y, halfWidth: components.size[id].x/2, halfHeight: components.size[id].y/2 })) {
+      this.context.fillStyle = components.color[id];
+      this.context.fillRect(components.position[id].x - components.size[id].x/2, components.position[id].y - components.size[id].y/2, components.size[id].x, components.size[id].y);
     }
   }
 
