@@ -5,6 +5,7 @@ export default class EntitiesManager {
     this.entityPools = {};
     this.currentEntityPool = null;
   }
+
   /**
    * adds an entity into current entity pool
    * @param {Object} entityComponents
@@ -37,5 +38,9 @@ export default class EntitiesManager {
     let pool = { id, entities: {} }
     this.entityPools[id] = pool;
     return pool;
+  }
+
+  getEntityPools() {
+    return this.entityPools;
   }
 }

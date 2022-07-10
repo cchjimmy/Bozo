@@ -20,8 +20,8 @@ export default class Engine {
 
     this.renderer.setSize(innerWidth, innerHeight);
     
-    for (let i = 0; i < 1000; i++) {
-      this.sceneManager.addEntity({position: new Vec2(randomRange(0, innerWidth), randomRange(0, innerHeight)), size: new Vec2(10, 10), velocity: new Vec2(randomRange(-50,50), randomRange(-50,50))});
+    for (let i = 0; i < 2; i++) {
+      this.sceneManager.addEntity({position: new Vec2(randomRange(0, innerWidth), randomRange(0, innerHeight)), size: new Vec2(randomRange(10, 40), randomRange(10, 40)), velocity: new Vec2(randomRange(-50,50), randomRange(-50,50)), color: `rgba(${randomRange(0, 255)}, ${randomRange(0, 255)}, ${randomRange(0, 255)}, 1)`});
     }
     
     // credit: https://stackoverflow.com/questions/63301553/debounce-function-not-working-in-javascript

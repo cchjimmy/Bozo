@@ -18,7 +18,7 @@ export default class Quadtree {
    */
   insert(object) {
     if (this.level == 0 && !this.contains(object)) {
-      return;
+      return false;
     }
 
     // if subnodes exist, insert object to subnodes
@@ -27,7 +27,7 @@ export default class Quadtree {
       for (let i = 0; i < indices.length; i++) {
         this.nodes[indices[i]].insert(object);
       }
-      return;
+      return true;
     }
 
     this.objects.push(object);
@@ -45,11 +45,12 @@ export default class Quadtree {
       }
       this.objects = [];
     }
+    return true;
   }
 
   /**
    * returns an array of indices indicating the subnodes the object overlaps
-   * @param {*} object { centerX, centerY, halfWidth, halfHeight }
+   * @param {Object} object { centerX, centerY, halfWidth, halfHeight }
    * @returns an array
    */
   getIndex(object) {
@@ -118,18 +119,20 @@ export default class Quadtree {
       context.restore();
     }
 
+    found = this.objects;
+
     if (this.nodes.length) {
       let indices = this.getIndex(object);
       for (let i = 0; i < indices.length; i++) {
         found = found.concat(this.nodes[indices[i]].queryRange(object, context));
       }
-    } else {
-      found = this.objects;
     }
 
     found = found.filter((object, index) => {
       return found.indexOf(object) >= index;
     });
+
+    
 
     return found;
   }
