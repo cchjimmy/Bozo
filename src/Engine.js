@@ -5,11 +5,21 @@ import AssetManager from "./AssetManager.js";
 import randomRange from "./utilities/randomRange.js";
 
 export default class Engine {
-  constructor() {
+  constructor(options = { showFps: true, showQuadtree: false }) {
     this.sceneManager = new SceneManager;
     this.renderer = new Renderer2D;
     this.assetManager = new AssetManager;
-    
+
+    this.prevTime = performance.now();
+    this.frames = 0;
+    this.timeStep = 1 / 60;
+
+    this.options = {};
+    if (options) {
+      for (let option in options) {
+        this.options[option] = options[option];
+      }
+    }
   }
 
   init() {
@@ -19,11 +29,11 @@ export default class Engine {
     }
 
     this.renderer.setSize(innerWidth, innerHeight);
-    
-    for (let i = 0; i < 2; i++) {
-      this.sceneManager.addEntity({position: new Vec2(randomRange(0, innerWidth), randomRange(0, innerHeight)), size: new Vec2(randomRange(10, 40), randomRange(10, 40)), velocity: new Vec2(randomRange(-50,50), randomRange(-50,50)), color: `rgba(${randomRange(0, 255)}, ${randomRange(0, 255)}, ${randomRange(0, 255)}, 1)`});
+
+    for (let i = 0; i < 1000; i++) {
+      this.sceneManager.addEntity({ position: new Vec2(randomRange(0, innerWidth), randomRange(0, innerHeight)), size: new Vec2(randomRange(10, 40), randomRange(10, 40)), velocity: new Vec2(randomRange(-50, 50), randomRange(-50, 50)), color: `rgba(${randomRange(0, 255)}, ${randomRange(0, 255)}, ${randomRange(0, 255)}, 1)` });
     }
-    
+
     // credit: https://stackoverflow.com/questions/63301553/debounce-function-not-working-in-javascript
     let timer;
     function debounce(func, timeout = 300) {
@@ -46,19 +56,39 @@ export default class Engine {
   }
 
   loop() {
-    // draw only when not resizing
-    if (this.isLooping) {
-      this.renderer.draw(this.sceneManager.currentEntityPool.entities);
+    const start = performance.now();
+
+    this.renderer.clear();
+
+    for (let object in this.sceneManager.currentEntityPool.entities) {
+      this.update(this.timeStep, this.sceneManager.currentEntityPool.entities[object]);
     }
-    
-    if (this.renderer.getTimeStep()) {
-      this.update(this.renderer.getTimeStep());
-    }
-    
+
     requestAnimationFrame(() => { this.loop(); });
+
+    if (this.options.showFps) {
+      this.renderer.context.strokeStyle = "white";
+      this.renderer.context.strokeText(`fps: ${(1 / this.timeStep).toFixed(0)}`, 10, 10);
+    }
+
+    if (this.options.showQuadtree) {
+      this.renderer.qtree.show(this.renderer.context);
+    }
+
+    this.frames++;
+
+    if (start >= this.prevTime + 1000) {
+      this.timeStep = (start - this.prevTime) / (this.frames * 1000);
+      this.prevTime = start;
+      this.frames = 0;
+    }
   }
 
-  update(timeStep) {
-    this.sceneManager.update(timeStep);
+  update(timeStep, object) {
+    // draw only when not resizing
+    if (this.isLooping) {
+      this.renderer.draw(object);
+    }
+    this.sceneManager.update(timeStep, object);
   }
 }

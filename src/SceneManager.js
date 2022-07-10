@@ -2,7 +2,7 @@ import uuidv4 from "./utilities/uuidv4.js";
 import EntityManager from "./EntityManager.js";
 import Vec2 from "./utilities/Vec2.js";
 
-export default class SceneManager extends EntityManager{
+export default class SceneManager extends EntityManager {
   constructor() {
     super();
     this.scenes = {};
@@ -11,19 +11,17 @@ export default class SceneManager extends EntityManager{
 
   createScene() {
     let id = uuidv4();
-    let scene = { id, entityPool: this.addEntityPool(id)};
+    let scene = { id, entityPool: this.addEntityPool(id) };
     this.scenes[id] = scene;
-    
+
     this.currentEntityPool = scene.entityPool;
     return scene;
   }
 
-  update(timeStep) {
-    let entities = this.currentEntityPool.entities;
-    let deltaTime = new Vec2(timeStep, timeStep);
-    for (let entity in entities) {
-      entities[entity].position = entities[entity].position.add(entities[entity].velocity.mult(deltaTime));
-    }
+  update(timeStep, object) {
+    if (!object) return;
+    const deltaTime = new Vec2(timeStep, timeStep);
+    object.position = object.position.add(object.velocity.mult(deltaTime));
   }
 
   setCurrentScene(id) {
