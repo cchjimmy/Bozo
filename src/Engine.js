@@ -34,30 +34,29 @@ export default class Engine {
       return;
     }
 
-    function resize(renderer, scale) {
-      renderer.setResolution(Math.floor(innerWidth * scale), Math.floor(innerHeight * scale));
-      renderer.setSize(Math.floor(innerWidth), Math.floor(innerHeight));
-      // renderer.context.scale(scale, scale);
-    }
-    resize(this.renderer, 1/5);
+    this.renderer.setPixelDensity(1 / 2);
+    this.renderer.setResolution(innerWidth, innerHeight);
+    this.renderer.setSize(innerWidth, innerHeight);
 
-    for (let i = 0; i < 500; i++) {
+
+    for (let i = 0; i < 1000; i++) {
       this.sceneManager.createEntity({
-        position: new Vec2(randomRange(-this.renderer.canvas.width / 2, this.renderer.canvas.width / 2), randomRange(-this.renderer.canvas.height / 2, this.renderer.canvas.height / 2)),
-        size: new Vec2(randomRange(1, 10), randomRange(1, 10)),
-        velocity: new Vec2(randomRange(-50, 50), randomRange(-50, 50)),
+        position: new Vec2(randomRange(-10, 10), randomRange(-10, 10)),
+        size: new Vec2(randomRange(1, 2), randomRange(1, 2)),
+        velocity: new Vec2(randomRange(-1, 1), randomRange(-1, 1)),
         color: `rgba(${randomRange(0, 255)}, ${randomRange(0, 255)}, ${randomRange(0, 255)}, 1)`,
-        //collider: true
+        // collider: true
       });
     }
 
-    // this.sceneManager.createEntity({ position: new Vec2(0, 0) });
-    // this.sceneManager.createEntity({ position: new Vec2(1, 1), camera: new Vec2(0, 0) });
+    // this.sceneManager.createEntity({ position: new Vec2(0, 0), collider: true });
+    // this.sceneManager.createEntity({ position: new Vec2(1, 1), camera: new Vec2(0, 0), collider: true });
 
     window.onresize = () => {
       this.isLooping = false;
       debounce(() => {
-        resize(this.renderer, 1 / 5);
+        this.renderer.setResolution(innerWidth * this.renderer.pixelDensity, innerHeight * this.renderer.pixelDensity);
+        this.renderer.setSize(innerWidth, innerHeight);
         this.isLooping = true;
       }, 200);
     }
