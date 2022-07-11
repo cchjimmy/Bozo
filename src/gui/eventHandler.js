@@ -1,4 +1,4 @@
-import { guis } from "./GuiHandler.js";
+import { guis } from "./GuiManager.js";
 
 // https://htmldom.dev/make-a-draggable-element/
 export function dragElement(elmnt) {

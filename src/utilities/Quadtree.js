@@ -178,13 +178,13 @@ export default class Quadtree {
     context.fillStyle = "rgba(0, 255, 0, 0.5)";
     if (this.objects.length) {
       for (let i = 0; i < this.objects.length; i++) {
-        context.fillRect(this.objects[i].centerX - this.objects[i].halfWidth, this.objects[i].centerY - this.objects[i].halfHeight, this.objects[i].halfWidth * 2, this.objects[i].halfHeight * 2);
+        context.fillRect(Math.floor(this.objects[i].centerX - this.objects[i].halfWidth), Math.floor(this.objects[i].centerY - this.objects[i].halfHeight), Math.floor(this.objects[i].halfWidth * 2), Math.floor(this.objects[i].halfHeight * 2));
       }
     }
 
     // show boundary
     context.strokeStyle = "white";
-    context.strokeRect(this.boundary.centerX - this.boundary.halfWidth, this.boundary.centerY - this.boundary.halfHeight, this.boundary.halfWidth * 2, this.boundary.halfHeight * 2);
+    context.strokeRect(Math.floor(this.boundary.centerX - this.boundary.halfWidth), Math.floor(this.boundary.centerY - this.boundary.halfHeight), Math.floor(this.boundary.halfWidth * 2), Math.floor(this.boundary.halfHeight * 2));
 
     // do the same for subnodes if exist
     if (this.nodes.length) {

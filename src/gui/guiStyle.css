@@ -43,7 +43,7 @@
   min-height: 25px;
   display: none;
   outline: 1px solid gray;
-  resize: both;
+  /* resize: both; */
   overflow: hidden;
   background-color: var(--background-color);
 }

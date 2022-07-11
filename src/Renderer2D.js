@@ -20,15 +20,18 @@ export default class Renderer2D extends Canvas2D {
   setSize(width, height) {
     this.canvas.style.width = `${width}px`;
     this.canvas.style.height = `${height}px`;
+    // this.context.scale(width/this.canvas.width, height/this.canvas.height);
+    
   }
 
   draw(id, components) {
-    if (this.qtree.insert({ centerX: components.position[id].x, centerY: components.position[id].y, halfWidth: components.size[id].x / 2, halfHeight: components.size[id].y / 2 })) {
-      this.context.fillStyle = components.color[id];
-      this.context.setTransform(components.size[id].x, 0, 0, components.size[id].y, Math.floor(components.position[id].x - components.size[id].x / 2), Math.floor(components.position[id].y - components.size[id].y / 2));
-      this.context.fillRect(0, 0, 1, 1);
-      this.context.resetTransform();
+    if (components.collider[id]) {
+      this.qtree.insert({ centerX: components.position[id].x, centerY: components.position[id].y, halfWidth: components.size[id].x / 2, halfHeight: components.size[id].y / 2 })
     }
+    this.context.fillStyle = components.color[id];
+    this.context.setTransform(Math.floor(components.size[id].x), 0, 0, Math.floor(components.size[id].y), Math.floor(components.position[id].x - components.size[id].x / 2 + this.canvas.width / 2), Math.floor(components.position[id].y - components.size[id].y / 2 + this.canvas.height / 2));
+    this.context.fillRect(0, 0, 1, 1);
+    this.context.resetTransform();
   }
 
   clear() {

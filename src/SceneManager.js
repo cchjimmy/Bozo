@@ -1,20 +1,21 @@
 import uuidv4 from "./utilities/uuidv4.js";
 import EntityManager from "./EntityManager.js";
+import ControlManager from "./ControlManager.js";
 
 export default class SceneManager extends EntityManager {
   constructor() {
     super();
     this.scenes = {};
     this.currentScene = this.createScene();
+    this.currentEntityPool = this.createEntityPool(this.getCurrentSceneId())
     this.webWorker = new Worker("./src/SMWebWorker.js");
+    this.controlManager = new ControlManager;
   }
 
   createScene() {
     let id = uuidv4();
-    let scene = { id, entityPool: this.addEntityPool(id) };
+    let scene = { id };
     this.scenes[id] = scene;
-
-    this.currentEntityPool = scene.entityPool;
     return scene;
   }
 
@@ -23,7 +24,6 @@ export default class SceneManager extends EntityManager {
     this.webWorker.onmessage = (e) => {
       this.components = e.data;
     }
-    // this.components.position[id] = this.components.position[id].add(this.components.velocity[id].mult(timeStep));
   }
 
   setCurrentScene(id) {
@@ -40,5 +40,9 @@ export default class SceneManager extends EntityManager {
 
   getScenes() {
     return this.scenes;
+  }
+
+  setCurrentEntityPool(id) {
+    this.currentEntityPool = this.getEntityPools()[id];
   }
 }

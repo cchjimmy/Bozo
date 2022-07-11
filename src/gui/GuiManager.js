@@ -2,10 +2,10 @@ import { docking, dragElement, elementFullscreen } from "./eventHandler.js";
 
 export var guis = [];
 
-export default class GuiHandler {
+export default class GuiManager {
 
   constructor() {
-    this.init();
+    // this.init();
   }
 
   setTheme(theme = "") {
@@ -87,31 +87,31 @@ export default class GuiHandler {
     header.classList.add("header");
     header.id = id + "header";
 
-    let buttonContainer = document.createElement("div");
-    buttonContainer.classList.add("buttonContainer");
-    buttonContainer.id = id + "buttonContainer";
+    // let buttonContainer = document.createElement("div");
+    // buttonContainer.classList.add("buttonContainer");
+    // buttonContainer.id = id + "buttonContainer";
 
-    let close = document.createElement("button");
-    close.classList.add("button");
-    close.innerHTML = "&times;";
-    close.id = id + "close";
+    // let close = document.createElement("button");
+    // close.classList.add("button");
+    // close.innerHTML = "&times;";
+    // close.id = id + "close";
 
-    let fullscreen = document.createElement("button");
-    fullscreen.classList.add("button");
-    fullscreen.innerHTML = "&square;";
-    fullscreen.id = id + "fullscreen";
+    // let fullscreen = document.createElement("button");
+    // fullscreen.classList.add("button");
+    // fullscreen.innerHTML = "&square;";
+    // fullscreen.id = id + "fullscreen";
 
-    buttonContainer.appendChild(close);
-    buttonContainer.appendChild(fullscreen);
+    // buttonContainer.appendChild(close);
+    // buttonContainer.appendChild(fullscreen);
 
     // &boxminus; html code for minimize
-    empty.appendChild(buttonContainer);
+    // empty.appendChild(buttonContainer);
     empty.appendChild(header);
     empty.appendChild(container);
 
     document.body.appendChild(empty);
 
-    dragElement(empty);
+    // dragElement(empty);
     elementFullscreen(empty);
 
     this.title(id, id);
@@ -229,7 +229,7 @@ export default class GuiHandler {
   }
 
   init() {
-    this.createDockBoxes();
+    // this.createDockBoxes();
 
     this.setTheme("dark");
     this.create("test");

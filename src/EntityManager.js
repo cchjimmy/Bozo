@@ -1,4 +1,5 @@
 import uuidv4 from "./utilities/uuidv4.js";
+import Vec2 from "./utilities/Vec2.js";
 
 export default class EntitiesManager {
   constructor() {
@@ -9,25 +10,34 @@ export default class EntitiesManager {
 
   /**
    * adds an entity into current entity pool
-   * @param {Object} entityComponents
+   * @param {Object} components
    */
-  addEntity(entityComponents) {
+  createEntity(components) {
     let id = uuidv4();
     let entity = { id };
+    this.currentEntityPool.entities[id] = entity;
 
-    for (let component in entityComponents) {
+    let comp = { 
+      position: new Vec2(0, 0),
+      size: new Vec2(1, 1),
+      velocity: new Vec2(0, 0),
+      color: "white",
+      collider: false,
+      camera: false
+    };
+
+    if (components) {
+      for (let component in components) {
+        comp[component] = components[component];
+      }
+    }
+    
+    for (let component in comp) {
       if (!this.components[component]) {
         this.components[component] = {};
       }
-
-      this.components[component][id] = entityComponents[component];
+      this.components[component][id] = comp[component];
     }
-
-    // for (let component in entityComponents) {
-    //   entity[component] = entityComponents[component];
-    // }
-
-    this.currentEntityPool.entities[id] = entity;
     return entity;
   }
 
@@ -43,7 +53,7 @@ export default class EntitiesManager {
     return ids;
   }
 
-  addEntityPool(id) {
+  createEntityPool(id) {
     let pool = { id, entities: {} }
     this.entityPools[id] = pool;
     return pool;
@@ -51,5 +61,9 @@ export default class EntitiesManager {
 
   getEntityPools() {
     return this.entityPools;
+  }
+
+  setCurrentEntityPool(id) {
+    this.currentEntityPool = this.getEntityPools()[id];
   }
 }
