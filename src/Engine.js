@@ -5,7 +5,7 @@ import AssetManager from "./AssetManager.js";
 import randomRange from "./utilities/randomRange.js";
 
 export default class Engine {
-  constructor(options = { resolution: { width: 800, height: 600 }, showFps: true, showQuadtree: false }) {
+  constructor(options = { resolution: { width: 800, height: 600 }, frameRate: 30, showFps: true, showQuadtree: false }) {
     this.options = {};
     if (options) {
       for (let option in options) {
@@ -16,10 +16,6 @@ export default class Engine {
     this.sceneManager = new SceneManager;
     this.renderer = new Renderer2D;
     this.assetManager = new AssetManager;
-
-    this.prevTime = performance.now();
-    this.frames = 0;
-    this.timeStep = 1 / 60;
 
     this.renderer.setResolution(this.options.resolution.width, this.options.resolution.height);
   }
@@ -32,9 +28,9 @@ export default class Engine {
 
     this.renderer.setSize(innerWidth, innerHeight);
 
-    for (let i = 0; i < 500; i++) {
+    for (let i = 0; i < 1000; i++) {
       this.sceneManager.addEntity({
-        position: new Vec2(randomRange(0, innerWidth), randomRange(0, innerHeight)),
+        position: new Vec2(randomRange(0, this.renderer.canvas.width), randomRange(0, this.renderer.canvas.height)),
         size: new Vec2(randomRange(10, 40), randomRange(10, 40)),
         velocity: new Vec2(randomRange(-50, 50), randomRange(-50, 50)),
         color: `rgba(${randomRange(0, 255)}, ${randomRange(0, 255)}, ${randomRange(0, 255)}, 1)`
@@ -60,44 +56,34 @@ export default class Engine {
 
     this.isLooping = true;
     this.loop();
+
+    this.sceneManager.update(1/this.options.frameRate);
   }
 
   loop() {
-    const start = performance.now();
-
     this.renderer.clear();
 
     let entityIds = this.sceneManager.getEntityIds();
-    let deltaTime = new Vec2(this.timeStep, this.timeStep);
     for (let i = 0; i < entityIds.length; i++) {
-      this.update(deltaTime, entityIds[i], this.sceneManager.components);
+      this.update(entityIds[i], this.sceneManager.components);
     }
 
     requestAnimationFrame(() => { this.loop(); });
 
-    if (this.options.showFps) {
-      this.renderer.context.strokeStyle = "white";
-      this.renderer.context.strokeText(`fps: ${(1 / this.timeStep).toFixed(0)}`, 10, 10);
-    }
+    // if (this.options.showFps) {
+    //   this.renderer.context.strokeStyle = "white";
+    //   this.renderer.context.strokeText(`fps: ${(1 / this.timeStep).toFixed(0)}`, 10, 10);
+    // }
 
     if (this.options.showQuadtree) {
       this.renderer.qtree.show(this.renderer.context);
     }
-
-    this.frames++;
-
-    if (start >= this.prevTime + 1000) {
-      this.timeStep = (start - this.prevTime) / (this.frames * 1000);
-      this.prevTime = start;
-      this.frames = 0;
-    }
   }
 
-  update(timeStep, id, components) {
+  update(id, components) {
     // draw only when not resizing
     if (this.isLooping) {
-      this.renderer.draw(components, id);
+      this.renderer.draw(id, components);
     }
-    this.sceneManager.update(timeStep, id);
   }
 }

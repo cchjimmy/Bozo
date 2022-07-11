@@ -32,7 +32,7 @@ export default class EntitiesManager {
   }
 
   /**
-   * returns an array containing all entity ids
+   * returns an array containing all entity ids in current entity pool
    * @returns an array
    */
   getEntityIds() {

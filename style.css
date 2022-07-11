@@ -22,3 +22,7 @@ body {
   image-rendering: pixelated;
   image-rendering: crisp-edges;
 }
+
+/* canvas {
+  border: 1px solid red;
+} */

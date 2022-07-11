@@ -6,8 +6,7 @@ export default class SceneManager extends EntityManager {
     super();
     this.scenes = {};
     this.currentScene = this.createScene();
-    this.webWorker = new Worker("./SMWebWorker.js");
-    console.log(this.webWorker);
+    this.webWorker = new Worker("./src/SMWebWorker.js");
   }
 
   createScene() {
@@ -19,9 +18,12 @@ export default class SceneManager extends EntityManager {
     return scene;
   }
 
-  update(timeStep, id) {
-    
-    this.components.position[id] = this.components.position[id].add(this.components.velocity[id].mult(timeStep));
+  update(timeStep) {
+    this.webWorker.postMessage([timeStep, this.components, this.getEntityIds()]);
+    this.webWorker.onmessage = (e) => {
+      this.components = e.data;
+    }
+    // this.components.position[id] = this.components.position[id].add(this.components.velocity[id].mult(timeStep));
   }
 
   setCurrentScene(id) {
