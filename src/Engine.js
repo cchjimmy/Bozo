@@ -5,7 +5,14 @@ import AssetManager from "./AssetManager.js";
 import randomRange from "./utilities/randomRange.js";
 
 export default class Engine {
-  constructor(options = { showFps: true, showQuadtree: false }) {
+  constructor(options = { resolution: { width: 800, height: 600 }, showFps: true, showQuadtree: false }) {
+    this.options = {};
+    if (options) {
+      for (let option in options) {
+        this.options[option] = options[option];
+      }
+    }
+
     this.sceneManager = new SceneManager;
     this.renderer = new Renderer2D;
     this.assetManager = new AssetManager;
@@ -14,12 +21,7 @@ export default class Engine {
     this.frames = 0;
     this.timeStep = 1 / 60;
 
-    this.options = {};
-    if (options) {
-      for (let option in options) {
-        this.options[option] = options[option];
-      }
-    }
+    this.renderer.setResolution(this.options.resolution.width, this.options.resolution.height);
   }
 
   init() {
@@ -30,8 +32,13 @@ export default class Engine {
 
     this.renderer.setSize(innerWidth, innerHeight);
 
-    for (let i = 0; i < 1000; i++) {
-      this.sceneManager.addEntity({ position: new Vec2(randomRange(0, innerWidth), randomRange(0, innerHeight)), size: new Vec2(randomRange(10, 40), randomRange(10, 40)), velocity: new Vec2(randomRange(-50, 50), randomRange(-50, 50)), color: `rgba(${randomRange(0, 255)}, ${randomRange(0, 255)}, ${randomRange(0, 255)}, 1)` });
+    for (let i = 0; i < 500; i++) {
+      this.sceneManager.addEntity({
+        position: new Vec2(randomRange(0, innerWidth), randomRange(0, innerHeight)),
+        size: new Vec2(randomRange(10, 40), randomRange(10, 40)),
+        velocity: new Vec2(randomRange(-50, 50), randomRange(-50, 50)),
+        color: `rgba(${randomRange(0, 255)}, ${randomRange(0, 255)}, ${randomRange(0, 255)}, 1)`
+      });
     }
 
     // credit: https://stackoverflow.com/questions/63301553/debounce-function-not-working-in-javascript
@@ -62,7 +69,7 @@ export default class Engine {
 
     let entityIds = this.sceneManager.getEntityIds();
     let deltaTime = new Vec2(this.timeStep, this.timeStep);
-    for (let i = 0; i < entityIds.length; i ++) {
+    for (let i = 0; i < entityIds.length; i++) {
       this.update(deltaTime, entityIds[i], this.sceneManager.components);
     }
 

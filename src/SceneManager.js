@@ -1,12 +1,13 @@
 import uuidv4 from "./utilities/uuidv4.js";
 import EntityManager from "./EntityManager.js";
-import Vec2 from "./utilities/Vec2.js";
 
 export default class SceneManager extends EntityManager {
   constructor() {
     super();
     this.scenes = {};
     this.currentScene = this.createScene();
+    this.webWorker = new Worker("./SMWebWorker.js");
+    console.log(this.webWorker);
   }
 
   createScene() {
@@ -19,6 +20,7 @@ export default class SceneManager extends EntityManager {
   }
 
   update(timeStep, id) {
+    
     this.components.position[id] = this.components.position[id].add(this.components.velocity[id].mult(timeStep));
   }
 
