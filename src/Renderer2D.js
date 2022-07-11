@@ -10,7 +10,7 @@ export default class Renderer2D extends Canvas2D {
     this.canvas.style.width = this.canvas.width;
     this.canvas.style.height = this.canvas.height;
     this.pixelDensity = 1;
-    this.unitScale = 20;
+    this.unitScale = 10;
   }
 
   /**

@@ -55,7 +55,7 @@ export default class Engine {
     window.onresize = () => {
       this.isLooping = false;
       debounce(() => {
-        this.renderer.setResolution(innerWidth * this.renderer.pixelDensity, innerHeight * this.renderer.pixelDensity);
+        this.renderer.setResolution(innerWidth, innerHeight);
         this.renderer.setSize(innerWidth, innerHeight);
         this.isLooping = true;
       }, 200);
