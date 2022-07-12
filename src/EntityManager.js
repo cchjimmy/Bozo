@@ -38,6 +38,7 @@ export default class EntitiesManager {
       }
       this.components[component][id] = comp[component];
     }
+    
     return entity;
   }
 

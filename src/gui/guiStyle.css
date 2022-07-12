@@ -1,6 +1,6 @@
 /* https://www.w3schools.com/howto/howto_css_custom_scrollbar.asp */
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background-color: transparent;
 }
 
 ::-webkit-scrollbar {
@@ -8,8 +8,8 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  border: 4px solid rgba(0, 0, 0, 0);
-  background-clip: padding-box;
+  /* border: 4px solid rgba(0, 0, 0, 0);
+  background-clip: padding-box; */
   border-radius: 9999px;
   background-color: var(--secondary-text-color);
 }
@@ -27,7 +27,8 @@
 }
 
 :root {
-  --scrollbar-width: 14px;
+  --scrollbar-width: 4px;
+  /* --scrollbar-width: 10px; */
   --title-bar-height: 25px;
 
   --body-background-color: white;
@@ -43,13 +44,14 @@
   min-height: 25px;
   display: none;
   outline: 1px solid gray;
-  /* resize: both; */
   overflow: hidden;
   background-color: var(--background-color);
+
+  resize: both;
 }
 
 .container {
-  width: 100%;
+  width: calc(100% - var(--scrollbar-width));
   height: calc(100% - var(--title-bar-height));
   padding: 5px;
 
@@ -61,7 +63,7 @@
   overflow-x: hidden;
 
   /* https://css-tricks.com/scrollbars-on-hover/ */
-  mask-image: linear-gradient(to top, transparent, black),
+  /* mask-image: linear-gradient(to top, transparent, black),
     linear-gradient(to left, transparent var(--scrollbar-width), black var(--scrollbar-width));
   mask-size: 100% 20000px;
   mask-position: left bottom;
@@ -69,13 +71,13 @@
     linear-gradient(to left, transparent var(--scrollbar-width), black var(--scrollbar-width));
   -webkit-mask-size: 100% 20000px;
   -webkit-mask-position: left bottom;
-  transition: mask-position 0.3s, -webkit-mask-position 0.3s;
+  transition: mask-position 0.3s, -webkit-mask-position 0.3s; */
 }
 
-.container:hover {
+/* .container:hover {
   -webkit-mask-position: left top;
   mask-position: left top;
-}
+} */
 
 .header {
   display: flex;
@@ -86,6 +88,7 @@
   padding: 0px 3px;
   border-bottom: 1px solid gray;
   height: var(--title-bar-height);
+  width: 100%;
   background-color: var(--header-color);
   color: var(--primary-text-color);
 }
@@ -112,7 +115,7 @@
   color: var(--primary-text-color);
 }
 
-.dock-box {
+/* .dock-box {
   background-color: gray;
   display: flex;
   transition: background-color 0.3s;
@@ -124,7 +127,7 @@
   width: 100%;
   border: 1px solid orange;
   box-sizing: border-box;
-}
+} */
 
 .resizer {
   background-color: #cbd5e0;
