@@ -7,10 +7,10 @@ export default class Renderer2D extends Canvas2D {
 
     this.qtree = new Quadtree({ centerX: this.canvas.width / 2, centerY: this.canvas.height / 2, halfWidth: this.canvas.width / 2, halfHeight: this.canvas.height / 2 });
 
-    this.canvas.style.width = this.canvas.width;
-    this.canvas.style.height = this.canvas.height;
     this.pixelDensity = 1;
     this.unitScale = 50;
+
+    // this.webWorker = new Worker("./src/R2DWebWorker.js");
   }
 
   /**
@@ -24,19 +24,18 @@ export default class Renderer2D extends Canvas2D {
     this.qtree.newBoundary({ centerX: width * this.pixelDensity / 2, centerY: height * this.pixelDensity / 2, halfWidth: width * this.pixelDensity / 2, halfHeight: height * this.pixelDensity / 2 });
   }
 
-  draw(id, components) {
-    let screenPosX = Math.floor((components.position[id].x) * this.unitScale + this.canvas.width / 2);
-    let screenPosY = Math.floor((-components.position[id].y) * this.unitScale + this.canvas.height / 2);
-    let screenSizeX = Math.floor(components.size[id].x * this.unitScale);
-    let screenSizeY = Math.floor(components.size[id].y * this.unitScale);
+  draw(transforms, colors) {
+    for (let i = 0; i < transforms.length; i++) {
+      const screenPosX = transforms[i][0];
+      const screenPosY = transforms[i][1];
+      const screenSizeX = transforms[i][2];
+      const screenSizeY = transforms[i][3];
 
-    if (components.collider[id]) {
-      this.qtree.insert({ centerX: screenPosX, centerY: screenPosY, halfWidth: screenSizeX / 2, halfHeight: screenSizeY / 2 })
+      this.context.save();
+      this.context.fillStyle = colors[i];
+      this.context.fillRect(Math.floor(screenPosX - screenSizeX/2), Math.floor(screenPosY - screenSizeY/2), screenSizeX, screenSizeY);
+      this.context.restore();
     }
-    this.context.save();
-    this.context.fillStyle = components.color[id];
-    this.context.fillRect(Math.floor(screenPosX - components.size[id].x / 2 * this.unitScale), Math.floor(screenPosY - components.size[id].y / 2 * this.unitScale), screenSizeX, screenSizeY);
-    this.context.restore();
   }
 
   clear() {
@@ -54,6 +53,10 @@ export default class Renderer2D extends Canvas2D {
     this.setResolution(Math.floor(this.canvas.width), Math.floor(this.canvas.height));
   }
 
+  /**
+   * 
+   * @param {Number} scale pixels : unit scale ratio
+   */
   setUnitScale(scale) {
     this.unitScale = scale * this.pixelDensity;
   }

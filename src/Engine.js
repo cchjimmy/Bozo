@@ -9,9 +9,9 @@ import GuiManager from "./gui/GuiManager.js";
 
 export default class Engine {
   constructor(options = {
-    resolution: { width: 800, height: 600 },
-    pixelDensity: 1 / 2,
-    unitScale: 50,
+    resolution: { width: 256, height: 240 },
+    pixelDensity: 1,
+    unitScale: 20,
     frameRate: 30,
     showFps: true,
     showQuadtree: false
@@ -36,19 +36,27 @@ export default class Engine {
       return;
     }
 
+    this.renderer.setResolution(this.options.resolution.width, this.options.resolution.height);
     this.renderer.setUnitScale(this.options.unitScale);
     this.renderer.setPixelDensity(this.options.pixelDensity);
-    this.renderer.setResolution(innerWidth, innerHeight);
-    this.renderer.setSize(innerWidth, innerHeight);
 
-    for (let i = 0; i < 500; i++) {
-      this.sceneManager.createEntity({
-        position: new Vec2(randomRange(-10, 10), randomRange(-10, 10)),
-        size: new Vec2(randomRange(1, 2), randomRange(1, 2)),
-        velocity: new Vec2(randomRange(-1, 1), randomRange(-1, 1)),
-        color: `rgba(${randomRange(0, 255)}, ${randomRange(0, 255)}, ${randomRange(0, 255)}, 1)`,
-        // collider: true
-      });
+    function resizeToFit(renderer, options) {
+      if (window.innerWidth > window.innerHeight) {
+        renderer.setSize(options.resolution.width * innerHeight / options.resolution.height, innerHeight);
+      } else {
+        renderer.setSize(innerWidth, options.resolution.height * innerWidth / options.resolution.width);
+      }
+    }
+    resizeToFit(this.renderer, this.options);
+
+    for (let i = 0; i < 1000; i++) {
+    this.sceneManager.createEntity({
+    position: new Vec2(randomRange(-10, 10), randomRange(-10, 10)),
+    size: new Vec2(randomRange(1, 2), randomRange(1, 2)),
+    velocity: new Vec2(randomRange(-1, 1), randomRange(-1, 1)),
+    color: `rgba(${randomRange(0, 255)}, ${randomRange(0, 255)}, ${randomRange(0, 255)}, 1)`,
+    collider: true
+    });
     }
 
     this.sceneManager.createEntity({ position: new Vec2(0, 0), collider: true });
@@ -57,8 +65,7 @@ export default class Engine {
     window.onresize = () => {
       this.isLooping = false;
       debounce(() => {
-        this.renderer.setResolution(innerWidth, innerHeight);
-        this.renderer.setSize(innerWidth, innerHeight);
+        resizeToFit(this.renderer, this.options);
         this.isLooping = true;
       }, 200);
     }
@@ -66,17 +73,14 @@ export default class Engine {
     this.isLooping = true;
     this.loop();
 
-    this.sceneManager.update(1 / this.options.frameRate);
+    this.sceneManager.update(1 / this.options.frameRate, this.options.unitScale, this.renderer.canvas.width, this.renderer.canvas.height);
   }
 
   loop() {
     if (this.isLooping) {
       this.renderer.clear();
-      let entityIds = this.sceneManager.getEntityIds();
-      for (let i = 0; i < entityIds.length; i++) {
-        // draw only when not resizing
-        this.renderer.draw(entityIds[i], this.sceneManager.components);
-      }
+      // draw only when not resizing
+      this.renderer.draw(this.sceneManager.getTransforms(), this.sceneManager.getColors());
     }
 
     requestAnimationFrame(() => { this.loop(); });
