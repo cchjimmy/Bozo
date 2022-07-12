@@ -11,7 +11,7 @@ export default class Engine {
   constructor(options = {
     resolution: { width: 256, height: 240 },
     pixelDensity: 1,
-    unitScale: 20,
+    unitScale: 10,
     frameRate: 30,
     showFps: true,
     showQuadtree: false
@@ -49,18 +49,18 @@ export default class Engine {
     }
     resizeToFit(this.renderer, this.options);
 
-    for (let i = 0; i < 1000; i++) {
-    this.sceneManager.createEntity({
-    position: new Vec2(randomRange(-10, 10), randomRange(-10, 10)),
-    size: new Vec2(randomRange(1, 2), randomRange(1, 2)),
-    velocity: new Vec2(randomRange(-1, 1), randomRange(-1, 1)),
-    color: `rgba(${randomRange(0, 255)}, ${randomRange(0, 255)}, ${randomRange(0, 255)}, 1)`,
-    collider: true
-    });
+    for (let i = 0; i < 500; i++) {
+      this.sceneManager.createEntity({
+        position: new Vec2(randomRange(-5, 5), randomRange(-5, 5)),
+        size: new Vec2(randomRange(1, 2), randomRange(1, 2)),
+        velocity: new Vec2(randomRange(-1, 1), randomRange(-1, 1)),
+        color: `rgba(${randomRange(0, 255)}, ${randomRange(0, 255)}, ${randomRange(0, 255)}, 1)`,
+        collider: true
+      });
     }
 
-    this.sceneManager.createEntity({ position: new Vec2(0, 0), collider: true });
-    this.sceneManager.createEntity({ position: new Vec2(1, 1), camera: new Vec2(0, 0), collider: true });
+    // this.sceneManager.createEntity({ position: new Vec2(0, 0), collider: true });
+    // this.sceneManager.createEntity({ position: new Vec2(1, 1), camera: new Vec2(0, 0), collider: true });
 
     window.onresize = () => {
       this.isLooping = false;
@@ -73,7 +73,7 @@ export default class Engine {
     this.isLooping = true;
     this.loop();
 
-    this.sceneManager.update(1 / this.options.frameRate, this.options.unitScale, this.renderer.canvas.width, this.renderer.canvas.height);
+    this.sceneManager.update(1 / this.options.frameRate, this.renderer.unitScale, this.renderer.canvas.width, this.renderer.canvas.height);
   }
 
   loop() {
