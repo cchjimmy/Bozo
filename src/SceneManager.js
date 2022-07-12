@@ -7,9 +7,9 @@ export default class SceneManager extends EntityManager {
     super();
     this.scenes = {};
     this.currentScene = this.createScene();
-    this.currentEntityPool = this.createEntityPool(this.getCurrentSceneId())
-    this.webWorker = new Worker("./src/SMWebWorker.js");
+    this.currentEntityPool = this.createEntityPool(this.getCurrentSceneId());
     this.controlManager = new ControlManager;
+    this.webWorker = new Worker("./src/SMWebWorker.js");
     this.transforms = [];
     this.colors = [];
   }
@@ -22,11 +22,11 @@ export default class SceneManager extends EntityManager {
   }
 
   update(timeStep, unitScale, canvasWidth, canvasHeight) {
-    this.webWorker.postMessage([timeStep, this.components, this.getEntityIds(), unitScale, canvasWidth, canvasHeight]);
+    this.webWorker.postMessage({ timeStep, components: this.components, entityIds: this.getEntityIds(), unitScale, canvasWidth, canvasHeight, name: "newProperties" });
     this.webWorker.onmessage = (e) => {
-      this.components = e.data[0];
-      this.transforms = e.data[1];
-      this.colors = e.data[2];
+      this.components = e.data.components;
+      this.transforms = e.data.transforms;
+      this.colors = e.data.colors;
     }
   }
 
@@ -53,7 +53,7 @@ export default class SceneManager extends EntityManager {
   getTransforms() {
     return this.transforms;
   }
-  
+
   getColors() {
     return this.colors;
   }

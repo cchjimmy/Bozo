@@ -1,22 +1,29 @@
+var screenPosX;
+var screenPosY;
+var screenSizeX;
+var screenSizeY;
+
+var intervalId;
 onmessage = (e) => {
-  setInterval(() => {
-    var screenPosX
-    var screenPosY
-    var screenSizeX
-    var screenSizeY
+  if (e.data.name == "newProperties") {
+    if (intervalId) {
+      clearInterval(intervalId);
+    }
+  }
+  intervalId = setInterval(() => {
     var transforms = [];
     var colors = [];
-    for (let i = 0; i < e.data[2].length; i++) {
-      e.data[1].position[e.data[2][i]].x += e.data[1].velocity[e.data[2][i]].x * e.data[0];
-      e.data[1].position[e.data[2][i]].y += e.data[1].velocity[e.data[2][i]].y * e.data[0];
+    for (let i = 0; i < e.data.entityIds.length; i++) {
+      let worldPosX = e.data.components.position[e.data.entityIds[i]].x += e.data.components.velocity[e.data.entityIds[i]].x * e.data.timeStep;
+      let worldPosY = e.data.components.position[e.data.entityIds[i]].y += e.data.components.velocity[e.data.entityIds[i]].y * e.data.timeStep;
 
-      screenPosX = Math.floor((e.data[1].position[e.data[2][i]].x) * e.data[3] + e.data[4] / 2);
-      screenPosY = Math.floor((-e.data[1].position[e.data[2][i]].y) * e.data[3] + e.data[5] / 2);
-      screenSizeX = Math.floor(e.data[1].size[e.data[2][i]].x * e.data[3]);
-      screenSizeY = Math.floor(e.data[1].size[e.data[2][i]].y * e.data[3]);
+      screenPosX = Math.floor(worldPosX * e.data.unitScale + e.data.canvasWidth / 2);
+      screenPosY = Math.floor(-worldPosY * e.data.unitScale + e.data.canvasHeight / 2);
+      screenSizeX = Math.floor(e.data.components.size[e.data.entityIds[i]].x * e.data.unitScale);
+      screenSizeY = Math.floor(e.data.components.size[e.data.entityIds[i]].y * e.data.unitScale);
       transforms.push([screenPosX, screenPosY, screenSizeX, screenSizeY]);
-      colors.push(e.data[1].color[e.data[2][i]]);
+      colors.push(e.data.components.color[e.data.entityIds[i]]);
     }
-    postMessage([e.data[1], transforms, colors]);
-  }, e.data[0] * 1000);
+    postMessage({ components: e.data.components, transforms, colors });
+  }, e.data.timeStep * 1000);
 }

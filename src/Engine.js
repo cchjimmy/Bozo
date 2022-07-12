@@ -6,6 +6,7 @@ import AssetManager from "./AssetManager.js";
 import randomRange from "./utilities/randomRange.js";
 import CameraManager from "./CameraManager.js";
 import GuiManager from "./gui/GuiManager.js";
+import AudioManager from "./AudioManager.js";
 
 export default class Engine {
   constructor(options = {
@@ -28,6 +29,7 @@ export default class Engine {
     this.assetManager = new AssetManager;
     this.cameraManager = new CameraManager;
     this.guiManager = new GuiManager;
+    this.audioManager = new AudioManager;
   }
 
   init() {
@@ -40,16 +42,7 @@ export default class Engine {
     this.renderer.setUnitScale(this.options.unitScale);
     this.renderer.setPixelDensity(this.options.pixelDensity);
 
-    function resizeToFit(renderer, options) {
-      if (window.innerWidth > window.innerHeight) {
-        renderer.setSize(options.resolution.width * innerHeight / options.resolution.height, innerHeight);
-      } else {
-        renderer.setSize(innerWidth, options.resolution.height * innerWidth / options.resolution.width);
-      }
-    }
-    resizeToFit(this.renderer, this.options);
-
-    for (let i = 0; i < 500; i++) {
+    for (let i = 0; i < 1000; i++) {
       this.sceneManager.createEntity({
         position: new Vec2(randomRange(-5, 5), randomRange(-5, 5)),
         size: new Vec2(randomRange(1, 2), randomRange(1, 2)),
@@ -59,8 +52,17 @@ export default class Engine {
       });
     }
 
-    // this.sceneManager.createEntity({ position: new Vec2(0, 0), collider: true });
+    this.sceneManager.createEntity({ position: new Vec2(0, 0), collider: true });
     // this.sceneManager.createEntity({ position: new Vec2(1, 1), camera: new Vec2(0, 0), collider: true });
+
+    function resizeToFit(renderer, options) {
+      if (window.innerWidth > window.innerHeight) {
+        renderer.setSize(options.resolution.width * innerHeight / options.resolution.height, innerHeight);
+      } else {
+        renderer.setSize(innerWidth, options.resolution.height * innerWidth / options.resolution.width);
+      }
+    }
+    resizeToFit(this.renderer, this.options);
 
     window.onresize = () => {
       this.isLooping = false;
@@ -84,11 +86,6 @@ export default class Engine {
     }
 
     requestAnimationFrame(() => { this.loop(); });
-
-    // if (this.options.showFps) {
-    //   this.renderer.context.strokeStyle = "white";
-    //   this.renderer.context.strokeText(`fps: ${(1 / this.timeStep).toFixed(0)}`, 10, 10);
-    // }
 
     if (this.options.showQuadtree) {
       this.renderer.qtree.show(this.renderer.context);
