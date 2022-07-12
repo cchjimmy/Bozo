@@ -38,7 +38,6 @@ export default class Engine {
     this.renderer.setResolution(innerWidth, innerHeight);
     this.renderer.setSize(innerWidth, innerHeight);
 
-
     for (let i = 0; i < 1000; i++) {
       this.sceneManager.createEntity({
         position: new Vec2(randomRange(-10, 10), randomRange(-10, 10)),

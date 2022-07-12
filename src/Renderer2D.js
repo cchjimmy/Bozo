@@ -10,7 +10,7 @@ export default class Renderer2D extends Canvas2D {
     this.canvas.style.width = this.canvas.width;
     this.canvas.style.height = this.canvas.height;
     this.pixelDensity = 1;
-    this.unitScale = 10;
+    this.unitScale = 20;
   }
 
   /**
@@ -50,8 +50,8 @@ export default class Renderer2D extends Canvas2D {
    */
   setPixelDensity(pixelDensity) {
     this.pixelDensity = pixelDensity;
-    this.setResolution(Math.floor(this.canvas.width * pixelDensity), Math.floor(this.canvas.height * pixelDensity));
     this.setUnitScale(this.unitScale);
+    this.setResolution(Math.floor(this.canvas.width), Math.floor(this.canvas.height));
   }
 
   setUnitScale(scale) {
