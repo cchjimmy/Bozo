@@ -10,6 +10,8 @@ import GuiManager from "./gui/GuiManager.js";
 export default class Engine {
   constructor(options = {
     resolution: { width: 800, height: 600 },
+    pixelDensity: 1 / 2,
+    unitScale: 50,
     frameRate: 30,
     showFps: true,
     showQuadtree: false
@@ -34,11 +36,12 @@ export default class Engine {
       return;
     }
 
-    this.renderer.setPixelDensity(1 / 2);
+    this.renderer.setUnitScale(this.options.unitScale);
+    this.renderer.setPixelDensity(this.options.pixelDensity);
     this.renderer.setResolution(innerWidth, innerHeight);
     this.renderer.setSize(innerWidth, innerHeight);
 
-    for (let i = 0; i < 1000; i++) {
+    for (let i = 0; i < 500; i++) {
       this.sceneManager.createEntity({
         position: new Vec2(randomRange(-10, 10), randomRange(-10, 10)),
         size: new Vec2(randomRange(1, 2), randomRange(1, 2)),
@@ -48,8 +51,8 @@ export default class Engine {
       });
     }
 
-    // this.sceneManager.createEntity({ position: new Vec2(0, 0), collider: true });
-    // this.sceneManager.createEntity({ position: new Vec2(1, 1), camera: new Vec2(0, 0), collider: true });
+    this.sceneManager.createEntity({ position: new Vec2(0, 0), collider: true });
+    this.sceneManager.createEntity({ position: new Vec2(1, 1), camera: new Vec2(0, 0), collider: true });
 
     window.onresize = () => {
       this.isLooping = false;
