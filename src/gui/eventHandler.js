@@ -205,7 +205,6 @@ function moveToFront(elmnt) {
   guis.forEach(gui => {
     gui.style.zIndex = guis.indexOf(gui) + 1;
   });
-  return;
 }
 
 function getParent(elmnt) {
@@ -222,9 +221,6 @@ function drawDockBoxes() {
       })
     }
   }
-
-  console.log("drawDockBox");
-  return;
 }
 
 function hideDockBoxes() {
@@ -234,8 +230,6 @@ function hideDockBoxes() {
       box.style.display = "none";
     }
   }
-  console.log("hideDockBoxes");
-  return;
 }
 
 // https://htmldom.dev/create-resizable-split-views/

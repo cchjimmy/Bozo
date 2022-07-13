@@ -1,11 +1,10 @@
-import { dragElement } from "./eventHandler.js";
+// import { dragElement } from "./eventHandler.js";
 
-export var guis = [];
+// export var guis = [];
 
 export default class GuiManager {
 
   constructor() {
-    this.guis = {};
     this.setTheme("dark");
     // this.init();
   }
@@ -25,40 +24,6 @@ export default class GuiManager {
     }
   }
 
-  createContent({ id = "", contentId = "", content }) {
-    let mainContainer = this.get(id + "container");
-
-    if (!mainContainer || !content) return;
-
-    let contentContainer = document.createElement("div");
-    if (contentId) {
-      contentContainer.id = contentId;
-    }
-
-    contentContainer.classList.add("user-select");
-    switch (typeof content) {
-      case typeof "":
-        contentContainer.innerHTML = content;
-        mainContainer.appendChild(contentContainer);
-        break;
-
-      //     case typeof mainContainer:
-      //       console.log(typeof mainContainer, "mc");
-      //       if (content.classList.contains("empty")) {
-      //         console.warn("Cannot display a container within another container.");
-      //       } else {
-      //         contentContainer.appendChild(content);
-      //         mainContainer.appendChild(contentContainer);
-      //       }
-      //       break;
-
-      default:
-        contentContainer.appendChild(content);
-        mainContainer.appendChild(contentContainer);
-        break;
-    }
-  }
-
   resize(id = "", width = 100, height = 100) {
     let gui = this.get(id);
     if (gui) {
@@ -67,105 +32,77 @@ export default class GuiManager {
     }
   }
 
-  create(id = "", width = 100, height = 100) {
+  create(id = "") {
     let gui = this.get(id);
     if (gui) {
       this.remove(id);
     }
+    // let titleBarHeight = 25;
 
-    this.guis[id] = {
-      id,
-      header: { title: id },
-      container: { content: [] },
-      left: 0,
-      top: 0,
-      width,
-      height
-    };
+    // let empty = document.createElement("div");
+    // empty.style.width = `${width}px`;
+    // empty.style.height = `${height + titleBarHeight}px`
+    // empty.id = id;
+    // empty.classList.add("empty");
 
-    let titleBarHeight = 25;
+    let empty = this.addDiv({ divId: id, divClass: "empty" });
+    this.addDiv({ parentId: id, divId: id + "header", divClass: "header", content: id });
+    this.addDiv({ parentId: id, divId: id + "container", divClass: "container" })
 
-    let empty = document.createElement("div");
-    // console.log(typeof empty);
-    empty.style.width = `${width}px`;
-    empty.style.height = `${height + titleBarHeight}px`
-    empty.id = id;
-    empty.classList.add("empty");
-
-    let container = document.createElement("div");
-    container.id = id + "container";
-    container.classList.add("container");
-
-    let header = document.createElement("div");
-    header.classList.add("header");
-    header.id = id + "header";
-
-    empty.appendChild(header);
-    empty.appendChild(container);
-
-    document.body.appendChild(empty);
-
-    this.title(id, id);
-    this.reposition(id, 0, 0);
-
-    guis.push(empty)
-    dragElement(empty);
-  }
-
-  updateContent({ contentId = "", content }) {
-    let contentContainer = this.get(contentId);
-    if (contentContainer) {
-      contentContainer.innerHTML = content;
-    }
-  }
-
-  removeContent(contentId = "") {
-    let contentContainer = this.get(contentId);
-    if (contentContainer) {
-      contentContainer.remove();
-    }
+    return empty;
+    // dragElement(empty);
   }
 
   remove(id = "") {
-    let gui = this.get(id);
-    if (gui) {
-      guis.slice(guis.indexOf(gui), 1);
-      delete this.guis[id];
-      gui.remove();
+    let div = this.get(id);
+    if (div) {
+      if (guis.includes(div)) { guis.slice(guis.indexOf(div), 1) };
+      div.remove();
     }
   }
 
-  reposition(id = "", left = this.get(id).style.left, top = this.get(id).style.top) {
-    let gui = this.get(id);
-    if (gui) {
-      this.guis[id].left = left;
-      this.guis[id].top = top;
-      gui.style.top = `${top}px`;
-      gui.style.left = `${left}px`;
-    }
-  }
+  // reposition(id = "", left = this.get(id).style.left, top = this.get(id).style.top) {
+  //   let gui = this.get(id);
+  //   if (gui) {
+  //     gui.style.top = `${top}px`;
+  //     gui.style.left = `${left}px`;
+  //   }
+  // }
 
-  draw(id = "", x = this.get(id).style.left, y = this.get(id).style.top) {
-    let gui = this.get(id);
-    if (gui) {
-      gui.style.display = "flex";
-      gui.style.flexWrap = "wrap";
-      this.reposition(id, x, y);
+  draw(id = "") {
+    let div = this.get(id);
+    if (div) {
+      div.style.display = "inline-block";
+      // gui.style.flexWrap = "wrap";
     }
   }
 
   hide(id = "") {
-    let gui = this.get(id);
-    if (gui) {
-      gui.style.display = "none";
+    let div = this.get(id);
+    if (div) {
+      div.style.display = "none";
     }
   }
 
-  title(id = "", title = "") {
-    let header = this.get(id + "header");
-    if (header) {
-      header.innerText = title;
+  updateDiv({divId="", content=""}) {
+    let div = this.get(divId);
+    if (div) {
+      div.innerHTML = content;
     }
+  }
+
+  addDiv({ parentId = "", divId = "", divClass = "", content }) {
+    let div = document.createElement("div");
+    if (divId) { div.id = divId; }
+    if (divClass) { div.classList.add(divClass); }
+    if (content) { div.innerHTML = content }
+    if (parentId) {
+      let parent = this.get(parentId);
+      parent.appendChild(div);
+    } else {
+      document.body.appendChild(div);
+    }
+    return div;
   }
 
   removeTitle(id = "") {
@@ -177,14 +114,15 @@ export default class GuiManager {
 
   removeHeader(id = "") {
     let gui = this.get(id);
-    if (gui) {
-      let header = this.get(id + "header");
+    let header = this.get(id + "header");
+    if (gui && header) {
+
       // let buttonContainer = this.get(id + "buttonContainer");
-      gui.removeChild(header);
+      header.remove();
       // gui.removeChild(buttonContainer);
       // dragElement(gui);
 
-      gui.style.height = `${parseInt(gui.style.height) - parseInt(header.style.height)}px`;
+      // gui.style.height = `${parseInt(gui.style.height) - parseInt(header.style.height)}px`;
     }
   }
 

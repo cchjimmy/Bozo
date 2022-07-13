@@ -1,7 +1,6 @@
 export default class Canvas2D {
   constructor() {
-    document.body.appendChild(document.createElement("canvas"));
-    this.canvas = document.querySelector("canvas");
+    this.canvas = document.createElement("canvas");
     this.context = this.canvas.getContext("2d", {alpha:false});
   }
 
@@ -30,5 +29,9 @@ export default class Canvas2D {
    */
   clear() {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  }
+
+  showCanvas() {
+    document.body.appendChild(this.canvas);
   }
 }
