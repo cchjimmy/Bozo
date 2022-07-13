@@ -25,7 +25,6 @@ export default class Renderer2D extends Canvas2D {
   }
 
   draw(transforms, colors) {
-    // console.log(transforms);
     for (let i = 0; i < transforms.length; i++) {
       const screenPosX = transforms[i][0];
       const screenPosY = transforms[i][1];
@@ -34,7 +33,7 @@ export default class Renderer2D extends Canvas2D {
 
       this.context.save();
       this.context.fillStyle = colors[i];
-      this.context.fillRect(Math.floor(screenPosX - screenSizeX/2), Math.floor(screenPosY - screenSizeY/2), screenSizeX, screenSizeY);
+      this.context.fillRect(screenPosX, screenPosY, screenSizeX, screenSizeY);
       this.context.restore();
     }
   }

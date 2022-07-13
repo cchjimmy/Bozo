@@ -33,7 +33,7 @@ export function dragElement(elmnt) {
   }
 
   function dragMouseDown(e) {
-    moveToFront(elmnt);
+    // moveToFront(elmnt);
     parent = getParent(elmnt);
     isParentBody = parent == document.body;
     if (isParentBody) {

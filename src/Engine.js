@@ -10,9 +10,9 @@ import AudioManager from "./AudioManager.js";
 
 export default class Engine {
   constructor(options = {
-    resolution: { width: 256, height: 240 },
-    pixelDensity: 1,
-    unitScale: 10,
+    resolution: { width: innerWidth, height: innerHeight },
+    pixelDensity: 1/5,
+    unitScale: 30,
     frameRate: 30,
     showFps: true,
     showQuadtree: false,
@@ -45,15 +45,15 @@ export default class Engine {
 
     this.uiInit();
 
-    // for (let i = 0; i < 1; i++) {
-    //   this.sceneManager.createEntity({
-    //     position: new Vec2(randomRange(-5, 5), randomRange(-5, 5)),
-    //     size: new Vec2(randomRange(1, 2), randomRange(1, 2)),
-    //     velocity: new Vec2(randomRange(-1, 1), randomRange(-1, 1)),
-    //     color: `rgba(${randomRange(0, 255)}, ${randomRange(0, 255)}, ${randomRange(0, 255)}, 1)`,
-    //     collider: false
-    //   });
-    //   this.sceneManager.update(1 / this.options.frameRate, this.renderer.unitScale, this.renderer.canvas.width, this.renderer.canvas.height);
+    // for (let i = 0; i < 1000; i++) {
+      // this.sceneManager.createEntity({
+        // position: new Vec2(randomRange(-5, 5), randomRange(-5, 5)),
+        // size: new Vec2(randomRange(1, 2), randomRange(1, 2)),
+        // velocity: new Vec2(randomRange(-1, 1), randomRange(-1, 1)),
+        // color: `rgba(${randomRange(0, 255)}, ${randomRange(0, 255)}, ${randomRange(0, 255)}, 1)`,
+        // collider: false
+      // });
+      // this.sceneManager.update(1 / this.options.frameRate, this.renderer.unitScale, this.renderer.canvas.width, this.renderer.canvas.height);
     // }
 
     function resizeToFit(renderer, options) {
@@ -97,57 +97,80 @@ export default class Engine {
     if (this.options.debug) {
       this.guiManager.create("Current_scene");
       this.guiManager.draw("Current_scene");
-      this.guiManager.createContent({ id: "Current_scene", contentId: "sceneId", content: `id: ${this.sceneManager.getCurrentSceneId()}` })
+      this.guiManager.createContent({ id: "Current_scene", contentId: "sceneId", content: `id: <span>${this.sceneManager.getCurrentSceneId()}</span> <button id="scene-id-clipboard-button" style="float:right"><i class="fa fa-clipboard"></i></button>` })
       this.guiManager.createContent({ id: "Current_scene", contentId: "name", content: `name: <span>${this.sceneManager.currentScene.name}</span>` });
       this.guiManager.createContent({ id: "Current_scene", contentId: "entity_count", content: `entity count: <span>${this.sceneManager.currentEntityPool.count}</span>` });
 
-      this.guiManager.create("create_entity");
-      this.guiManager.draw("create_entity", 200);
+      this.guiManager.create("entityManager");
+      this.guiManager.draw("entityManager", 0, 200);
 
       // credit for grid style https://dev.to/dawnind/3-ways-to-display-two-divs-side-by-side-3d8b
       // credit for input https://www.w3schools.com/tags/att_input_value.asp
       this.guiManager.createContent({
-        id: "create_entity",
+        id: "entityManager",
         content:
           `position:
-      <form style="display: grid; grid-template-columns: 1fr 1fr; grid-gap: 20px;">
-        <div>
-          <label for="x">x: </label>
-          <input type="number" name="x" value="0" id="x" style="width: 50px;"></input>
-        </div>
-        <div>
-          <label for="y">y: </label>
-          <input type="number" name="y" value="0" id="y" style="width: 50px;"></input>
-        </div>
-      </form>
-      </br>
-      size:
-      <form style="display: grid; grid-template-columns: 1fr 1fr; grid-gap: 20px;">
-        <div>
-          <label for="width">width: </label>
-          <input type="number" name="width" value="1" id="width" style="width: 50px;"></input>
-        </div>
-        <div>
-          <label for="height">height: </label>
-          <input type="number" name="height" value="1" id="height" style="width: 50px;"></input>
-        </div>
-      </form>
-      </br>
-      <button id="add-component">add component</button>
-      <input type="submit" id="create-entity" value="create entity"></input>`
+          <div style="display: grid; grid-template-columns: 1fr 1fr; grid-gap: 20px;">
+            <div>
+              <label for="x">x: </label>
+              <input type="number" name="x" value="0" id="x" style="width: 50px;"></input>
+            </div>
+            <div>
+              <label for="y">y: </label>
+              <input type="number" name="y" value="0" id="y" style="width: 50px;"></input>
+            </div>
+          </div>
+          </br>
+          size:
+          <div style="display: grid; grid-template-columns: 1fr 1fr; grid-gap: 20px;">
+            <div>
+              <label for="width">width: </label>
+              <input type="number" name="width" value="1" id="width" style="width: 50px;"></input>
+            </div>
+            <div>
+              <label for="height">height: </label>
+              <input type="number" name="height" value="1" id="height" style="width: 50px;"></input>
+            </div>
+          </div>
+          </br>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; grid-gap: 20px;">
+            <button id="add-component">add component</button>
+            <button id="create-entity">create entity</button>
+          </div>`
       });
 
       const createEntityButton = document.querySelector("#create-entity");
-      // console.log(createEntityButton);
+      const addComponentButton = document.querySelector("#add-component");
+      const clipBoardButton = document.querySelector("#scene-id-clipboard-button");
       
+      clipBoardButton.addEventListener("click", () => {
+        if (!navigator.clipboard){
+          return console.warn("Unable to copy scene id");
+        }
+        let text = this.guiManager.get("sceneId span").innerHTML;
+        navigator.clipboard.writeText(text);
+      })
+
       createEntityButton.addEventListener("click", ()=> {
-        const x = parseInt(document.querySelector("#x").value);
-        const y = parseInt(document.querySelector("#y").value);
-        const w = parseInt(document.querySelector("#width").value);
-        const h = parseInt(document.querySelector("#height").value);
-        
+        const x = parseFloat(document.querySelector("#x").value);
+        const y = parseFloat(document.querySelector("#y").value);
+        const w = parseFloat(document.querySelector("#width").value);
+        const h = parseFloat(document.querySelector("#height").value);
+
+        if (isNaN(x)||isNaN(y)||isNaN(w)||isNaN(h)) {
+          this.guiManager.createContent({id: "entityManager", contentId: "invalidInput", content:`<div style="color: red">Please input number values!</div>`});
+
+          setTimeout(() => {
+            this.guiManager.removeContent("invalidInput");
+          }, 3000);
+          return;
+        }
         this.sceneManager.createEntity({position: new Vec2(x, y), size: new Vec2(w, h)});
         this.sceneManager.update(1 / this.options.frameRate, this.renderer.unitScale, this.renderer.canvas.width, this.renderer.canvas.height);
+      })
+
+      addComponentButton.addEventListener("click", ()=> {
+        
       })
       // this.guiManager.createContent({ id: "create_entity", contentId: "size", content: `size` });
       // this.guiManager.createContent({ id: "create_entity", contentId: "velcocity", content: `velocity` });

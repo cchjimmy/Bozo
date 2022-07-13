@@ -25,7 +25,7 @@ export default class GuiManager {
     }
   }
 
-  createContent({id = "", contentId = "", content}) {
+  createContent({ id = "", contentId = "", content }) {
     let mainContainer = this.get(id + "container");
 
     if (!mainContainer || !content) return;
@@ -34,7 +34,7 @@ export default class GuiManager {
     if (contentId) {
       contentContainer.id = contentId;
     }
-    
+
     contentContainer.classList.add("user-select");
     switch (typeof content) {
       case typeof "":
@@ -112,10 +112,17 @@ export default class GuiManager {
     dragElement(empty);
   }
 
-  updateContent({contentId= "", content}) {
+  updateContent({ contentId = "", content }) {
     let contentContainer = this.get(contentId);
     if (contentContainer) {
       contentContainer.innerHTML = content;
+    }
+  }
+
+  removeContent(contentId = "") {
+    let contentContainer = this.get(contentId);
+    if (contentContainer) {
+      contentContainer.remove();
     }
   }
 
@@ -124,7 +131,7 @@ export default class GuiManager {
     if (gui) {
       guis.slice(guis.indexOf(gui), 1);
       delete this.guis[id];
-      document.body.removeChild(gui);
+      gui.remove();
     }
   }
 
