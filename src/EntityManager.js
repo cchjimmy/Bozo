@@ -10,14 +10,15 @@ export default class EntitiesManager {
 
   /**
    * adds an entity into current entity pool
-   * @param {Object} components
+   * @param {object} components
    */
-  createEntity(components) {
+  createEntity(components = {}) {
     let id = uuidv4();
     let entity = { id };
     this.currentEntityPool.entities[id] = entity;
+    this.currentEntityPool.count++;
 
-    let comp = { 
+    let comp = {
       position: new Vec2(0, 0),
       size: new Vec2(1, 1),
       velocity: new Vec2(0, 0),
@@ -31,14 +32,14 @@ export default class EntitiesManager {
         comp[component] = components[component];
       }
     }
-    
+
     for (let component in comp) {
       if (!this.components[component]) {
         this.components[component] = {};
       }
       this.components[component][id] = comp[component];
     }
-    
+
     return entity;
   }
 
@@ -55,7 +56,7 @@ export default class EntitiesManager {
   }
 
   createEntityPool(id) {
-    let pool = { id, entities: {} }
+    let pool = { id, entities: {}, count: 0 }
     this.entityPools[id] = pool;
     return pool;
   }

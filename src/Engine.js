@@ -15,7 +15,8 @@ export default class Engine {
     unitScale: 10,
     frameRate: 30,
     showFps: true,
-    showQuadtree: false
+    showQuadtree: false,
+    debug: true
   }) {
     this.options = {};
     if (options) {
@@ -42,38 +43,21 @@ export default class Engine {
     this.renderer.setUnitScale(this.options.unitScale);
     this.renderer.setPixelDensity(this.options.pixelDensity);
 
-    this.guiManager.create("Bozo");
-    this.guiManager.draw("Bozo");
-    this.guiManager.display("Bozo", `What is Lorem Ipsum?
-    Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
-    
-    Why do we use it?
-    It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).
-    
-    
-    Where does it come from?
-    Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of "de Finibus Bonorum et Malorum" (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, "Lorem ipsum dolor sit amet..", comes from a line in section 1.10.32.
-    
-    The standard chunk of Lorem Ipsum used since the 1500s is reproduced below for those interested. Sections 1.10.32 and 1.10.33 from "de Finibus Bonorum et Malorum" by Cicero are also reproduced in their exact original form, accompanied by English versions from the 1914 translation by H. Rackham.
-    
-    Where can I get some?
-    There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't anything embarrassing hidden in the middle of text. All the Lorem Ipsum generators on the Internet tend to repeat predefined chunks as necessary, making this the first true generator on the Internet. It uses a dictionary of over 200 Latin words, combined with a handful of model sentence structures, to generate Lorem Ipsum which looks reasonable. The generated Lorem Ipsum is therefore always free from repetition, injected humour, or non-characteristic words etc.`)
+    this.uiInit();
 
-    // for (let i = 0; i < 1000; i++) {
+    // for (let i = 0; i < 1; i++) {
     //   this.sceneManager.createEntity({
     //     position: new Vec2(randomRange(-5, 5), randomRange(-5, 5)),
     //     size: new Vec2(randomRange(1, 2), randomRange(1, 2)),
     //     velocity: new Vec2(randomRange(-1, 1), randomRange(-1, 1)),
     //     color: `rgba(${randomRange(0, 255)}, ${randomRange(0, 255)}, ${randomRange(0, 255)}, 1)`,
-    //     collider: true
+    //     collider: false
     //   });
+    //   this.sceneManager.update(1 / this.options.frameRate, this.renderer.unitScale, this.renderer.canvas.width, this.renderer.canvas.height);
     // }
 
-    this.sceneManager.createEntity({ position: new Vec2(0, 0), collider: true });
-    // this.sceneManager.createEntity({ position: new Vec2(1, 1), camera: new Vec2(0, 0), collider: true });
-
     function resizeToFit(renderer, options) {
-      if (window.innerWidth > window.innerHeight) {
+      if (innerWidth > innerHeight) {
         renderer.setSize(options.resolution.width * innerHeight / options.resolution.height, innerHeight);
       } else {
         renderer.setSize(innerWidth, options.resolution.height * innerWidth / options.resolution.width);
@@ -91,21 +75,90 @@ export default class Engine {
 
     this.isLooping = true;
     this.loop();
-
-    this.sceneManager.update(1 / this.options.frameRate, this.renderer.unitScale, this.renderer.canvas.width, this.renderer.canvas.height);
   }
 
   loop() {
+    // draw only when not resizing
     if (this.isLooping) {
       this.renderer.clear();
-      // draw only when not resizing
       this.renderer.draw(this.sceneManager.getTransforms(), this.sceneManager.getColors());
     }
 
-    requestAnimationFrame(() => { this.loop(); });
-
     if (this.options.showQuadtree) {
       this.renderer.qtree.show(this.renderer.context);
+    }
+
+    this.uiUpdate();
+
+    requestAnimationFrame(() => { this.loop(); });
+  }
+
+  uiInit() {
+    if (this.options.debug) {
+      this.guiManager.create("Current_scene");
+      this.guiManager.draw("Current_scene");
+      this.guiManager.createContent({ id: "Current_scene", contentId: "sceneId", content: `id: ${this.sceneManager.getCurrentSceneId()}` })
+      this.guiManager.createContent({ id: "Current_scene", contentId: "name", content: `name: <span>${this.sceneManager.currentScene.name}</span>` });
+      this.guiManager.createContent({ id: "Current_scene", contentId: "entity_count", content: `entity count: <span>${this.sceneManager.currentEntityPool.count}</span>` });
+
+      this.guiManager.create("create_entity");
+      this.guiManager.draw("create_entity", 200);
+
+      // credit for grid style https://dev.to/dawnind/3-ways-to-display-two-divs-side-by-side-3d8b
+      // credit for input https://www.w3schools.com/tags/att_input_value.asp
+      this.guiManager.createContent({
+        id: "create_entity",
+        content:
+          `position:
+      <form style="display: grid; grid-template-columns: 1fr 1fr; grid-gap: 20px;">
+        <div>
+          <label for="x">x: </label>
+          <input type="number" name="x" value="0" id="x" style="width: 50px;"></input>
+        </div>
+        <div>
+          <label for="y">y: </label>
+          <input type="number" name="y" value="0" id="y" style="width: 50px;"></input>
+        </div>
+      </form>
+      </br>
+      size:
+      <form style="display: grid; grid-template-columns: 1fr 1fr; grid-gap: 20px;">
+        <div>
+          <label for="width">width: </label>
+          <input type="number" name="width" value="1" id="width" style="width: 50px;"></input>
+        </div>
+        <div>
+          <label for="height">height: </label>
+          <input type="number" name="height" value="1" id="height" style="width: 50px;"></input>
+        </div>
+      </form>
+      </br>
+      <button id="add-component">add component</button>
+      <input type="submit" id="create-entity" value="create entity"></input>`
+      });
+
+      const createEntityButton = document.querySelector("#create-entity");
+      // console.log(createEntityButton);
+      
+      createEntityButton.addEventListener("click", ()=> {
+        const x = parseInt(document.querySelector("#x").value);
+        const y = parseInt(document.querySelector("#y").value);
+        const w = parseInt(document.querySelector("#width").value);
+        const h = parseInt(document.querySelector("#height").value);
+        
+        this.sceneManager.createEntity({position: new Vec2(x, y), size: new Vec2(w, h)});
+        this.sceneManager.update(1 / this.options.frameRate, this.renderer.unitScale, this.renderer.canvas.width, this.renderer.canvas.height);
+      })
+      // this.guiManager.createContent({ id: "create_entity", contentId: "size", content: `size` });
+      // this.guiManager.createContent({ id: "create_entity", contentId: "velcocity", content: `velocity` });
+      // this.guiManager.createContent({ id: "create_entity", contentId: "color", content: `color` });
+      // this.guiManager.createContent({ id: "create_entity", contentId: "collider", content: `collider` });
+    }
+  }
+  uiUpdate() {
+    if (this.options.debug) {
+      this.guiManager.updateContent({ contentId: "name span", content: this.sceneManager.currentScene.name });
+      this.guiManager.updateContent({ contentId: "entity_count span", content: this.sceneManager.currentEntityPool.count });
     }
   }
 }

@@ -15,8 +15,8 @@ export default class Renderer2D extends Canvas2D {
 
   /**
    * sets resolution of canvas
-   * @param {Number} width 
-   * @param {Number} height 
+   * @param {number} width 
+   * @param {number} height 
    */
   setResolution(width, height) {
     this.canvas.width = width * this.pixelDensity;
@@ -25,6 +25,7 @@ export default class Renderer2D extends Canvas2D {
   }
 
   draw(transforms, colors) {
+    // console.log(transforms);
     for (let i = 0; i < transforms.length; i++) {
       const screenPosX = transforms[i][0];
       const screenPosY = transforms[i][1];
@@ -45,7 +46,7 @@ export default class Renderer2D extends Canvas2D {
 
   /**
    * 
-   * @param {Number} pixelDensity css pixel : canvas pixel ratio
+   * @param {number} pixelDensity css pixel : canvas pixel ratio
    */
   setPixelDensity(pixelDensity) {
     this.pixelDensity = pixelDensity;
@@ -55,7 +56,7 @@ export default class Renderer2D extends Canvas2D {
 
   /**
    * 
-   * @param {Number} scale pixels : unit scale ratio
+   * @param {number} scale pixels : unit scale ratio
    */
   setUnitScale(scale) {
     this.unitScale = scale * this.pixelDensity;

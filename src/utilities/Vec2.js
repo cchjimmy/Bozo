@@ -24,7 +24,7 @@ export default class Vec2 {
 
   /**
    * sets magnitude of current vec2
-   * @param {Number} scalar desire magnitude
+   * @param {number} scalar desire magnitude
    * @returns a vec2
    */
   setMag(scalar) {
@@ -62,7 +62,7 @@ export default class Vec2 {
 
   /**
    * sets direction of vec2 from positive x-axis in radians, regardless of original direction
-   * @param {Number} rad input angle in radians
+   * @param {number} rad input angle in radians
    * @returns a vec2
    */
   setDirn(rad) {

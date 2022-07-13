@@ -25,29 +25,32 @@ export default class GuiManager {
     }
   }
 
-  display(id = "", content = []) {
+  createContent({id = "", contentId = "", content}) {
     let mainContainer = this.get(id + "container");
 
-    if (!mainContainer || content == []) return;
+    if (!mainContainer || !content) return;
 
     let contentContainer = document.createElement("div");
-
+    if (contentId) {
+      contentContainer.id = contentId;
+    }
+    
+    contentContainer.classList.add("user-select");
     switch (typeof content) {
       case typeof "":
-        // console.log(typeof "");
-        contentContainer.innerText = content;
+        contentContainer.innerHTML = content;
         mainContainer.appendChild(contentContainer);
         break;
 
-  //     case typeof mainContainer:
-  //       console.log(typeof mainContainer, "mc");
-  //       if (content.classList.contains("empty")) {
-  //         console.warn("Cannot display a container within another container.");
-  //       } else {
-  //         contentContainer.appendChild(content);
-  //         mainContainer.appendChild(contentContainer);
-  //       }
-  //       break;
+      //     case typeof mainContainer:
+      //       console.log(typeof mainContainer, "mc");
+      //       if (content.classList.contains("empty")) {
+      //         console.warn("Cannot display a container within another container.");
+      //       } else {
+      //         contentContainer.appendChild(content);
+      //         mainContainer.appendChild(contentContainer);
+      //       }
+      //       break;
 
       default:
         contentContainer.appendChild(content);
@@ -107,6 +110,13 @@ export default class GuiManager {
 
     guis.push(empty)
     dragElement(empty);
+  }
+
+  updateContent({contentId= "", content}) {
+    let contentContainer = this.get(contentId);
+    if (contentContainer) {
+      contentContainer.innerHTML = content;
+    }
   }
 
   remove(id = "") {
@@ -199,6 +209,12 @@ export default class GuiManager {
   //   docking(wrapper);
   // }
 
+  /**
+   * 
+   * @param {string} id 
+   * @param {string} name 
+   * @param {function} callback 
+   */
   addOption(id = "", name = "", callback) {
     let wrapper = document.createElement("div");
     wrapper.style.display = "flex";
@@ -227,6 +243,8 @@ export default class GuiManager {
   //   this.setTheme("dark");
   //   this.create("test");
   //   this.draw("test");
+
+  //   credit for the text https://www.lipsum.com
   //   this.display("test", `What is Lorem Ipsum?
   //   Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
 

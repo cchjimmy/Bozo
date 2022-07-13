@@ -7,8 +7,8 @@ export default class Canvas2D {
 
   /**
    * sets resolution of canvas
-   * @param {Number} width 
-   * @param {Number} height 
+   * @param {number} width 
+   * @param {number} height 
    */
   setResolution(width, height) {
     this.canvas.width = width;
@@ -17,8 +17,8 @@ export default class Canvas2D {
 
   /**
    * sets drawn size of canvas
-   * @param {Number} width 
-   * @param {Number} height 
+   * @param {number} width 
+   * @param {number} height 
    */
   setSize(width, height) {
     this.canvas.style.width = `${width}px`;

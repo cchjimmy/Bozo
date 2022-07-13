@@ -1,6 +1,6 @@
 import uuidv4 from "./utilities/uuidv4.js";
 import EntityManager from "./EntityManager.js";
-import ControlManager from "./ControlManager.js";
+// import ControlManager from "./ControlManager.js";
 
 export default class SceneManager extends EntityManager {
   constructor() {
@@ -8,21 +8,29 @@ export default class SceneManager extends EntityManager {
     this.scenes = {};
     this.currentScene = this.createScene();
     this.currentEntityPool = this.createEntityPool(this.getCurrentSceneId());
-    this.controlManager = new ControlManager;
-    this.webWorker = new Worker("./src/SMWebWorker.js");
+    // this.controlManager = new ControlManager;
+    this.webWorker = new Worker("./src/SMWebWorker.js", { type: "module" });
     this.transforms = [];
     this.colors = [];
   }
 
-  createScene() {
+  createScene(name = "new_scene") {
     let id = uuidv4();
-    let scene = { id };
+    let scene = { id, name: name };
     this.scenes[id] = scene;
     return scene;
   }
 
   update(timeStep, unitScale, canvasWidth, canvasHeight) {
-    this.webWorker.postMessage({ timeStep, components: this.components, entityIds: this.getEntityIds(), unitScale, canvasWidth, canvasHeight, name: "newProperties" });
+    this.webWorker.postMessage({
+      timeStep,
+      components: this.components,
+      entityIds: this.getEntityIds(),
+      unitScale,
+      canvasWidth,
+      canvasHeight,
+      name: "newProperties"
+    });
     this.webWorker.onmessage = (e) => {
       this.components = e.data.components;
       this.transforms = e.data.transforms;

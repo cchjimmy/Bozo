@@ -49,19 +49,22 @@
 
   resize: both;
 }
-
+.container div {
+  padding: 5px;
+  box-sizing: border-box;
+  user-select: text;
+}
 .container {
   width: calc(100% - var(--scrollbar-width));
   height: calc(100% - var(--title-bar-height));
-  padding: 5px;
 
   /* https://melvingeorge.me/blog/avoid-height-width-increase-when-using-margin-padding-outline-on-html-element-tags */
-  box-sizing: border-box;
 
   color: var(--secondary-text-color);
   overflow-y: auto;
   overflow-x: hidden;
 
+  /* user-select: all; */
   /* https://css-tricks.com/scrollbars-on-hover/ */
   /* mask-image: linear-gradient(to top, transparent, black),
     linear-gradient(to left, transparent var(--scrollbar-width), black var(--scrollbar-width));

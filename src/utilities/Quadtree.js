@@ -1,5 +1,5 @@
 /**
- * @param boundary { centerX, centerY, halfWidth, halfHeight }
+ * @param {object} boundary { centerX, centerY, halfWidth, halfHeight }
  */
 export default class Quadtree {
   constructor(boundary, capacity = 10, maxLevel = 10) {
@@ -13,7 +13,7 @@ export default class Quadtree {
 
   /**
    * inserts an object into quadtree
-   * @param {Object} object { centerX, centerY, halfWidth, halfHeight }
+   * @param {object} object { centerX, centerY, halfWidth, halfHeight }
    * @returns 
    */
   insert(object) {
@@ -50,7 +50,7 @@ export default class Quadtree {
 
   /**
    * returns an array of indices indicating the subnodes the object overlaps
-   * @param {Object} object { centerX, centerY, halfWidth, halfHeight }
+   * @param {object} object { centerX, centerY, halfWidth, halfHeight }
    * @returns an array
    */
   getIndex(object) {
@@ -105,7 +105,7 @@ export default class Quadtree {
 
   /**
    * return objects contained within boundaries that overlap with the query object
-   * @param {Object} object { centerX, centerY, halfWidth, halfHeight }
+   * @param {object} object { centerX, centerY, halfWidth, halfHeight }
    * @param {CanvasRenderingContext2D} context 
    * @returns an array
    */
@@ -152,7 +152,7 @@ export default class Quadtree {
 
   /**
    * checks if an object is contained within a boundary
-   * @param {Object} object { centerX, centerY, halfWidth, halfHeight }
+   * @param {object} object { centerX, centerY, halfWidth, halfHeight }
    * @returns boolean
    */
   contains(object) {
