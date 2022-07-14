@@ -14,8 +14,8 @@ onmessage = (e) => {
       pos.y += vel.y * e.data.timeStep;
 
       transforms.push(
-        [Math.floor(pos.x * e.data.unitScale + e.data.canvasWidth / 2 - (size.x * e.data.unitScale) / 2), // screen pos x
-        Math.floor(-pos.y * e.data.unitScale + e.data.canvasHeight / 2 - (size.y * e.data.unitScale) / 2), // screen pos y
+        [Math.floor(pos.x * e.data.unitScale - (size.x * e.data.unitScale) / 2), // screen pos x
+        Math.floor(-pos.y * e.data.unitScale - (size.y * e.data.unitScale) / 2), // screen pos y
         Math.floor(size.x * e.data.unitScale), // screen size x
         Math.floor(size.y * e.data.unitScale)] // screen size y
       );

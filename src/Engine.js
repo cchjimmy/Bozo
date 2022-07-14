@@ -44,6 +44,8 @@ export default class Engine {
     this.renderer.setUnitScale(this.options.unitScale);
     this.renderer.setPixelDensity(this.options.pixelDensity);
     this.renderer.setSize(innerWidth, "100%");
+    
+    this.renderer.context.translate(this.renderer.canvas.width/2, this.renderer.canvas.height/2)
 
     this.guiInit();
 
