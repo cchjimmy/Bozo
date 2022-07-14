@@ -9,6 +9,8 @@ export default class Renderer2D extends Canvas2D {
 
     this.pixelDensity = 1;
     this.unitScale = 50;
+
+    this.oldTransforms = [];
   }
 
   /**
@@ -29,11 +31,14 @@ export default class Renderer2D extends Canvas2D {
       this.context.fillRect(transforms[i][0], transforms[i][1], transforms[i][2], transforms[i][3]);
       this.context.restore();
     }
+    this.oldTransforms = transforms;
   }
 
   clear() {
+    for (let i = 0; i < this.oldTransforms.length; i++) {
+      this.context.clearRect(this.oldTransforms[i][0], this.oldTransforms[i][1], this.oldTransforms[i][2], this.oldTransforms[i][3]);
+    }
     this.qtree.clear();
-    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
   /**

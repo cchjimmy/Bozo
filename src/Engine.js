@@ -11,7 +11,7 @@ import AudioManager from "./AudioManager.js";
 export default class Engine {
   constructor(options = {
     resolution: { width: 800, height: 600 },
-    pixelDensity: 1 / 4,
+    pixelDensity: 1 /2,
     unitScale: 30,
     frameRate: 30,
     showFps: true,
@@ -51,16 +51,16 @@ export default class Engine {
       this.guiUpdate();
     }, 1000 / this.options.frameRate);
 
-    // for (let i = 0; i < 500; i++) {
-    //   this.sceneManager.createEntity({
-    //     position: new Vec2(randomRange(-5, 5), randomRange(-5, 5)),
-    //     size: new Vec2(randomRange(1, 2), randomRange(1, 2)),
-    //     velocity: new Vec2(randomRange(-1, 1), randomRange(-1, 1)),
-    //     color: `rgba(${randomRange(0, 255)}, ${randomRange(0, 255)}, ${randomRange(0, 255)}, 1)`,
-    //     collider: false
-    //   });
-    //   this.sceneManager.update(1 / this.options.frameRate, this.renderer.unitScale, this.renderer.canvas.width, this.renderer.canvas.height);
-    // }
+    for (let i = 0; i < 1000; i++) {
+      this.sceneManager.createEntity({
+        position: new Vec2(randomRange(-5, 5), randomRange(-5, 5)),
+        size: new Vec2(randomRange(1, 2), randomRange(1, 2)),
+        velocity: new Vec2(randomRange(-1, 1), randomRange(-1, 1)),
+        color: `rgba(${randomRange(0, 255)}, ${randomRange(0, 255)}, ${randomRange(0, 255)}, 1)`,
+        collider: false
+      });
+      this.sceneManager.update(1 / this.options.frameRate, this.renderer.unitScale, this.renderer.canvas.width, this.renderer.canvas.height);
+    }
 
     window.onresize = () => {
       this.isLooping = false;
