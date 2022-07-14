@@ -16,7 +16,8 @@ export default class Engine {
     frameRate: 30,
     showFps: true,
     showQuadtree: false,
-    dev: true
+    dev: true,
+    uiTheme: "dark"
   }) {
     this.options = {};
     if (options) {
@@ -44,10 +45,10 @@ export default class Engine {
     this.renderer.setPixelDensity(this.options.pixelDensity);
     this.renderer.setSize(innerWidth, "100%");
 
-    this.uiInit();
+    this.guiInit();
 
     setInterval(() => {
-      this.uiUpdate();
+      this.guiUpdate();
     }, 1000 / this.options.frameRate);
 
     // for (let i = 0; i < 500; i++) {
@@ -59,14 +60,6 @@ export default class Engine {
     //     collider: false
     //   });
     //   this.sceneManager.update(1 / this.options.frameRate, this.renderer.unitScale, this.renderer.canvas.width, this.renderer.canvas.height);
-    // }
-
-    // function resizeToFit(renderer, options) {
-    //   if (innerWidth > innerHeight) {
-    //     renderer.setSize(options.resolution.width * innerHeight / options.resolution.height, innerHeight);
-    //   } else {
-    //     renderer.setSize(innerWidth, options.resolution.height * innerWidth / options.resolution.width);
-    //   }
     // }
 
     window.onresize = () => {
@@ -94,12 +87,18 @@ export default class Engine {
     requestAnimationFrame(() => { this.loop(); });
   }
 
-  uiInit() {
+  guiInit() {
+    this.guiManager.setTheme(this.options.uiTheme);
+    document.body.style.overflow = "hidden";
     this.renderer.showCanvas();
     if (this.options.dev) {
-      document.body.style.overflowY="auto";
-      document.body.style.overflowX="hidden";
-      // this.guiManager.create("toolbar");
+      document.body.style.overflowY = "scroll";
+
+      this.guiManager.add("body", `
+      <div class="scrollmenu">
+        <a>Current_scene</a>
+        <a>entityManager</a>
+      </div>`);
 
       this.guiManager.create("Current_scene");
 
@@ -116,12 +115,12 @@ export default class Engine {
         entity count: <span></span>
       <div>`);
 
-      this.guiManager.create("Inspector");
+      this.guiManager.create("entityManager");
 
       // // // credit for grid style https://dev.to/dawnind/3-ways-to-display-two-divs-side-by-side-3d8b
       // // // credit for input https://www.w3schools.com/tags/att_input_value.asp
       this.guiManager.add(
-        "#Inspectorcontainer",
+        "#entityManagercontainer",
         `position:
           <div style="display: grid; grid-template-columns: 1fr 1fr; grid-gap: 20px;">
             <div>
@@ -161,7 +160,7 @@ export default class Engine {
         if (!navigator.clipboard) {
           return console.warn("Unable to copy scene id");
         }
-        let text = this.guiManager.get("sceneId span").innerHTML;
+        let text = this.guiManager.get("#sceneId span").innerHTML;
         navigator.clipboard.writeText(text);
       })
 
@@ -186,14 +185,10 @@ export default class Engine {
       // addComponentButton.addEventListener("click", ()=> {
 
       // })
-      // // this.guiManager.createContent({ id: "create_entity", contentId: "size", content: `size` });
-      // // this.guiManager.createContent({ id: "create_entity", contentId: "velcocity", content: `velocity` });
-      // // this.guiManager.createContent({ id: "create_entity", contentId: "color", content: `color` });
-      // // this.guiManager.createContent({ id: "create_entity", contentId: "collider", content: `collider` });
       return;
     }
   }
-  uiUpdate() {
+  guiUpdate() {
     if (this.options.dev) {
       this.guiManager.update("#sceneId span", this.sceneManager.getCurrentSceneId());
       this.guiManager.update("#name span", this.sceneManager.currentScene.name);

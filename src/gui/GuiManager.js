@@ -4,7 +4,6 @@
 
 export default class GuiManager {
   constructor() {
-    this.setTheme("dark");
   }
 
   setTheme(theme = "") {
@@ -39,7 +38,6 @@ export default class GuiManager {
   }
 
   create(name = "") {
-    console.log(this.get("body"));
     this.add("body", `
     <div id="${name}" class="empty">
       <div id="${name+"header"}" class="header">${name}</div>
