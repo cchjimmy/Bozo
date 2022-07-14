@@ -9,8 +9,6 @@ export default class Renderer2D extends Canvas2D {
 
     this.pixelDensity = 1;
     this.unitScale = 50;
-
-    // this.webWorker = new Worker("./src/R2DWebWorker.js");
   }
 
   /**
@@ -26,14 +24,9 @@ export default class Renderer2D extends Canvas2D {
 
   draw(transforms, colors) {
     for (let i = 0; i < transforms.length; i++) {
-      const screenPosX = transforms[i][0];
-      const screenPosY = transforms[i][1];
-      const screenSizeX = transforms[i][2];
-      const screenSizeY = transforms[i][3];
-
       this.context.save();
       this.context.fillStyle = colors[i];
-      this.context.fillRect(screenPosX, screenPosY, screenSizeX, screenSizeY);
+      this.context.fillRect(transforms[i][0], transforms[i][1], transforms[i][2], transforms[i][3]);
       this.context.restore();
     }
   }

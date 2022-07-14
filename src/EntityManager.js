@@ -25,12 +25,10 @@ export default class EntitiesManager {
       color: "white",
       collider: false,
       camera: false
-    };
+    }
 
-    if (components) {
-      for (let component in components) {
-        comp[component] = components[component];
-      }
+    for (let component in components) {
+      comp[component] = components[component];
     }
 
     for (let component in comp) {
@@ -39,7 +37,6 @@ export default class EntitiesManager {
       }
       this.components[component][id] = comp[component];
     }
-
     return entity;
   }
 

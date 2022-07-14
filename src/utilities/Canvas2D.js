@@ -34,4 +34,8 @@ export default class Canvas2D {
   showCanvas() {
     document.body.appendChild(this.canvas);
   }
+
+  removeCanvas() {
+    document.body.removeChild(this.canvas);
+  }
 }
