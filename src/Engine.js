@@ -94,22 +94,25 @@ export default class Engine {
     this.guiManager.setTheme(this.options.uiTheme);
 
     this.guiManager.add("body", `<table id="table"></table>`);
-    this.guiManager.add("#table", `<tbody id="canvas-container"><tr><td></td></tr></tbody>`)
-    this.renderer.showCanvas("#canvas-container td");
+    this.guiManager.add("#table", `<tr><td id='canvas-container'></td></tr>`)
+    this.renderer.showCanvas("#canvas-container");
     if (this.options.dev) {
       // credit for clipboard icon https://www.w3schools.com/icons/tryit.asp?filename=tryicons_fa-clipboard
       // credit for grid style https://dev.to/dawnind/3-ways-to-display-two-divs-side-by-side-3d8b
       // credit for input https://www.w3schools.com/tags/att_input_value.asp
       this.guiManager.add("#table", `
-      <tbody class="scrollmenu header">
+      <tr class="scrollmenu header">
         <th id="tab">current-scene-info</th>
         <th id="tab">entity-spawner</th>
-      </tbody>
+      </tr>
         `);
+        
+      this.guiManager.add('#table', `<tr id="ui-container"></tr>`)
 
       //id="current-scene-info"
-      this.guiManager.add("#table", `
-      <tbody id="current-scene-info" style="display: none;">
+      this.guiManager.add("#ui-container", `
+      <td>
+      <table id="current-scene-info" style="display: none;">
         <tr class="container"><td id="scene-id">
             id: <span></span><button id="scene-id-clipboard-button" style="float:right"><i class="fa fa-clipboard"></i></button>
         </td></tr>
@@ -121,11 +124,13 @@ export default class Engine {
         <tr class="container"><td id="entity-count">
             entity count: <span></span>
         </td></tr>
-      </tbody>`);
+      </table>
+      </td>`);
 
       //id="entity-spawner"
-      this.guiManager.add("#table", `
-      <tbody id="entity-spawner" style="display: none;">
+      this.guiManager.add("#ui-container", `
+      <td>
+      <table id="entity-spawner" style="display: none;">
         <tr class="container"><td>
             position:
         </td></tr>
@@ -168,29 +173,26 @@ export default class Engine {
               <button id="create-entity">create entity</button>
             </div>
         </td></tr>
-      </tbody>`);
+      </table>
+      </td>`);
 
       const tabs = document.querySelectorAll("#tab");
 
-      var currentMenu;
       var lastMenu;
       var currentMenuHTML;
       for (let i = 0; i < tabs.length; i++) {
         tabs[i].addEventListener("click", () => {
-          currentMenu = tabs[i].innerHTML;
-          if (currentMenu == "current-scene-info") {
-            // const clipboardButton = document.querySelector("#scene-id-clipboard-button");
-            // clipboardButton.addEventListener("click", copySceneId);
-            currentMenuHTML = this.guiManager.get("#" + currentMenu);
-          }
-          if (currentMenu == "entity-spawner") {
-            currentMenuHTML = this.guiManager.get("#" + currentMenu);
-          }
+        
+          // const clipboardButton = document.querySelector("#scene-id-clipboard-button");
+          // clipboardButton.addEventListener("click", copySceneId);
+          
+          currentMenuHTML = this.guiManager.get("#" + tabs[i].innerHTML);
+          
           if (lastMenu && lastMenu != currentMenuHTML) {
             lastMenu.setAttribute("style", "display: none;");
           }
           if (currentMenuHTML.style.display === "none") {
-            currentMenuHTML.setAttribute("style", "display: table-row; height: auto; overflow-y: scroll;");
+            currentMenuHTML.setAttribute("style", "display: table; overflow-y: scroll;");
           } else {
             currentMenuHTML.setAttribute("style", "display: none;");
           }

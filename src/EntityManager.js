@@ -32,7 +32,7 @@ export default class EntitiesManager {
     }
 
     for (let component in comp) {
-      if (!this.components[this.currentEntityPool.id]) {
+    if (!this.components[this.currentEntityPool.id]) {
         this.components[this.currentEntityPool.id] = {}
       }
       if (!this.components[this.currentEntityPool.id][component]) {
