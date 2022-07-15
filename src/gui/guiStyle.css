@@ -8,8 +8,6 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  /* border: 4px solid rgba(0, 0, 0, 0);
-  background-clip: padding-box; */
   border-radius: 9999px;
   background-color: var(--secondary-text-color);
 }
@@ -20,8 +18,7 @@
 
 .dark {
   --body-background-color: black;
-  /* --background-color: #121212;*/
-  --background-color: rgba(10, 10, 10, 0.8);
+  --background-color: rgb(20, 20, 20);
   --header-color: #181818;
   --primary-text-color: #FFFFFF;
   --secondary-text-color: #B3B3B3;
@@ -29,12 +26,10 @@
 
 :root {
   --scrollbar-width: 4px;
-  /* --scrollbar-width: 10px; */
   --title-bar-height: 25px;
 
   --body-background-color: white;
-  /* --background-color: white; */
-  --background-color: rgba(255, 255, 255, 0.8);
+  --background-color: rgb(220, 220, 220);
   --header-color: white;
   --primary-text-color: black;
   --secondary-text-color: rgba(50, 50, 50);
@@ -44,56 +39,33 @@ body {
   background-color: var(--body-background-color);
 }
 
-.empty {
-  /* position: absolute; */
-  min-width: 100px;
-  min-height: 25px;
-  /* display: none; */
-  outline: 1px solid gray;
-  overflow: hidden;
-  background-color: var(--background-color);
-}
-.container div {
+tr.container td {
   padding: 5px;
   box-sizing: border-box;
-}
-.container {
-  width: 100%;
-  height: calc(100% - var(--title-bar-height));
-
-  /* https://melvingeorge.me/blog/avoid-height-width-increase-when-using-margin-padding-outline-on-html-element-tags */
-
   color: var(--secondary-text-color);
-  overflow-y: auto;
-  overflow-x: hidden;
-
-  /* https://css-tricks.com/scrollbars-on-hover/ */
-  /* mask-image: linear-gradient(to top, transparent, black),
-    linear-gradient(to left, transparent var(--scrollbar-width), black var(--scrollbar-width));
-  mask-size: 100% 20000px;
-  mask-position: left bottom;
-  -webkit-mask-image: linear-gradient(to top, transparent, black),
-    linear-gradient(to left, transparent var(--scrollbar-width), black var(--scrollbar-width));
-  -webkit-mask-size: 100% 20000px;
-  -webkit-mask-position: left bottom;
-  transition: mask-position 0.3s, -webkit-mask-position 0.3s; */
+  background-color: var(--background-color);
 }
 
-/* .container:hover {
-  -webkit-mask-position: left top;
-  mask-position: left top;
-} */
+tbody {
+  overflow-y: scroll;
+}
+
+table {
+  width: 100%;
+  height: 100%;
+  border-spacing: 0px;
+  border-collapse: collapse;
+}
 
 .header {
-  /* display: flex; */
   align-items: center;
 
   box-sizing: border-box;
 
   padding: 0px 3px;
   border-bottom: 1px solid gray;
+  border-top: 1px solid gray;
   height: var(--title-bar-height);
-  width: 100%;
   background-color: var(--header-color);
   color: var(--primary-text-color);
 }
@@ -120,20 +92,6 @@ body {
   color: var(--primary-text-color);
 }
 
-/* .dock-box {
-  background-color: gray;
-  display: flex;
-  transition: background-color 0.3s;
-}
-
-.dock-box-container {
-  display: flex;
-  height: 100%;
-  width: 100%;
-  border: 1px solid orange;
-  box-sizing: border-box;
-} */
-
 .resizer {
   background-color: #cbd5e0;
   cursor: col-resize;
@@ -150,20 +108,32 @@ body {
 }
 
 /* credit: https://www.w3schools.com/howto/howto_css_menu_horizontal_scroll.asp */
-div.scrollmenu {
-  background-color: #333;
+tbody.scrollmenu {
+  background-color: var(--background-color);
   overflow: auto;
   white-space: nowrap;
 }
 
-div.scrollmenu a {
+tbody.scrollmenu th {
   display: inline-block;
-  color: white;
+  color: var(--primary-text-color);
   text-align: center;
   padding: 10px;
   text-decoration: none;
 }
 
-div.scrollmenu a:hover {
+tbody.scrollmenu th:hover {
   background-color: #777;
+}
+
+.sticky {
+  position: -webkit-sticky; /* Safari */
+  position: sticky;
+  top: 0;
+}
+
+/* credit: https://stackoverflow.com/questions/2279396/how-to-remove-unwanted-space-between-rows-and-columns-in-table */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
 }

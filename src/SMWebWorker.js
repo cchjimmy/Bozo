@@ -6,10 +6,10 @@ onmessage = (e) => {
   intervalId = setInterval(() => {
     var transforms = [];
     var colors = [];
-    for (let i = 0; i < e.data.entityIds.length; i++) {
-      let pos = e.data.components.position[e.data.entityIds[i]];
-      let vel = e.data.components.velocity[e.data.entityIds[i]];
-      let size = e.data.components.size[e.data.entityIds[i]];
+    for (let entity in e.data.components.velocity) {
+      let pos = e.data.components.position[entity];
+      let vel = e.data.components.velocity[entity];
+      let size = e.data.components.size[entity];
       pos.x += vel.x * e.data.timeStep;
       pos.y += vel.y * e.data.timeStep;
 
@@ -19,7 +19,7 @@ onmessage = (e) => {
         Math.floor(size.x * e.data.unitScale), // screen size x
         Math.floor(size.y * e.data.unitScale)] // screen size y
       );
-      colors.push(e.data.components.color[e.data.entityIds[i]]);
+      colors.push(e.data.components.color[entity]);
     }
     postMessage({ transforms, colors });
   }, e.data.timeStep * 1000);

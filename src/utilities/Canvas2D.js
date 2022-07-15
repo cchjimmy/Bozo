@@ -31,11 +31,10 @@ export default class Canvas2D {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
-  showCanvas() {
-    document.body.appendChild(this.canvas);
-  }
-
-  removeCanvas() {
-    document.body.removeChild(this.canvas);
+  showCanvas(parentSelector) {
+    let parent = document.querySelector(parentSelector);
+    if (parent) {
+      parent.appendChild(this.canvas);
+    }
   }
 }
