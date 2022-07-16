@@ -106,12 +106,10 @@ export default class Engine {
         <th id="tab">entity-spawner</th>
       </tr>
         `);
-        
-      this.guiManager.add('#table', `<tr id="ui-container"></tr>`)
 
       //id="current-scene-info"
-      this.guiManager.add("#ui-container", `
-      <td>
+      this.guiManager.add("#table", `
+      <tr><td>
       <table id="current-scene-info" style="display: none;">
         <tr class="container"><td id="scene-id">
             id: <span></span><button id="scene-id-clipboard-button" style="float:right"><i class="fa fa-clipboard"></i></button>
@@ -125,10 +123,10 @@ export default class Engine {
             entity count: <span></span>
         </td></tr>
       </table>
-      </td>`);
+      </td></tr>`);
 
       //id="entity-spawner"
-      this.guiManager.add("#ui-container", `
+      this.guiManager.add("#table", `
       <td>
       <table id="entity-spawner" style="display: none;">
         <tr class="container"><td>
@@ -148,7 +146,7 @@ export default class Engine {
             </div>
         </td></tr>
 
-        <tr class="container"><td></br></td></tr>
+        <tr class="container"><td><br></td></tr>
 
         <tr class="container"><td>
             size:
@@ -174,7 +172,7 @@ export default class Engine {
             </div>
         </td></tr>
       </table>
-      </td>`);
+      </td></tr>`);
 
       const tabs = document.querySelectorAll("#tab");
 
