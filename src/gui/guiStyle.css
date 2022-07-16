@@ -1,14 +1,14 @@
 /* https://www.w3schools.com/howto/howto_css_custom_scrollbar.asp */
 ::-webkit-scrollbar-track {
-  background-color: transparent;
+  background-color: var(--background-color);
 }
 
 ::-webkit-scrollbar {
   width: var(--scrollbar-width);
+  height: var(--scrollbar-height);
 }
 
 ::-webkit-scrollbar-thumb {
-  border-radius: 9999px;
   background-color: var(--secondary-text-color);
 }
 
@@ -26,6 +26,7 @@
 
 :root {
   --scrollbar-width: 4px;
+  --scrollbar-height: 4px;
   --title-bar-height: 25px;
 
   --body-background-color: white;
@@ -61,7 +62,7 @@ table {
   padding: 0px 3px;
   border-bottom: 1px solid gray;
   border-top: 1px solid gray;
-  height: var(--title-bar-height);
+  /* height: var(--title-bar-height); */
   background-color: var(--header-color);
   color: var(--primary-text-color);
 }
@@ -104,21 +105,32 @@ table {
 }
 
 /* credit: https://www.w3schools.com/howto/howto_css_menu_horizontal_scroll.asp */
-tr.scrollmenu {
+.scrollmenu {
   background-color: var(--background-color);
   overflow: auto;
   white-space: nowrap;
+  position: fixed;
+  width: 100%;
+  bottom: 0px;
+  /* width: inherit; */
 }
 
-tr.scrollmenu th {
+.scrollmenu div {
   display: inline-block;
   color: var(--primary-text-color);
   text-align: center;
-  padding: 10px;
+  padding: 7px;
+  margin: 7px;
   text-decoration: none;
 }
 
-tr.scrollmenu th:hover {
+.scrollmenu div:hover {
+  border-radius: 9999px;
+  background-color: #777;
+}
+
+.scrollmenu div.active {
+  border-radius: 9999px;
   background-color: #777;
 }
 
@@ -128,8 +140,21 @@ tr.scrollmenu th:hover {
   top: 0;
 }
 
-/* credit: https://stackoverflow.com/questions/2279396/how-to-remove-unwanted-space-between-rows-and-columns-in-table */
+.fill {
+  flex-grow: 1;
+}
+
+/* credit: https://stackoverflow.com/questions/37369716/how-to-keep-a-tables-height-contained-within-a-parent-div */
+.table-container {
+  position: fixed;
+  bottom: 45px;
+  height: 185px;
+  overflow: auto;
+}
+
 table {
+  table-layout: fixed;
+  height: 100%;
   border-collapse: collapse;
   border-spacing: 0;
 }

@@ -29,10 +29,10 @@ export default class Engine {
 
     this.sceneManager = new SceneManager;
     this.renderer = new Renderer2D;
-    this.assetManager = new AssetManager;
-    this.cameraManager = new CameraManager;
+    // this.assetManager = new AssetManager;
+    // this.cameraManager = new CameraManager;
     this.guiManager = new GuiManager;
-    this.audioManager = new AudioManager;
+    // this.audioManager = new AudioManager;
   }
 
   init() {
@@ -54,21 +54,21 @@ export default class Engine {
       this.guiUpdate();
     }, 1000 / this.options.frameRate);
 
-    for (let i = 0; i < 100; i++) {
-      this.sceneManager.createEntity({
-        position: new Vec2(randomRange(-5, 5), randomRange(-5, 5)),
-        size: new Vec2(randomRange(1, 2), randomRange(1, 2)),
-        velocity: new Vec2(randomRange(-1, 1), randomRange(-1, 1)),
-        color: `rgba(${randomRange(0, 255)}, ${randomRange(0, 255)}, ${randomRange(0, 255)}, 1)`,
-        collider: false
-      });
-      this.sceneManager.update(1 / this.options.frameRate, this.renderer.unitScale, this.renderer.canvas.width, this.renderer.canvas.height);
-    }
+    // for (let i = 0; i < 100; i++) {
+    //   this.sceneManager.createEntity({
+    //     position: new Vec2(randomRange(-5, 5), randomRange(-5, 5)),
+    //     size: new Vec2(randomRange(1, 2), randomRange(1, 2)),
+    //     velocity: new Vec2(randomRange(-1, 1), randomRange(-1, 1)),
+    //     color: `rgba(${randomRange(0, 255)}, ${randomRange(0, 255)}, ${randomRange(0, 255)}, 1)`,
+    //     collider: false
+    //   });
+    //   this.sceneManager.update(1 / this.options.frameRate, this.renderer.unitScale, this.renderer.canvas.width, this.renderer.canvas.height);
+    // }
 
     window.onresize = () => {
       this.isLooping = false;
       debounce(() => {
-        this.renderer.setSize(innerWidth, this.renderer.height * innerWidth / this.renderer.width);
+        // this.renderer.setSize(innerWidth, this.renderer.height * innerWidth / this.renderer.width);
         this.isLooping = true;
       }, 200);
     }
@@ -92,25 +92,13 @@ export default class Engine {
 
   guiInit() {
     this.guiManager.setTheme(this.options.uiTheme);
-
-    this.guiManager.add("body", `<table id="table"></table>`);
-    this.guiManager.add("#table", `<tr><td id='canvas-container'></td></tr>`)
-    this.renderer.showCanvas("#canvas-container");
+    // this.guiManager.add("body", `<div id="canvas-container"></div>`)
+    this.renderer.showCanvas("body");
     if (this.options.dev) {
-      // credit for clipboard icon https://www.w3schools.com/icons/tryit.asp?filename=tryicons_fa-clipboard
-      // credit for grid style https://dev.to/dawnind/3-ways-to-display-two-divs-side-by-side-3d8b
-      // credit for input https://www.w3schools.com/tags/att_input_value.asp
-      this.guiManager.add("#table", `
-      <tr class="scrollmenu header">
-        <th id="tab">current-scene-info</th>
-        <th id="tab">entity-spawner</th>
-      </tr>
-        `);
-
       //id="current-scene-info"
-      this.guiManager.add("#table", `
-      <tr><td>
-      <table id="current-scene-info" style="display: none;">
+      this.guiManager.add("body", `
+      <div class="table-container" id="current-scene-info" style="display: none;">
+      <table>
         <tr class="container"><td id="scene-id">
             id: <span></span><button id="scene-id-clipboard-button" style="float:right"><i class="fa fa-clipboard"></i></button>
         </td></tr>
@@ -123,114 +111,139 @@ export default class Engine {
             entity count: <span></span>
         </td></tr>
       </table>
-      </td></tr>`);
+      `);
 
       //id="entity-spawner"
-      this.guiManager.add("#table", `
-      <td>
-      <table id="entity-spawner" style="display: none;">
-        <tr class="container"><td>
-            position:
-        </td></tr>
+      this.guiManager.add("body", `
+      <div class="table-container" id="entity-spawner" style="display: none;">
+          <table>
+            <tr class="container">
+              <td>
+                position:
+              </td>
+            </tr>
 
-        <tr class="container"><td>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-              <div>
-                <label for="x">x: </label>
-                <input type="number" name="x" value="0" id="x" style="width: 50px;"></input>
-              </div>
-              <div>
-                <label for="y">y: </label>
-                <input type="number" name="y" value="0" id="y" style="width: 50px;"></input>
-              </div>
-            </div>
-        </td></tr>
+            <tr class="container">
+              <td>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                  <div>
+                    <label for="x">x: </label>
+                    <input type="number" name="x" value="0" id="x" style="width: 50px;"></input>
+                  </div>
+                  <div>
+                    <label for="y">y: </label>
+                    <input type="number" name="y" value="0" id="y" style="width: 50px;"></input>
+                  </div>
+                </div>
+              </td>
+            </tr>
 
-        <tr class="container"><td><br></td></tr>
+            <tr class="container">
+              <td><br></td>
+            </tr>
 
-        <tr class="container"><td>
-            size:
-        </td></tr>
+            <tr class="container">
+              <td>
+                size:
+              </td>
+            </tr>
 
-        <tr class="container"><td>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-              <div>
-                <label for="width">width: </label>
-                <input type="number" name="width" value="1" id="w" style="width: 50px;"></input>
-              </div>
-              <div>
-                <label for="height">height: </label>
-                <input type="number" name="height" value="1" id="h" style="width: 50px;"></input>
-              </div>
-            </div>
-        </td></tr>
+            <tr class="container">
+              <td>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                  <div>
+                    <label for="width">width: </label>
+                    <input type="number" name="width" value="1" id="width" style="width: 50px;"></input>
+                  </div>
+                  <div>
+                    <label for="height">height: </label>
+                    <input type="number" name="height" value="1" id="height" style="width: 50px;"></input>
+                  </div>
+                </div>
+              </td>
+            </tr>
 
-        <tr class="container"><td>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-              <button id="add-component">add component</button>
-              <button id="create-entity">create entity</button>
-            </div>
-        </td></tr>
-      </table>
-      </td></tr>`);
+            <tr class="container">
+              <td>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                  <button id="add-component">add component</button>
+                  <button id="create-entity">create entity</button>
+                </div>
+              </td>
+            </tr>
+          </table>
+          </div>`);
 
-      const tabs = document.querySelectorAll("#tab");
+      // credit for clipboard icon https://www.w3schools.com/icons/tryit.asp?filename=tryicons_fa-clipboard
+      // credit for grid style https://dev.to/dawnind/3-ways-to-display-two-divs-side-by-side-3d8b
+      // credit for input https://www.w3schools.com/tags/att_input_value.asp
+      this.guiManager.add("body", `
+
+      <div class="scrollmenu">
+        <div class="tab" id="current-scene-info-tab">current-scene-info</div>
+        <div class="tab" id="entity-spawner-tab">entity-spawner</div>
+        <div>bruh</div>
+        <div>bruh</div>
+        <div>bruh</div>
+        <div>bruh</div>
+        <div>bruh</div>
+        </div>
+        `);
+
+      const tabs = document.querySelectorAll(".tab");
 
       var lastMenu;
       var currentMenuHTML;
       for (let i = 0; i < tabs.length; i++) {
         tabs[i].addEventListener("click", () => {
-        
-          // const clipboardButton = document.querySelector("#scene-id-clipboard-button");
-          // clipboardButton.addEventListener("click", copySceneId);
-          
           currentMenuHTML = this.guiManager.get("#" + tabs[i].innerHTML);
-          
+
           if (lastMenu && lastMenu != currentMenuHTML) {
             lastMenu.setAttribute("style", "display: none;");
+            this.guiManager.get("#" + lastMenu.id + "-tab").classList.remove("active");
           }
           if (currentMenuHTML.style.display === "none") {
-            currentMenuHTML.setAttribute("style", "display: table; overflow-y: scroll;");
+            currentMenuHTML.setAttribute("style", "display: block;");
+            tabs[i].classList.add("active");
           } else {
             currentMenuHTML.setAttribute("style", "display: none;");
+            tabs[i].classList.remove("active");
           }
           lastMenu = currentMenuHTML;
         });
-
-        // if (currentMenu == "entitySpawner") {
-        //   const createEntityButton = document.querySelector("#create-entity");
-        //   createEntityButton.addEventListener("click", spawnEntity(this.guiManager, this.sceneManager, this.options, this.renderer));
-        //   // const addComponentButton = document.querySelector("#add-component");
-        //   // addComponentButton.addEventListener("click", ()=> {
-        //   // })
-        // }
       }
 
-      // function copySceneId() {
-      //   if (!navigator.clipboard) {
-      //     return console.warn("Unable to copy scene id");
-      //   }
-      //   let text = this.guiManager.get("#sceneId span").innerHTML;
-      //   navigator.clipboard.writeText(text);
-      // }
+      const createEntityButton = document.querySelector("#create-entity");
+      createEntityButton.addEventListener("click", () => {
+        const x = parseFloat(document.querySelector("#x").value);
+        const y = parseFloat(document.querySelector("#y").value);
+        const w = parseFloat(document.querySelector("#width").value);
+        const h = parseFloat(document.querySelector("#height").value);
 
-      // function spawnEntity(guiManager, sceneManager, options, renderer) {
-      //   const x = parseFloat(document.querySelector("#x").value);
-      //   const y = parseFloat(document.querySelector("#y").value);
-      //   const w = parseFloat(document.querySelector("#width").value);
-      //   const h = parseFloat(document.querySelector("#height").value);
+        if (isNaN(x) || isNaN(y) || isNaN(w) || isNaN(h)) {
+          this.guiManager.add("#entity-spawner", `<div id="invalidInput" style="color: red">Please input number values!</div>`);
 
-      //   if (isNaN(x) || isNaN(y) || isNaN(w) || isNaN(h)) {
-      //     guiManager.add("#Inspectorcontainer", `<div id="invalidInput" style="color: red">Please input number values!</div>`);
+          setTimeout(() => {
+            this.guiManager.remove("#invalidInput");
+          }, 3000);
+          return;
+        }
+        this.sceneManager.createEntity({ position: new Vec2(x, y), size: new Vec2(w, h) });
+        this.sceneManager.update(1 / this.options.frameRate, this.renderer.unitScale, this.renderer.canvas.width, this.renderer.canvas.height);
+      });
 
-      //     setTimeout(() => {
-      //       guiManager.remove("#invalidInput");
-      //     }, 3000);
-      //     return;
-      //   }
-      //   sceneManager.createEntity({ position: new Vec2(x, y), size: new Vec2(w, h) });
-      //   sceneManager.update(1 / options.frameRate, renderer.unitScale, renderer.canvas.width, renderer.canvas.height);
-      // }
+      const addComponentButton = document.querySelector("#add-component");
+      addComponentButton.addEventListener("click", () => {
+      })
+
+      const clipboardButton = document.querySelector("#scene-id-clipboard-button");
+      clipboardButton.addEventListener("click", () => {
+        if (!navigator.clipboard) {
+          return console.warn("Unable to copy scene id");
+        }
+        let text = this.guiManager.get("#sceneId span").innerHTML;
+        navigator.clipboard.writeText(text);
+      });
     }
   }
   guiUpdate() {

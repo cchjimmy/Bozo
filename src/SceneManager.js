@@ -27,7 +27,7 @@ export default class SceneManager extends EntityManager {
       this.webWorker.postMessage({
         timeStep,
         components: this.getComponents(),
-        // entityIds: this.getEntityIds(),
+        entityIds: this.getEntityIds(),
         unitScale,
         canvasWidth,
         canvasHeight
