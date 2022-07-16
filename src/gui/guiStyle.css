@@ -18,10 +18,14 @@
 
 .dark {
   --body-background-color: black;
-  --background-color: rgb(20, 20, 20);
+  --background-color: rgb(30, 30, 30);
   --header-color: #181818;
   --primary-text-color: #FFFFFF;
-  --secondary-text-color: #B3B3B3;
+  --secondary-text-color: rgb(190, 190, 190);
+
+  --scrollmenu-active-color: white;
+  --scrollmenu-active-text-color: black;
+  --scrollmenu-hover-color: rgb(30, 30, 30);
 }
 
 :root {
@@ -33,7 +37,11 @@
   --background-color: rgb(220, 220, 220);
   --header-color: white;
   --primary-text-color: black;
-  --secondary-text-color: rgba(50, 50, 50);
+  --secondary-text-color: rgb(50, 50, 50);
+
+  --scrollmenu-active-color: black;
+  --scrollmenu-active-text-color: white;
+  --scrollmenu-hover-color: rgb(220, 220, 220);
 }
 
 body {
@@ -106,7 +114,7 @@ table {
 
 /* credit: https://www.w3schools.com/howto/howto_css_menu_horizontal_scroll.asp */
 .scrollmenu {
-  background-color: var(--background-color);
+  background-color: var(--header-color);
   overflow: auto;
   white-space: nowrap;
   position: fixed;
@@ -126,16 +134,18 @@ table {
 
 .scrollmenu div:hover {
   border-radius: 9999px;
-  background-color: #777;
+  background-color: var(--scrollmenu-hover-color);
 }
 
 .scrollmenu div.active {
   border-radius: 9999px;
-  background-color: #777;
+  color: var(--scrollmenu-active-text-color);
+  background-color: var(--scrollmenu-active-color);
 }
 
 .sticky {
-  position: -webkit-sticky; /* Safari */
+  position: -webkit-sticky;
+  /* Safari */
   position: sticky;
   top: 0;
 }

@@ -36,7 +36,7 @@ export default class EntitiesManager {
         this.components[this.currentEntityPool.id] = {}
       }
       if (!this.components[this.currentEntityPool.id][component]) {
-        this.components[this.currentEntityPool.id][component]= {};
+        this.addComponent(this.currentEntityPool.id, component);
       }
       this.components[this.currentEntityPool.id][component][id] = comp[component];
     }
@@ -67,5 +67,9 @@ export default class EntitiesManager {
 
   setCurrentEntityPool(id) {
     this.currentEntityPool = this.getEntityPools()[id];
+  }
+
+  addComponent(entityPoolId, component="") {
+    this.components[entityPoolId][component] = {};
   }
 }

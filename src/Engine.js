@@ -54,16 +54,16 @@ export default class Engine {
       this.guiUpdate();
     }, 1000 / this.options.frameRate);
 
-    // for (let i = 0; i < 100; i++) {
-    //   this.sceneManager.createEntity({
-    //     position: new Vec2(randomRange(-5, 5), randomRange(-5, 5)),
-    //     size: new Vec2(randomRange(1, 2), randomRange(1, 2)),
-    //     velocity: new Vec2(randomRange(-1, 1), randomRange(-1, 1)),
-    //     color: `rgba(${randomRange(0, 255)}, ${randomRange(0, 255)}, ${randomRange(0, 255)}, 1)`,
-    //     collider: false
-    //   });
-    //   this.sceneManager.update(1 / this.options.frameRate, this.renderer.unitScale, this.renderer.canvas.width, this.renderer.canvas.height);
-    // }
+    for (let i = 0; i < 100; i++) {
+      this.sceneManager.createEntity({
+        position: new Vec2(randomRange(-5, 5), randomRange(-5, 5)),
+        size: new Vec2(randomRange(1, 2), randomRange(1, 2)),
+        velocity: new Vec2(randomRange(-1, 1), randomRange(-1, 1)),
+        color: `rgb(${randomRange(0, 255)}, ${randomRange(0, 255)}, ${randomRange(0, 255)})`,
+        collider: false
+      });
+      this.sceneManager.update(1 / this.options.frameRate, this.renderer.unitScale, this.renderer.canvas.width, this.renderer.canvas.height);
+    }
 
     window.onresize = () => {
       this.isLooping = false;
@@ -92,7 +92,6 @@ export default class Engine {
 
   guiInit() {
     this.guiManager.setTheme(this.options.uiTheme);
-    // this.guiManager.add("body", `<div id="canvas-container"></div>`)
     this.renderer.showCanvas("body");
     if (this.options.dev) {
       //id="current-scene-info"
@@ -178,7 +177,6 @@ export default class Engine {
       // credit for grid style https://dev.to/dawnind/3-ways-to-display-two-divs-side-by-side-3d8b
       // credit for input https://www.w3schools.com/tags/att_input_value.asp
       this.guiManager.add("body", `
-
       <div class="scrollmenu">
         <div class="tab" id="current-scene-info-tab">current-scene-info</div>
         <div class="tab" id="entity-spawner-tab">entity-spawner</div>
@@ -234,6 +232,7 @@ export default class Engine {
 
       const addComponentButton = document.querySelector("#add-component");
       addComponentButton.addEventListener("click", () => {
+        console.log("add component");
       })
 
       const clipboardButton = document.querySelector("#scene-id-clipboard-button");
