@@ -30,38 +30,6 @@ export default class ECS {
     }
     delete this.Worlds[id];
   }
-
-  // Event = class Event {
-  //   constructor() {
-  //     this.Events = {};
-  //     this.Listeners = {};
-  //     this.pending = [];
-  //   }
-
-  //   registerEvent(name = "") {
-  //     this.Events[name] = name;
-  //   }
-
-  //   dispatchEvent(name = "") {
-  //     debounce(() => {
-  //       this.pending.push(this.Events[name]);
-  //       this.checkEvent();
-  //     })
-  //   }
-
-  //   checkEvent() {
-  //     for (let i = 0; i < this.pending.length; i++) {
-  //       if (this.Listeners[this.pending[i]]) {
-  //         this.Listeners[this.pending[i]]();
-  //         delete this.pending[i];
-  //       }
-  //     }
-  //   }
-
-  //   addEventListener(name = "", callback) {
-  //     this.Listeners[name] = callback;
-  //   }
-  // }
 }
 
 ECS.prototype.Component = class Component { };
@@ -77,10 +45,6 @@ ECS.prototype.System = class System {
     this.world = world;
     this.queries = {};
     this.enabled = false;
-    // this.world.Event.addEventListener("newEntity", () => {
-    //   this.queries.result = this.world.query(this.queries.components);
-    //   console.log(this.queries);
-    // });
   }
 
   query() {
@@ -124,7 +88,6 @@ ECS.prototype.Entity = class Entity {
 
   getComponent(component) {
     if (!this.components[component.name]) {
-      // console.warn(`The component '${component.name}' does not exist on entity ID: ${this.id}.`);
       return;
     }
     return this.components[component.name];
@@ -143,13 +106,11 @@ ECS.prototype.World = class World {
   constructor(ecs) {
     this.ecs = ecs;
     this.id = uuidv4();
-    // this.Event = new this.ecs.Event;
     this.Components = {};
     this.Assemblages = {};
     this.Systems = {};
     this.Entities = {};
     this.lastTime = performance.now() / 1000;
-    // this.Event.registerEvent("newEntity")
   }
 
   registerComponent(component) {
@@ -171,7 +132,6 @@ ECS.prototype.World = class World {
   }
 
   createEntity(assemblageName = "") {
-    // this.Event.dispatchEvent("newEntity")
     if (!assemblageName) {
       const e = new this.ecs.Entity(this);
       this.Entities[e.id] = e;

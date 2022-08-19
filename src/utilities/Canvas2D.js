@@ -1,7 +1,7 @@
 export default class Canvas2D {
   constructor() {
     this.canvas = document.createElement("canvas");
-    this.context = this.canvas.getContext("2d", {alpha:false});
+    this.context = this.canvas.getContext("2d", { alpha: false });
   }
 
   /**
