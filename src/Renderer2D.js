@@ -5,7 +5,7 @@ export default class Renderer2D extends Canvas2D {
   constructor() {
     super();
 
-    this.qtree = new Quadtree({ centerX: this.canvas.width / 2, centerY: this.canvas.height / 2, halfWidth: this.canvas.width / 2, halfHeight: this.canvas.height / 2 });
+    this.qtree = new Quadtree({ capacity: 1, boundary: { centerX: 0, centerY: 0, halfWidth: this.canvas.width / 2, halfHeight: this.canvas.height / 2 } });
 
     this.pixelDensity = 1;
     this.unitScale = 50;
@@ -21,7 +21,7 @@ export default class Renderer2D extends Canvas2D {
   setResolution(width, height) {
     this.canvas.width = width * this.pixelDensity;
     this.canvas.height = height * this.pixelDensity;
-    this.qtree.newBoundary({ centerX: width * this.pixelDensity / 2, centerY: height * this.pixelDensity / 2, halfWidth: width * this.pixelDensity / 2, halfHeight: height * this.pixelDensity / 2 });
+    this.qtree.newBoundary({ centerX: 0, centerY: 0, halfWidth: width * this.pixelDensity / 2, halfHeight: height * this.pixelDensity / 2 });
   }
 
   draw(transforms, colors) {

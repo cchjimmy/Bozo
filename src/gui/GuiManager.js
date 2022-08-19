@@ -34,6 +34,21 @@ export default class GuiManager {
   }
 
   get(selector = "") {
-    return document.querySelector(selector);
+    let element = document.querySelector(selector);
+    if (!element) {
+      return;
+    }
+    return element;
+  }
+
+  drawRows(parentSelector, data=[]) {
+    let dataString = "";
+    for (let i = 0; i < data.length; i++) {
+      dataString+=`<tr><td>${data[i]}</td></tr>`;
+    }
+    this.add(parentSelector, `
+    <table>
+      ${dataString}
+    </table>`);
   }
 }

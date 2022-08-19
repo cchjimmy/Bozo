@@ -1,3 +1,5 @@
+@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css");
+
 /* https://www.w3schools.com/howto/howto_css_custom_scrollbar.asp */
 ::-webkit-scrollbar-track {
   background-color: var(--background-color);
@@ -44,22 +46,29 @@
   --scrollmenu-hover-color: rgb(220, 220, 220);
 }
 
-body {
-  background-color: var(--body-background-color);
-}
-
-tr.container td {
+table tr td {
   padding: 5px;
   box-sizing: border-box;
   color: var(--secondary-text-color);
-  background-color: var(--background-color);
+  
 }
 
 table {
   width: 100%;
-  height: 100%;
+  /* height: 100%; */
   border-spacing: 0px;
-  border-collapse: collapse;
+  /* border-collapse: collapse; */
+  table-layout: fixed;
+}
+
+/* credit: https://stackoverflow.com/questions/37369716/how-to-keep-a-tables-height-contained-within-a-parent-div */
+.table-container {
+  width: 100%;
+  position: fixed;
+  bottom: 47px;
+  height: 185px;
+  overflow: auto;
+  background-color: var(--background-color);
 }
 
 .header {
@@ -123,48 +132,22 @@ table {
   /* width: inherit; */
 }
 
-.scrollmenu div {
+.scrollmenu .tab {
+  background-color: var(--header-color);
   display: inline-block;
   color: var(--primary-text-color);
   text-align: center;
   padding: 7px;
   margin: 7px;
   text-decoration: none;
+  border-radius: 9999px;
 }
 
-.scrollmenu div:hover {
-  border-radius: 9999px;
+.scrollmenu .tab:hover {
   background-color: var(--scrollmenu-hover-color);
 }
 
-.scrollmenu div.active {
-  border-radius: 9999px;
+.scrollmenu .tab.active {
   color: var(--scrollmenu-active-text-color);
   background-color: var(--scrollmenu-active-color);
-}
-
-.sticky {
-  position: -webkit-sticky;
-  /* Safari */
-  position: sticky;
-  top: 0;
-}
-
-.fill {
-  flex-grow: 1;
-}
-
-/* credit: https://stackoverflow.com/questions/37369716/how-to-keep-a-tables-height-contained-within-a-parent-div */
-.table-container {
-  position: fixed;
-  bottom: 45px;
-  height: 185px;
-  overflow: auto;
-}
-
-table {
-  table-layout: fixed;
-  height: 100%;
-  border-collapse: collapse;
-  border-spacing: 0;
 }

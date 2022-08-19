@@ -2,7 +2,7 @@
  * @param {object} boundary { centerX, centerY, halfWidth, halfHeight }
  */
 export default class Quadtree {
-  constructor(boundary, capacity = 10, maxLevel = 10) {
+  constructor({ boundary, capacity = 10, maxLevel = 10 }) {
     this.boundary = boundary;
     this.capacity = capacity;
     this.objects = [];
@@ -132,7 +132,7 @@ export default class Quadtree {
       return found.indexOf(object) >= index;
     });
 
-    
+
 
     return found;
   }
