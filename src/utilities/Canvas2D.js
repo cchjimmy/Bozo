@@ -15,7 +15,7 @@ export default class Canvas2D {
   }
 
   /**
-   * sets drawn size of canvas
+   * sets drawn size of canvas (CSS)
    * @param {number} width 
    * @param {number} height 
    */

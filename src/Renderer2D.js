@@ -10,7 +10,7 @@ export default class Renderer2D extends Canvas2D {
     this.pixelDensity = 1;
     this.unitScale = 50;
 
-    this.oldTransforms = [];
+    // this.oldTransforms = [];
   }
 
   /**
@@ -24,20 +24,21 @@ export default class Renderer2D extends Canvas2D {
     this.qtree.newBoundary({ centerX: 0, centerY: 0, halfWidth: width * this.pixelDensity / 2, halfHeight: height * this.pixelDensity / 2 });
   }
 
-  draw(transforms, colors) {
-    for (let i = 0; i < transforms.length; i++) {
-      this.context.save();
-      this.context.fillStyle = colors[i];
-      this.context.fillRect(transforms[i][0], transforms[i][1], transforms[i][2], transforms[i][3]);
-      this.context.restore();
-    }
-    this.oldTransforms = transforms;
-  }
+  // draw(transforms, colors) {
+  //   for (let i = 0; i < transforms.length; i++) {
+  //     this.context.save();
+  //     this.context.fillStyle = colors[i];
+  //     this.context.fillRect(transforms[i][0], transforms[i][1], transforms[i][2], transforms[i][3]);
+  //     this.context.restore();
+  //   }
+  //   // this.oldTransforms = transforms;
+  // }
 
   clear() {
-    for (let i = 0; i < this.oldTransforms.length; i++) {
-      this.context.clearRect(this.oldTransforms[i][0], this.oldTransforms[i][1], this.oldTransforms[i][2], this.oldTransforms[i][3]);
-    }
+    // for (let i = 0; i < this.oldTransforms.length; i++) {
+    //   this.context.clearRect(this.oldTransforms[i][0], this.oldTransforms[i][1], this.oldTransforms[i][2], this.oldTransforms[i][3]);
+    // }
+    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.qtree.clear();
   }
 

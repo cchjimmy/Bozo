@@ -19,7 +19,7 @@ export default class Engine {
     showFps: true,
     showQuadtree: true,
     dev: true,
-    uiTheme: "dak"
+    uiTheme: "dark"
   }) {
     this.options = {};
     if (options) {
@@ -29,7 +29,7 @@ export default class Engine {
     }
 
     this.ecs = new ECS;
-    this.sceneManager = new SceneManager;
+    // this.sceneManager = new SceneManager;
     this.renderer = new Renderer2D;
     // this.assetManager = new AssetManager;
     // this.cameraManager = new CameraManager;
@@ -42,11 +42,19 @@ export default class Engine {
       console.error("Unable to initialize CanvasRenderingContext2D");
       return;
     }
-
     this.renderer.setResolution(this.options.resolution.width, this.options.resolution.height);
     this.renderer.setUnitScale(this.options.unitScale);
     this.renderer.setPixelDensity(this.options.pixelDensity);
-    this.renderer.setSize(innerWidth, this.renderer.height * innerWidth / this.renderer.width);
+    this.renderer.canvas.style.background = "blue";
+    resizeToFit.apply(this);
+    function resizeToFit() {
+      if (innerHeight>this.renderer.canvas.height) {
+        this.renderer.setSize(innerWidth, this.renderer.canvas.height * innerWidth / this.renderer.canvas.width);
+      } else {
+        this.renderer.setSize(this.renderer.canvas.width * innerHeight / this.renderer.canvas.height, innerHeight);
+      }
+    }
+    
 
     this.renderer.context.translate(this.renderer.canvas.width / 2, this.renderer.canvas.height / 2)
     this.renderer.context.scale(this.options.zoom, this.options.zoom);
@@ -62,21 +70,10 @@ export default class Engine {
       }, 1000 / this.options.frameRate);
     }
 
-    // for (let i = 0; i < 100; i++) {
-    //   this.sceneManager.createEntity({
-    //     position: new Vec2(randomRange(-5, 5), randomRange(-5, 5)),
-    //     size: new Vec2(randomRange(1, 2), randomRange(1, 2)),
-    //     velocity: new Vec2(randomRange(-1, 1), randomRange(-1, 1)),
-    //     color: `rgb(${randomRange(0, 255)}, ${randomRange(0, 255)}, ${randomRange(0, 255)})`,
-    //     collider: true
-    //   });
-    //   this.sceneManager.update(1 / this.options.frameRate, this.renderer.unitScale, this.renderer.canvas.width, this.renderer.canvas.height);
-    // }
-
     window.onresize = () => {
       this.isLooping = false;
       debounce(() => {
-        // this.renderer.setSize(innerWidth, this.renderer.height * innerWidth / this.renderer.width);
+        resizeToFit.apply(this);
         this.isLooping = true;
       }, 200);
     }
@@ -89,12 +86,12 @@ export default class Engine {
     // draw only when not resizing
     if (this.isLooping) {
       this.renderer.clear();
-      this.renderer.draw(this.sceneManager.getTransforms(), this.sceneManager.getColors());
+      // this.renderer.draw(this.sceneManager.getTransforms(), this.sceneManager.getColors());
     }
 
-    if (this.options.showQuadtree) {
-      this.renderer.qtree.show(this.renderer.context);
-    }
+    // if (this.options.showQuadtree) {
+    //   this.renderer.qtree.show(this.renderer.context);
+    // }
     requestAnimationFrame(() => { this.loop(); });
   }
 
@@ -108,7 +105,7 @@ export default class Engine {
         <div class="tab has-menu" id="entities-tab">entities</div>
         <div class="tab has-menu" id="components-tab">components</div>
         <div class="tab has-menu" id="systems-tab">systems</div>
-        <div class="tab" id="play" style="border:2px solid white; display: inline-block; position: sticky; right: 0px; width: 40px;"><i class="fa fa-play"></i></div>
+        <div class="tab" id="play" style="display: inline-block; position: sticky; right: 0px; width: 40px;"><i class="fa fa-play"></i></div>
       </div>`);
 
     const tabs = document.querySelectorAll(".tab.has-menu");
@@ -145,7 +142,7 @@ export default class Engine {
 
       // menu id="entities"
       this.guiManager.add("#entities", `<div id="draw-components"></div>`);
-      this.guiManager.drawTable("#draw-components", [['bruh'], ['bruh'], ['bruh'], ['bruh'], ['bruh'], ['bruh']]);
+      // this.guiManager.drawTable("#draw-components", [['bruh'], ['bruh'], ['bruh'], ['bruh'], ['bruh'], ['bruh']]);
       this.guiManager.add("#entities", `<div style="position:sticky;bottom:0px;" id="entities-buttons"></div>`);
       this.guiManager.drawTable("#entities-buttons",
         [[`<button class="button" id="create-entity" style="text-align:center; width:100%;">Add component</button>`, `<button class="button" id="add-component" style="text-align:center; width:100%;">Add entity</button>`]]);
@@ -186,8 +183,8 @@ export default class Engine {
   }
 
   guiUpdate() {
-    this.guiManager.update("#scene-id", this.sceneManager.getCurrentSceneId());
-    this.guiManager.update("#scene-name", this.sceneManager.currentScene.name);
-    this.guiManager.update("#entity-count", this.sceneManager.currentEntityPool.count);
+    // this.guiManager.update("#scene-id", this.sceneManager.getCurrentSceneId());
+    // this.guiManager.update("#scene-name", this.sceneManager.currentScene.name);
+    // this.guiManager.update("#entity-count", this.sceneManager.currentEntityPool.count);
   }
 }
