@@ -19,7 +19,7 @@ export default class Engine {
     showFps: true,
     showQuadtree: true,
     dev: true,
-    uiTheme: "dark"
+    uiTheme: "dak"
   }) {
     this.options = {};
     if (options) {

@@ -65,36 +65,10 @@ table {
 .table-container {
   width: 100%;
   position: fixed;
-  bottom: 51px;
+  bottom: 50px;
   height: 185px;
   overflow: auto;
   background-color: var(--background-color);
-}
-
-.header {
-  align-items: center;
-
-  box-sizing: border-box;
-
-  padding: 0px 3px;
-  border-bottom: 1px solid gray;
-  border-top: 1px solid gray;
-  /* height: var(--title-bar-height); */
-  background-color: var(--header-color);
-  color: var(--primary-text-color);
-}
-
-.buttonContainer {
-  /* display: flex; */
-  align-items: center;
-
-  box-sizing: border-box;
-
-  float: right;
-  padding: 0px 3px;
-  border-bottom: 1px solid gray;
-  height: var(--title-bar-height);
-  background-color: var(--header-color);
 }
 
 .button {
@@ -103,21 +77,6 @@ table {
   cursor: pointer;
   background-color: var(--scrollmenu-active-color);
   color: var(--scrollmenu-active-text-color);
-}
-
-.resizer {
-  background-color: #cbd5e0;
-  cursor: col-resize;
-  height: 100%;
-  width: 5px;
-}
-
-.draggable.dragging {
-  opacity: 0.5;
-}
-
-.draggable {
-  cursor: pointer;
 }
 
 /* credit: https://www.w3schools.com/howto/howto_css_menu_horizontal_scroll.asp */
