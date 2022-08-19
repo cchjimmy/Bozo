@@ -65,7 +65,7 @@ table {
 .table-container {
   width: 100%;
   position: fixed;
-  bottom: 47px;
+  bottom: 51px;
   height: 185px;
   overflow: auto;
   background-color: var(--background-color);
@@ -98,12 +98,11 @@ table {
 }
 
 .button {
-  margin: auto;
-  text-align: center;
   border: none;
+  border-radius: 5px;
   cursor: pointer;
-  background-color: transparent;
-  color: var(--primary-text-color);
+  background-color: var(--scrollmenu-active-color);
+  color: var(--scrollmenu-active-text-color);
 }
 
 .resizer {

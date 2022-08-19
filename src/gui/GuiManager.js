@@ -23,14 +23,18 @@ export default class GuiManager {
 
   update(selector = "", innerHTML) {
     let element = this.get(selector);
-    if (element)
+    if (element) {
       element.innerHTML = innerHTML;
+    }
   }
 
   // credit https://codesource.io/how-to-convert-a-string-to-html-in-javascript/
   add(parentSelector = "", param) {
     let parent = this.get(parentSelector);
-    if (parent) { parent.insertAdjacentHTML("beforeend", param); }
+    if (parent) {
+      parent.insertAdjacentHTML("beforeend", param);
+      return parent.lastChild;
+    }
   }
 
   get(selector = "") {
@@ -41,14 +45,19 @@ export default class GuiManager {
     return element;
   }
 
-  drawRows(parentSelector, data=[]) {
-    let dataString = "";
+  drawTable(parentSelector, data = []) {
+    let Column, Row;
+    Column = Row = ""
     for (let i = 0; i < data.length; i++) {
-      dataString+=`<tr><td>${data[i]}</td></tr>`;
+      for (let j = 0; j < data[i].length; j++) {
+        Row += `<td>${data[i][j]}</td>`;
+      }
+      Column += `<tr>${Row}</tr>`;
+      Row = "";
     }
-    this.add(parentSelector, `
+    return this.add(parentSelector, `
     <table>
-      ${dataString}
+      ${Column}
     </table>`);
   }
 }

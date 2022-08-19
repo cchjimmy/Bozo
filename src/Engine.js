@@ -108,7 +108,7 @@ export default class Engine {
         <div class="tab has-menu" id="entities-tab">entities</div>
         <div class="tab has-menu" id="components-tab">components</div>
         <div class="tab has-menu" id="systems-tab">systems</div>
-        <div class="tab" id="play" style="display: inline-block; position: sticky; right: 0px; width: 20px;"><i class="fa fa-play"></i></div>
+        <div class="tab" id="play" style="border:2px solid white; display: inline-block; position: sticky; right: 0px; width: 40px;"><i class="fa fa-play"></i></div>
       </div>`);
 
     const tabs = document.querySelectorAll(".tab.has-menu");
@@ -137,105 +137,54 @@ export default class Engine {
     attachEventListeners.apply(this);
 
     function defineMenus() {
-      // menu id="components"
-      this.guiManager.drawRows("#components", [`<div style="text-align:center; width:100%;"><button>New component</button></div>`])
-
       // menu id="current-scene-info"
-      this.guiManager.drawRows("#current-scene-info",
-        [`id: <span id="scene-id"></span><button id="scene-id-clipboard-button" style="float:right;"><i class="fa fa-clipboard"></i></button>`,
-          `name: <span id="scene-name"></span>`,
-          `entity count: <span id="entity-count"></span>`])
+      this.guiManager.drawTable("#current-scene-info",
+        [[`id: `, `<span id="scene-id"></span><button id="scene-id-clipboard-button" style="float:right;"><i class="fa fa-clipboard"></i></button>`],
+        [`name: `, `<span id="scene-name"></span>`],
+        [`entity count: `, `<span id="entity-count"></span>`]]);
 
       // menu id="entities"
-      this.guiManager.add("#entities", `
-      <table>
-        <tr class="container">
-          <td>
-            position:
-          </td>
-        </tr>
-        <tr class="container">
-          <td>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-              <div>
-                x: 
-                <input type="number" name="x" value="0" id="x" style="width: 50px;"></input>
-              </div>
-              <div>
-                y: 
-                <input type="number" name="y" value="0" id="y" style="width: 50px;"></input>
-              </div>
-            </div>
-          </td>
-        </tr>
-        <tr class="container">
-          <td><br></td>
-        </tr>
-        <tr class="container">
-          <td>
-            size:
-          </td>
-        </tr>
-        <tr class="container">
-          <td>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-              <div>
-                width: 
-                <input type="number" name="width" value="1" id="width" style="width: 50px;"></input>
-              </div>
-              <div>
-                height: 
-                <input type="number" name="height" value="1" id="height" style="width: 50px;"></input>
-              </div>
-            </div>
-          </td>
-        </tr>
-        <tr class="container">
-          <td>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-              <button id="add-component">add component</button>
-              <button id="create-entity">create entity</button>
-            </div>
-          </td>
-        </tr>
-      </table>`);
+      this.guiManager.add("#entities", `<div id="draw-components"></div>`);
+      this.guiManager.drawTable("#draw-components", [['bruh'], ['bruh'], ['bruh'], ['bruh'], ['bruh'], ['bruh']]);
+      this.guiManager.add("#entities", `<div style="position:sticky;bottom:0px;" id="entities-buttons"></div>`);
+      this.guiManager.drawTable("#entities-buttons",
+        [[`<button class="button" id="create-entity" style="text-align:center; width:100%;">Add component</button>`, `<button class="button" id="add-component" style="text-align:center; width:100%;">Add entity</button>`]]);
+
+      // menu id="components"
+      this.guiManager.add("#components", `<div id="world-components"></div>`);
+      this.guiManager.add("#components", `<div style="position:sticky;bottom:0px;" id="components-buttons"></div>`);
+      this.guiManager.drawTable("#components-buttons",
+        [[`<button class="button" style="text-align:center; width:100%;">New component</button>`]]);
+
+      // menu id="systems"
+      this.guiManager.add("#systems", `<div id="world-systems"></div>`);
+      this.guiManager.add("#systems", `<div style="position:sticky;bottom:0px;" id="systems-buttons"></div>`);
+      this.guiManager.drawTable("#systems-buttons",
+        [[`<button class="button" style="text-align:center;width:100%;">New system</button>`]]);
     }
 
     function attachEventListeners() {
       const createEntityButton = document.querySelector("#create-entity");
-      createEntityButton.addEventListener("click", () => {
-        const x = parseFloat(document.querySelector("#x").value);
-        const y = parseFloat(document.querySelector("#y").value);
-        const w = parseFloat(document.querySelector("#width").value);
-        const h = parseFloat(document.querySelector("#height").value);
+      createEntityButton.onclick = () => {
 
-        if (isNaN(x) || isNaN(y) || isNaN(w) || isNaN(h)) {
-          this.guiManager.add("#entities", `<div id="invalidInput" style="color: red">Please input number values!</div>`);
-
-          setTimeout(() => {
-            this.guiManager.remove("#invalidInput");
-          }, 3000);
-          return;
-        }
-        this.sceneManager.createEntity({ position: new Vec2(x, y), size: new Vec2(w, h) });
-        this.sceneManager.update(1 / this.options.frameRate, this.renderer.unitScale, this.renderer.canvas.width, this.renderer.canvas.height);
-      });
+      }
 
       const addComponentButton = document.querySelector("#add-component");
-      addComponentButton.addEventListener("click", () => {
-        console.log("add component");
-      })
+      addComponentButton.onclick = () => {
+
+      }
 
       const clipboardButton = document.querySelector("#scene-id-clipboard-button");
-      clipboardButton.addEventListener("click", () => {
+      clipboardButton.onclick = () => {
         if (!navigator.clipboard) {
-          return console.warn("Unable to copy scene id");
+          return console.warn("Unable to copy scene id.");
         }
         let text = this.guiManager.get("#scene-id").innerHTML;
         navigator.clipboard.writeText(text);
-      });
+      }
     }
   }
+
   guiUpdate() {
     this.guiManager.update("#scene-id", this.sceneManager.getCurrentSceneId());
     this.guiManager.update("#scene-name", this.sceneManager.currentScene.name);
