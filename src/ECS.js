@@ -45,14 +45,15 @@ ECS.prototype.System = class System {
     this.world = world;
     this.queries = {};
     this.enabled = false;
+    this.isReady = false;
   }
 
   query() {
-    this.enabled = false;
+    this.isReady = false;
     for (let property in this.constructor.queries) {
-      this.queries[property] = { results: this.world.query(this.constructor.queries[property]) };
+      this.queries[property] = this.world.query(this.constructor.queries[property]);
     }
-    this.enabled = true;
+    this.isReady = true;
   }
 
   update() { }
@@ -161,27 +162,35 @@ ECS.prototype.World = class World {
     let delta = now - this.lastTime;
     this.lastTime = now;
     for (let system in this.Systems) {
-      if (this.Systems[system].enabled) {
+      if (this.Systems[system].enabled && this.Systems[system].ready) {
         this.Systems[system].update(delta);
       }
     }
   }
 
   query(components = []) {
-    let result = [];
+    let results = {};
+    let hasAllComponents = true;
+    for (let i = 0; i < components.length; i++) {
+      results[components[i].name] = [];
+    }
     for (let entity in this.Entities) {
-      let hasAllComponents = true;
+      hasAllComponents = true;
       for (let i = 0; i < components.length; i++) {
-        if (!this.Entities[entity].components[components[i].name]) hasAllComponents = false; break;
+        if (!this.Entities[entity].getComponent(components[i])) {
+          hasAllComponents = false;
+          break;
+        }
       }
       if (hasAllComponents) {
-        result.push(this.Entities[entity]);
+        for (let i = 0; i < components.length; i++) {
+          results[components[i].name].push(this.Entities[entity].getComponent(components[i]));
+        }
       }
     }
-
     // https://www.javascripttutorial.net/array/javascript-remove-duplicates-from-array/
-    result = result.filter((value, index) => { return result.indexOf(value) === index });
-    return result;
+    // result = result.filter((value, index) => { return result.indexOf(value) === index });
+    return results;
   }
 
   newSystemsQuery() {

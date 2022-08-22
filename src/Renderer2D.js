@@ -59,4 +59,12 @@ export default class Renderer2D extends Canvas2D {
   setUnitScale(scale) {
     this.unitScale = scale * this.pixelDensity;
   }
+
+  resizeToFit() {
+    if (innerHeight > this.canvas.height) {
+      this.setSize(innerWidth, this.canvas.height * innerWidth / this.canvas.width);
+    } else {
+      this.setSize(this.canvas.width * innerHeight / this.canvas.height, innerHeight);
+    }
+  }
 }
