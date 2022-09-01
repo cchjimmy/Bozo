@@ -1,11 +1,4 @@
-// import { dragElement } from "./eventHandler.js";
-
-// export var guis = [];
-
-export default class GuiManager {
-  constructor() {
-  }
-
+export default class GuiMaker {
   setTheme(theme = "") {
     if (theme == "dark") {
       document.body.classList.add("dark");

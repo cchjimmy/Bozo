@@ -2,9 +2,7 @@ import Engine from "./Engine.js";
 
 const engine = new Engine();
 
-const init = () => {
+(function init() {
   engine.init();
   return;
-}
-
-init();
+})();
