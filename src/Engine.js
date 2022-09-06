@@ -1,6 +1,6 @@
 import debounce from "./utilities/debounce.js";
 import Renderer2D from "./Renderer2D.js";
-import GuiMaker from "./gui/GuiMaker.js";
+import GuiMaker from "./utilities/gui/GuiMaker.js";
 import ECS from "./ECS.js";
 
 export default class Engine {
@@ -103,12 +103,12 @@ export default class Engine {
     this.GuiMaker.add("body", `<div id="main" class="centered" style="display:none; text-align:center;"></div>`);
     this.GuiMaker.drawTable("#main",
       [[`<div style="font-size: 50px;" class="header">Bozo</div>`],
-      [`<button id="projects-button" class="button" style="font-size: 20px;">Projects</button>`],
-      [`<button class="button" style="font-size: 20px;">settings</button>`]]);
+      [`<button id="projects-button" class="button" style="font-size: 20px;">Projects</button>`]
+      ]);
 
     // menu id="projects"
     this.GuiMaker.add("body", `<div id="projects" style="display:none;"></div>`);
-    this.GuiMaker.drawTable("#projects", [[`<div class="header">Projects</div>`,`<div style="float: right;"><button id="projects-back-button" class="button">back</button></div>`]]);
+    this.GuiMaker.drawTable("#projects", [[`<div class="header">Projects</div>`, `<div style="float: right;"><button id="projects-back-button" class="button">back</button></div>`]]);
     this.GuiMaker.add("#projects", `<div id="project-list"></div>`);
     this.GuiMaker.add("#projects", `<div id="new-project-button" style="text-align:center;"><button class="button">New project</button></div>`);
 
@@ -194,24 +194,29 @@ export default class Engine {
       this.switchMenu(this.menus.main);
     }
 
-    this.GuiMaker.get("#new-project-button").onclick = () => {
-      this.GuiMaker.get("#new-project-prompt").style.display = "block";
-    }
+    {
+      var dirHandle;
+      this.GuiMaker.get("#new-project-button").onclick = () => {
+        this.GuiMaker.get("#new-project-prompt").style.display = "block";
+      }
 
-    this.GuiMaker.get("#new-project-location-button").onclick = async () => {
-      await self.showOpenFilePicker();
-    }
+      this.GuiMaker.get("#new-project-location-button").onclick = async () => {
+        try {
+          dirHandle = await window.showDirectoryPicker();
+        } catch (err) { }
+        for await (const [key, value] of dirHandle.entries()) {
+          console.log({ key, value });
+        }
+      }
 
-    this.GuiMaker.get(`#new-project-cancel`).onclick = () => {
-      this.GuiMaker.get(`#new-project-prompt`).style.display = "none";
-    }
+      this.GuiMaker.get(`#new-project-confirm`).onclick = () => {
+        console.log(this.GuiMaker.get(`#new-project-name-input`).value);
+        this.GuiMaker.get(`#new-project-prompt`).style.display = "none";
+      }
 
-    this.GuiMaker.get(`#new-project-confirm`).onclick = () => {
-      console.log(this.GuiMaker.get(`#new-project-name-input`).value);
-
-      // console.log(__filename);
-      // mkdir(`/Projects/${this.GuiMaker.get(`#new-project-name-input`).value}`)
-      this.GuiMaker.get(`#new-project-prompt`).style.display = "none";
+      this.GuiMaker.get(`#new-project-cancel`).onclick = () => {
+        this.GuiMaker.get(`#new-project-prompt`).style.display = "none";
+      }
     }
 
     this.GuiMaker.get("#create-entity").onclick = () => {

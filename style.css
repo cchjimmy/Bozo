@@ -1,4 +1,4 @@
-@import "./src/gui/guiStyle.css";
+@import "./src/utilities/gui/guiStyle.css";
 
 *{
   box-sizing: border-box;
