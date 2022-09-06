@@ -20,7 +20,7 @@
 
 .dark {
   --body-background-color: black;
-  --background-color: rgb(30, 30, 30);
+  --background-color: rgba(30, 30, 30);
   --header-color: #181818;
   --primary-text-color: #FFFFFF;
   --secondary-text-color: rgb(190, 190, 190);
@@ -36,7 +36,7 @@
   --title-bar-height: 25px;
 
   --body-background-color: white;
-  --background-color: rgb(220, 220, 220);
+  --background-color: rgba(220, 220, 220);
   --header-color: white;
   --primary-text-color: black;
   --secondary-text-color: rgb(50, 50, 50);
@@ -82,8 +82,6 @@ table {
   white-space: nowrap;
   
   width: 100%;
-  
-  /* width: inherit; */
 }
 
 .scrollmenu .tab {

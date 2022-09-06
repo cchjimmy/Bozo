@@ -35,7 +35,6 @@ export default class Engine {
 
     this.menus = {
       main: "#main",
-      projects: "#projects",
       editor: "#editor",
     }
   }
@@ -82,7 +81,7 @@ export default class Engine {
 
     setInterval(() => {
       this.guiUpdate();
-    }, 1000 / this.options.frameRate);
+    }, 100);
 
     window.onresize = () => {
       this.isLooping = false;
@@ -93,34 +92,28 @@ export default class Engine {
     }
   }
 
-  switchMenu(state) {
+  switchMenu(menu) {
     this.hideAllMenus();
-    this.GuiMaker.get(state).style.display = "block";
+    this.GuiMaker.get(menu).style.display = "block";
   }
 
   defineMenus() {
     // menu id="main"
-    this.GuiMaker.add("body", `<div id="main" class="centered" style="display:none; text-align:center;"></div>`);
+    this.GuiMaker.add("body", `<div id="main" class="centered" style="display:none;"></div>`);
     this.GuiMaker.drawTable("#main",
-      [[`<div style="font-size: 50px;" class="header">Bozo</div>`],
-      [`<button id="projects-button" class="button" style="font-size: 20px;">Projects</button>`]
+      [[`<div style="font-size: 50px; background:orange;" class="header">Bozo</div>`],
+      [`<button id="new-project-button" class="button" style="font-size: 20px;">New project</button>`]
       ]);
 
-    // menu id="projects"
-    this.GuiMaker.add("body", `<div id="projects" style="display:none;"></div>`);
-    this.GuiMaker.drawTable("#projects", [[`<div class="header">Projects</div>`, `<div style="float: right;"><button id="projects-back-button" class="button">back</button></div>`]]);
-    this.GuiMaker.add("#projects", `<div id="project-list"></div>`);
-    this.GuiMaker.add("#projects", `<div id="new-project-button" style="text-align:center;"><button class="button">New project</button></div>`);
-
     // menu id="new-project-prompt"
-    this.GuiMaker.add("#projects", `<div id="new-project-prompt" style="display:none;"></div>`);
+    this.GuiMaker.add("body", `<div id="new-project-prompt" style="display:none;"></div>`);
     this.GuiMaker.add("#new-project-prompt", `<div style="background:rgb(0, 0, 0, 0.5); width:100%; height:100%; position:absolute; top:0px;"></div>`);
     this.GuiMaker.add("#new-project-prompt", `<div id="new-project-prompt-ui" class="table-container centered"></div>`)
     this.GuiMaker.drawTable("#new-project-prompt-ui",
       [[`New project`],
-      [`Project name:`, `<input type="text" placeholder="Project name" id="new-project-name-input"></input>`],
       [`Location:`, `<button id="new-project-location-button" class="button">choose location</button>`],
-      [`<button id="new-project-confirm">confirm</button>`, `<button id="new-project-cancel">cancel</button>`]]);
+      [`<div id="location-path"></div>`],
+      [`<button id="new-project-confirm">confirm</button>`, `<div style="float:right;"><button id="new-project-cancel">cancel</button></div>`]]);
 
     // menu id="editor"
     this.GuiMaker.add("body", `<div id="editor" style="display:none;"></div>`);
@@ -186,37 +179,27 @@ export default class Engine {
   }
 
   attachEventListeners() {
-    this.GuiMaker.get("#projects-button").onclick = () => {
-      this.switchMenu(this.menus.projects);
+    var dirHandle, path;
+    this.GuiMaker.get("#new-project-button").onclick = () => {
+      this.GuiMaker.get("#new-project-prompt").style.display = "block";
     }
 
-    this.GuiMaker.get("#projects-back-button").onclick = () => {
-      this.switchMenu(this.menus.main);
+    // credit: https://thewebdev.info/2021/04/25/how-to-create-a-file-object-in-javascript/#:~:text=We%20can%20create%20a%20file,File(parts%2C%20'sample.
+    this.GuiMaker.get("#new-project-location-button").onclick = async () => {
+      try {
+        dirHandle = await window.showDirectoryPicker();
+        path = "./" + dirHandle.name;
+        this.GuiMaker.get("#location-path").innerText = path;
+      } catch (err) { }
     }
 
-    {
-      var dirHandle;
-      this.GuiMaker.get("#new-project-button").onclick = () => {
-        this.GuiMaker.get("#new-project-prompt").style.display = "block";
-      }
+    this.GuiMaker.get(`#new-project-confirm`).onclick = () => {
+      this.GuiMaker.get(`#new-project-prompt`).style.display = "none";
+      this.switchMenu(this.menus.editor);
+    }
 
-      this.GuiMaker.get("#new-project-location-button").onclick = async () => {
-        try {
-          dirHandle = await window.showDirectoryPicker();
-        } catch (err) { }
-        for await (const [key, value] of dirHandle.entries()) {
-          console.log({ key, value });
-        }
-      }
-
-      this.GuiMaker.get(`#new-project-confirm`).onclick = () => {
-        console.log(this.GuiMaker.get(`#new-project-name-input`).value);
-        this.GuiMaker.get(`#new-project-prompt`).style.display = "none";
-      }
-
-      this.GuiMaker.get(`#new-project-cancel`).onclick = () => {
-        this.GuiMaker.get(`#new-project-prompt`).style.display = "none";
-      }
+    this.GuiMaker.get(`#new-project-cancel`).onclick = () => {
+      this.GuiMaker.get(`#new-project-prompt`).style.display = "none";
     }
 
     this.GuiMaker.get("#create-entity").onclick = () => {
