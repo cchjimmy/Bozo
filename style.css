@@ -24,20 +24,3 @@ body {
   -ms-user-select: none;
   user-select: none;
 }
-
-/* #canvas-container {
-  border: 1px solid green;
-  text-align: center;
-  justify-items: center;
-  height: 100%;
-} */
-
-/* credit: https://www.codegrepper.com/code-examples/css/locate+canvas+in+center+of+screen+css */
-canvas{
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  max-width: 100%;
-  max-height: 100%;
-}
