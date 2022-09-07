@@ -65,7 +65,7 @@ export default class Engine {
     this.renderer.setResolution(this.options.resolution.width, this.options.resolution.height);
     this.renderer.setUnitScale = this.options.unitScale;
     this.renderer.setPixelDensity = this.options.pixelDensity;
-    this.renderer.setZoom(this.options.zoom)
+    this.renderer.setZoom(this.options.zoom);
 
     this.renderer.canvas.classList.add("centered");
 
@@ -106,9 +106,9 @@ export default class Engine {
     this.GuiMaker.add("#new-project-prompt", `<div style="background:rgb(0, 0, 0, 0.5); width:100%; height:100%; position:absolute; top:0px;"></div>`);
     this.GuiMaker.add("#new-project-prompt", `<div id="new-project-prompt-ui" class="table-container centered"></div>`)
     this.GuiMaker.drawTable("#new-project-prompt-ui",
-      [[`New project`],
-      [`Location:`, `<button id="new-project-location-button" class="button">choose location</button>`],
-      [`<div id="location-path"></div>`],
+      [[`<div>New project</div>`],
+      [`Project name:`, `<input id="project-name" placeholder="Project name"></input>`],
+      [`Location: <button id="new-project-location-button" class="button">choose location</button>`, `<div id="location-path">undefined</div>`],
       [`<button id="new-project-confirm">confirm</button>`, `<div style="float:right;"><button id="new-project-cancel">cancel</button></div>`]]);
 
     // menu id="editor"
@@ -175,7 +175,7 @@ export default class Engine {
   }
 
   attachEventListeners() {
-    var dirHandle, path;
+    var dirHandle, path, projectDirHandle, projectSrcDirHandle;
     this.GuiMaker.get("#new-project-button").onclick = () => {
       this.GuiMaker.get("#new-project-prompt").style.display = "block";
     }
@@ -189,14 +189,38 @@ export default class Engine {
       } catch (err) { }
     }
 
-    this.GuiMaker.get(`#new-project-confirm`).onclick = () => {
-      if (this.GuiMaker.get("#location-path").innerText) {
-        this.GuiMaker.get(`#new-project-prompt`).style.display = "none";
-        this.switchMenu(this.menus.editor);
-      } else {
-        console.warn("Location is not defined.");
-        this.GuiMaker.add("#new-project-prompt-ui", `<div id="warn" style="color:red;">Location is not defined.</div>`);
-        setTimeout(()=>{this.GuiMaker.get(`#new-project-prompt-ui`).removeChild(this.GuiMaker.get("#warn"));}, 2000)
+    this.GuiMaker.get(`#new-project-confirm`).onclick = async () => {
+      let projectName = this.GuiMaker.get(`#project-name`).value;
+      let doesNameExist = false;
+      if (this.GuiMaker.get("#location-path").innerText != "undefined") {
+        for await (const [key, value] of dirHandle.entries()) {
+          if (key == projectName) {
+            doesNameExist = true;
+            break;
+          }
+        }
+        if (!doesNameExist) {
+          projectDirHandle = await dirHandle.getDirectoryHandle(projectName, { create: true });
+          projectSrcDirHandle = await projectDirHandle.getDirectoryHandle("src", { create: true });
+          let htmlFileHandle = await projectDirHandle.getFileHandle("index.html", { create: true });
+          let stream = await htmlFileHandle.createWritable();
+          await stream.write(`
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>${projectName}</title>
+          </head>
+          <body>
+            <h1>nice</h1>
+          </body>
+          </html>`);
+          await stream.close();
+          this.GuiMaker.get(`#new-project-prompt`).style.display = "none";
+          this.switchMenu(this.menus.editor);
+        }
       }
     }
 
