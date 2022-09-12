@@ -31,25 +31,34 @@ export default class GuiMaker {
   }
 
   get(selector = "") {
-    let element = document.querySelector(selector);
-    if (!element) {
-      return;
-    }
-    return element;
+    return document.querySelector(selector);
   }
 
-  drawTable(parentSelector, data = []) {
-    let Column, Row;
-    Column = Row = ""
-    for (let i = 0; i < data.length; i++) {
-      for (let j = 0; j < data[i].length; j++) {
-        Row += `<td>${data[i][j]}</td>`;
+  getAll(selector = "") {
+    return document.querySelectorAll(selector);
+  }
+
+  drawTable({ parentSelector = "", tableAttributes = "", td = [], colgroupAttributes = [], caption = "" }) {
+    let Column, Row, Colgroup;
+    Column = Row = Colgroup = "";
+    for (let i = 0; i < td.length; i++) {
+      for (let j = 0; j < td[i].length; j++) {
+        Row += `<td>${td[i][j]}</td>`;
       }
       Column += `<tr>${Row}</tr>`;
       Row = "";
     }
+    for (let i = 0; i < colgroupAttributes.length; i++) {
+      Colgroup += `<col ${colgroupAttributes[i]}>`;
+    }
     return this.add(parentSelector, `
-    <table>
+    <table ${tableAttributes}">
+      <caption>
+        ${caption}
+      </caption>
+      <colgroup>
+        ${Colgroup}
+      </colgroup>
       ${Column}
     </table>`);
   }

@@ -56,9 +56,9 @@ export default class Canvas2D {
     this.context.scale(zoom, zoom);
   }
 
-  clear() {
+  clear(clearColor = "black") {
     this.context.save();
-    this.context.fillStyle = "blue";
+    this.context.fillStyle = clearColor;
     this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
     this.context.restore();
   }
