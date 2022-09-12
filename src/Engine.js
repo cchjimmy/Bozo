@@ -36,6 +36,7 @@ export default class Engine {
     this.menus = {
       main: "#main",
       editor: "#editor",
+      settings: "#settings"
     }
   }
 
@@ -74,8 +75,8 @@ export default class Engine {
     this.defineMenus();
     this.attachEventListeners();
 
-    // this.switchMenu(this.menus.main);
-    this.switchMenu(this.menus.editor);
+    this.switchMenu(this.menus.main);
+    // this.switchMenu(this.menus.editor);
 
     setInterval(() => {
       this.guiUpdate();
@@ -102,9 +103,14 @@ export default class Engine {
     this.GuiMaker.drawTable({
       parentSelector: "#main",
       td: [[`<div style="font-size: 50px; background:orange;" class="header">Bozo</div>`],
-      [`<button id="new-project-button" class="button" style="font-size: 20px;">New project</button>`]
+      [`<button id="new-project-button" class="button" style="font-size: 20px;">New project</button>`],
+      [`<button id="settings-button" class="button" style="font-size: 20px;">Settings</div>`]
       ]
     });
+
+    // menu id="settings"
+    this.GuiMaker.add("body", `<div id="settings"></div>`);
+    this.GuiMaker.add(`#settings`, `<h2>Settings</h2>`)
 
     // menu id="new-project-prompt"
     this.GuiMaker.add("body", `<div id="new-project-prompt" style="display:none;"></div>`);
@@ -128,7 +134,7 @@ export default class Engine {
 
     this.GuiMaker.drawTable({
       parentSelector: "#editor", td: [[`<div style="text-align:center;">
-    <i id="settings-tab" class="tab has-menu fa fa-bars" style="width:40px;"></i>
+    <i id="editor-settings-tab" class="tab has-menu fa fa-bars" style="width:40px;"></i>
     <i id="play" class="tab fa fa-play" style="width:40px;"></i>
   </div>`, `
   <div class="scrollmenu">
@@ -193,6 +199,9 @@ export default class Engine {
       parentSelector: "#systems-buttons",
       td: [[`<button class="button" style="text-align:center;width:100%;">New system</button>`]]
     });
+
+    // submenu id="editor-settings"
+
   }
 
   attachEventListeners() {
