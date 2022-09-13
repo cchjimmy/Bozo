@@ -20,15 +20,10 @@ export default class ECS {
 }
 
 ECS.prototype.Component = class Component {
-  // constructor() { }
-
-  // clone() {
-  //   let clone = Object.create(this);
-  //   for (let property in this) {
-  //     clone[property] = this[property];
-  //   }
-  //   return clone;
-  // }
+  // credit: https://www.samanthaming.com/tidbits/70-3-ways-to-clone-objects/
+  clone() {
+    return Object.assign(new this.constructor(), this);
+  }
 };
 
 ECS.prototype.Component.prototype.isComponent = true;
@@ -48,7 +43,7 @@ ECS.prototype.System = class System {
   query() {
     this._isReady = false;
     for (let property in this.constructor.queries) {
-      this.queries[property] = this.world.queryComponents(this.constructor.queries[property]);
+      this.queries[property] = this.world.query(this.constructor.queries[property]);
     }
     this._isReady = true;
   }
@@ -76,45 +71,66 @@ ECS.prototype.System.prototype.isSystem = true;
 
 ECS.prototype.Entity = class Entity {
   constructor(world) {
-    this.id = uuidv4();
-    this.components = {};
+    this._id = uuidv4();
+    this._components = {};
     this.world = world;
   }
 
+  get id() {
+    return this._id;
+  }
+
   addComponent(component) {
-    if (!component.prototype.isComponent && !component.prototype.isTagComponent || !this.world.components[component.name]) {
+    if (!component.prototype.isComponent && !component.prototype.isTagComponent || !this.world.registeredComponents[component.name] || this.hasComponent(component)) {
       return this;
     }
-    this.components[component.name] = new this.world.components[component.name];
+    this._components[component.name] = new this.world.registeredComponents[component.name];;
     debounce({ context: this.world, func: this.world.newSystemsQuery });
     return this;
   }
 
   removeComponent(component) {
-    if (!this.components[component.name]) {
-      return;
+    if (!component.prototype.isComponent && !component.prototype.isTagComponent || !this.world.registeredComponents[component.name] || !this.hasComponent(component)) {
+      return this;
     }
-    delete this.components[component.name];
+    delete this._components[component.name];
     debounce({ context: this.world, func: this.world.newSystemsQuery });
     return this;
   }
 
-  getComponent(component) {
-    if (!this.components[component.name]) {
+  hasComponent(component) {
+    // credit: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Conditional_Operator
+    return (this._components[component.name] ? true : false);
+  }
+
+  hasAllComponents(components = []) {
+    let hasAllComponents = true;
+    for (let i = 0; i < components.length; i++) {
+      if (!this.hasComponent(components[i])) {
+        hasAllComponents = false;
+        break;
+      }
+    }
+    return hasAllComponents;
+  }
+
+  getComponent(component, clone = false) {
+    if (!this.hasComponent(component)) {
       return;
     }
-    return this.components[component.name];
+    let comp = this._components[component.name];
+    return (clone && !comp.isTagComponent ? comp.clone() : comp);
   }
 }
 
 ECS.prototype.World = class World {
   constructor(ecs) {
     this.ecs = ecs;
-    this.id = uuidv4();
-    this.components = {};
+    this._id = uuidv4();
+    this.registeredComponents = {};
     this.assemblages = {};
-    this.systems = {};
-    this.entities = {};
+    this.registeredSystems = {};
+    this.entities = [];
 
     this._isEnabled = true;
 
@@ -134,31 +150,35 @@ ECS.prototype.World = class World {
   //   this.newSystemsQuery();
   // }
 
+  get id() {
+    return this._id;
+  }
+
   registerComponent(component) {
-    if (this.components[component.name] || !component.prototype.isComponent && !component.prototype.isTagComponent) {
+    if (this.registeredComponents[component] || !component.prototype.isComponent && !component.prototype.isTagComponent) {
       return this;
     }
-    this.components[component.name] = component;
+    this.registeredComponents[component.name] = component;
     return this;
   }
 
   registerSystem(system) {
-    if (this.systems[system.name] || !system.prototype.isSystem) {
+    if (this.registeredSystems[system] || !system.prototype.isSystem) {
       return this;
     }
-    this.systems[system.name] = new system(this);
-    this.enableSystem(this.systems[system.name].constructor);
+    this.registeredSystems[system.name] = new system(this);
+    this.enableSystem(system);
     return this;
   }
 
   getSystem(system) {
-    return this.systems[system.name];
+    return this.registeredSystems[system.name];
   }
 
   createEntity(assemblageName = "") {
     if (!assemblageName) {
       const e = new this.ecs.Entity(this);
-      this.entities[e.id] = e;
+      this.entities.push(e);
       return e;
     }
     if (!this.assemblages[assemblageName]) {
@@ -167,12 +187,16 @@ ECS.prototype.World = class World {
     return this.assemblages[assemblageName]();
   }
 
+  removeEntity(entity) {
+    this.entities.splice(this.entities.indexOf(entity), 1);
+  }
+
   newAssemblage(name = "", components = []) {
     if (!components.length) {
       return;
     }
     this.assemblages[name] = () => {
-      const e = this.createEntity();
+      let e = this.createEntity();
       for (let i = 0; i < components.length; i++) {
         e.addComponent(components[i]);
       }
@@ -181,12 +205,12 @@ ECS.prototype.World = class World {
   }
 
   update(param) {
-    if (!this._isEnabled) {
+    if (!this.isEnabled) {
       return;
     }
-    for (let system in this.systems) {
-      if (this.systems[system].isEnabled && this.systems[system].isReady) {
-        this.systems[system].update(param);
+    for (let rs in this.registeredSystems) {
+      if (this.registeredSystems[rs].isEnabled && this.registeredSystems[rs].isReady) {
+        this.registeredSystems[rs].update(param);
       }
     }
   }
@@ -196,63 +220,19 @@ ECS.prototype.World = class World {
    * @param {*} components 
    * @returns 
    */
-  queryEntities(components = []) {
+  query(components = []) {
     let results = [];
-    for (let i = 0; i < components.length; i++) {
-      results[components[i].name] = [];
-    }
     for (let entity in this.entities) {
-      let hasAllComponents = true;
-      for (let i = 0; i < components.length; i++) {
-        if (!this.entities[entity].getComponent(components[i])) {
-          hasAllComponents = false;
-          break;
-        }
-      }
-      if (hasAllComponents) {
-        let clone = this.entities[entity]
-        results.push(clone);
+      if (this.entities[entity].hasAllComponents(components)) {
+        results.push(this.entities[entity]);
       }
     }
-    return results;
-  }
-
-  /**
-   * query outputs lists of components in an object
-   * @param {*} components 
-   * @returns 
-   */
-  queryComponents(components = []) {
-    let results = {};
-    let count = 0;
-    for (let i = 0; i < components.length; i++) {
-      results[components[i].name] = [];
-    }
-    for (let entity in this.entities) {
-      let hasAllComponents = true;
-      for (let i = 0; i < components.length; i++) {
-        if (!this.entities[entity].getComponent(components[i])) {
-          hasAllComponents = false;
-          break;
-        }
-      }
-      if (hasAllComponents) {
-        count++;
-        for (let i = 0; i < components.length; i++) {
-          if (this.entities[entity].getComponent(components[i]).isTagComponent) {
-            continue;
-          }
-          results[components[i].name].push(this.entities[entity].getComponent(components[i]).clone());
-        }
-      }
-    }
-    results.length = count;
     return results;
   }
 
   newSystemsQuery() {
-    for (let system in this.systems) {
-      this.systems[system].query();
+    for (let rs in this.registeredSystems) {
+      this.registeredSystems[rs].query();
     }
   }
 
@@ -269,11 +249,11 @@ ECS.prototype.World = class World {
   }
 
   enableSystem(system) {
-    this.systems[system.name].enable();
+    this.registeredSystems[system.name].enable();
   }
 
   disableSystem(system) {
-    this.systems[system.name].disable();
+    this.registeredSystems[system.name].disable();
   }
 }
 
