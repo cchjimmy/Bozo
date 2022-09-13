@@ -22,7 +22,21 @@ export default class ECS {
 ECS.prototype.Component = class Component {
   // credit: https://www.samanthaming.com/tidbits/70-3-ways-to-clone-objects/
   clone() {
-    return Object.assign(new this.constructor(), this);
+    return new this.constructor().copy(this);
+  }
+
+  copy(component) {
+    for (let prop in component) {
+      if (!this.hasOwnProperty(prop)) {
+        continue;
+      }
+      if (typeof component[prop] == "object") {
+        Object.assign(this[prop], component[prop]);
+        continue;
+      }
+      this[prop] = component[prop];
+    }
+    return this;
   }
 };
 
@@ -100,18 +114,16 @@ ECS.prototype.Entity = class Entity {
 
   hasComponent(component) {
     // credit: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Conditional_Operator
-    return (this._components[component.name] ? true : false);
+    return this._components[component.name] ? true : false;
   }
 
   hasAllComponents(components = []) {
-    let hasAllComponents = true;
     for (let i = 0; i < components.length; i++) {
       if (!this.hasComponent(components[i])) {
-        hasAllComponents = false;
-        break;
+        return false;
       }
     }
-    return hasAllComponents;
+    return true;
   }
 
   getComponent(component, clone = false) {
@@ -119,7 +131,7 @@ ECS.prototype.Entity = class Entity {
       return;
     }
     let comp = this._components[component.name];
-    return (clone && !comp.isTagComponent ? comp.clone() : comp);
+    return clone ? comp.clone() : comp;
   }
 }
 
