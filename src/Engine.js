@@ -201,7 +201,7 @@ export default class Engine {
     // submenu id="editor-settings"
 
     // submenu id="settings"
-    this.GuiMaker.add("body", `<div id="settings" style="display:block; width:100%; height:100%;"></div>`);
+    this.GuiMaker.add("body", `<div id="settings" style="display:none; width:100%; height:100%;"></div>`);
     this.GuiMaker.add("#settings", mask);
     this.GuiMaker.add("#settings", `<div id="settings-ui" class="table-container" style="display:flex; flex-flow:column; height:100%; width:300px; position:absolute; overflow:hidden;"></div>`);
     this.GuiMaker.add("#settings-ui",`<div id="settings-header" style="background:var(--header-background);"></div>`)
