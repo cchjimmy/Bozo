@@ -1,12 +1,4 @@
 export default class GuiMaker {
-  setTheme(theme = "") {
-    if (theme == "dark") {
-      document.body.classList.add("dark");
-    } else if (document.body.classList.contains("dark")) {
-      document.body.classList.remove("dark");
-    }
-  }
-
   remove(selector = "") {
     let element = this.get(selector);
     if (element) {
