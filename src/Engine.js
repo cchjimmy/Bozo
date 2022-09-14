@@ -75,8 +75,8 @@ export default class Engine {
     this.defineMenus();
     this.attachEventListeners();
 
-    this.switchMenu(this.menus.main);
-    // this.switchMenu(this.menus.editor);
+    // this.switchMenu(this.menus.main);
+    this.switchMenu(this.menus.editor);
 
     setInterval(() => {
       this.guiUpdate();
@@ -102,7 +102,7 @@ export default class Engine {
     this.GuiMaker.add("body", `<div id="main" class="centered" style="display:none;"></div>`);
     this.GuiMaker.drawTable({
       parentSelector: "#main",
-      td: [[`<div style="font-size: 50px; background:orange;" class="header">Bozo</div>`],
+      td: [[`<div style="font-size: 50px; background:#ff8c00;" class="header">Bozo</div>`],
       [`<button id="new-project-button" class="button" style="font-size: 20px;">New project</button>`],
       [`<button id="settings-button" class="button" style="font-size: 20px;">Settings</div>`]
       ]
@@ -135,6 +135,7 @@ export default class Engine {
     this.GuiMaker.drawTable({
       parentSelector: "#editor", td: [[`<div style="text-align:center;">
     <i id="editor-settings-tab" class="tab has-menu fa fa-bars" style="width:40px;"></i>
+    <svg class="tab has-menu" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg>
     <i id="play" class="tab fa fa-play" style="width:40px;"></i>
   </div>`, `
   <div class="scrollmenu">

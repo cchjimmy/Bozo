@@ -13,7 +13,7 @@
   <title>Bozo</title>
 
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <script src="https://kit.fontawesome.com/014dcd9a0e.js" crossorigin="anonymous"></script>
 
   <script defer type="module" src="./src/main.js"></script>
 
@@ -35,15 +35,34 @@
       // special hack to prevent zoom-to-tabs gesture in safari
       document.body.style.zoom = 0.99;
     });
-
-    if (`serviceWorker` in navigator) {
-      navigator.serviceWorker.register(`./sw.js`);
-    }
   </script>
 
 </head>
 
 <body>
+  <button id="a2hs-button" class="button">Add To Home Screen</button>
+  
+  <script>
+    if (`serviceWorker` in navigator) {
+      navigator.serviceWorker.register(`./sw.js`).then(() => { console.log("Service Worker Registered") });
+    }
+
+    let deferredPrompt;
+    const a2hs = document.querySelector("#a2hs-button");
+    a2hs.style.display = "none";
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      a2hs.style.display = "block";
+      a2hs.onclick = () => {
+        a2hs.style.display = "none";
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(() => {
+          deferredPrompt = null;
+        })
+      }
+    })
+  </script>
 </body>
 
 </html>
