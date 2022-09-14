@@ -1,2 +1,2 @@
 # Bozo
-Javascript 2D Game Engine
+Javascript 2D Game Engine (WIP)
