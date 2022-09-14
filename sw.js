@@ -14,6 +14,7 @@ const resourcesToPrecache = [
   'src/utilities/debounce.js',
   'src/utilities/ECS.js',
   'res/texture.png',
+  'site.webmanifest'
 ]
 
 self.addEventListener("install", e => {
