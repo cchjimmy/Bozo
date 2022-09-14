@@ -14,7 +14,6 @@ const resourcesToPrecache = [
   'src/utilities/debounce.js',
   'src/utilities/ECS.js',
   'res/texture.png',
-  'site.webmanifest'
 ]
 
 self.addEventListener("install", e => {
@@ -26,7 +25,7 @@ self.addEventListener("install", e => {
 });
 
 self.addEventListener("fetch", e => {
-  e.respondWith(caches.match(e.request.url).then(response => {
-    return response || fetch(e.request.url);
+  e.respondWith(caches.match(e.request).then(response => {
+    return response || fetch(e.request);
   }));
 });
