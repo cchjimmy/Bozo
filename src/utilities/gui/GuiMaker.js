@@ -52,7 +52,7 @@ export default class GuiMaker {
       Colgroup += `<col ${colgroupAttributes[i]}>`;
     }
     return this.add(parentSelector, `
-    <table ${tableAttributes}">
+    <table ${tableAttributes}>
       <caption>
         ${caption}
       </caption>

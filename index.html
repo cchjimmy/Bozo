@@ -40,29 +40,6 @@
 </head>
 
 <body>
-  <button id="a2hs-button" class="button">Add To Home Screen</button>
-  
-  <script>
-    if (`serviceWorker` in navigator) {
-      navigator.serviceWorker.register(`./sw.js`).then(() => { console.log("Service Worker Registered") });
-    }
-
-    let deferredPrompt;
-    const a2hs = document.querySelector("#a2hs-button");
-    a2hs.style.display = "none";
-    window.addEventListener("beforeinstallprompt", (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      a2hs.style.display = "block";
-      a2hs.onclick = () => {
-        a2hs.style.display = "none";
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then(() => {
-          deferredPrompt = null;
-        })
-      }
-    })
-  </script>
 </body>
 
 </html>

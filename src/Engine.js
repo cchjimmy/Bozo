@@ -36,7 +36,6 @@ export default class Engine {
     this.menus = {
       main: "#main",
       editor: "#editor",
-      settings: "#settings"
     }
   }
 
@@ -75,8 +74,8 @@ export default class Engine {
     this.defineMenus();
     this.attachEventListeners();
 
-    // this.switchMenu(this.menus.main);
-    this.switchMenu(this.menus.editor);
+    this.switchMenu(this.menus.main);
+    // this.switchMenu(this.menus.editor);
 
     setInterval(() => {
       this.guiUpdate();
@@ -98,23 +97,21 @@ export default class Engine {
   }
 
   defineMenus() {
+    const mask = `<div style="background:rgb(0, 0, 0, 0.5); width:100%; height:100%; position:absolute; top:0px;"></div>`;
+
     // menu id="main"
     this.GuiMaker.add("body", `<div id="main" class="centered" style="display:none;"></div>`);
     this.GuiMaker.drawTable({
       parentSelector: "#main",
       td: [[`<div style="font-size: 50px; background:#ff8c00;" class="header">Bozo</div>`],
       [`<button id="new-project-button" class="button" style="font-size: 20px;">New project</button>`],
-      [`<button id="settings-button" class="button" style="font-size: 20px;">Settings</div>`]
+      [`<button id="settings-button" class="button" style="font-size: 20px;">Settings</button>`],
       ]
     });
 
-    // menu id="settings"
-    this.GuiMaker.add("body", `<div id="settings"></div>`);
-    this.GuiMaker.add(`#settings`, `<h2>Settings</h2>`)
-
     // menu id="new-project-prompt"
     this.GuiMaker.add("body", `<div id="new-project-prompt" style="display:none;"></div>`);
-    this.GuiMaker.add("#new-project-prompt", `<div style="background:rgb(0, 0, 0, 0.5); width:100%; height:100%; position:absolute; top:0px;"></div>`);
+    this.GuiMaker.add("#new-project-prompt", mask);
     this.GuiMaker.add("#new-project-prompt", `<div id="new-project-prompt-ui" class="table-container centered"></div>`)
     this.GuiMaker.drawTable({
       parentSelector: "#new-project-prompt-ui",
@@ -203,9 +200,65 @@ export default class Engine {
 
     // submenu id="editor-settings"
 
+    // submenu id="settings"
+    this.GuiMaker.add("body", `<div id="settings" style="display:block; width:100%; height:100%;"></div>`);
+    this.GuiMaker.add("#settings", mask);
+    this.GuiMaker.add("#settings", `<div id="settings-ui" class="table-container" style="display:flex; flex-flow:column; height:100%; width:300px; position:absolute; overflow:hidden;"></div>`);
+    this.GuiMaker.add("#settings-ui",`<div id="settings-header" style="background:var(--header-background);"></div>`)
+    this.GuiMaker.drawTable({
+      parentSelector: "#settings-header",
+      td: [
+        [`<h3 style="color:var(--primary-text-color)">Settings</h3>`, `<button id="settings-close-button" class="button" style="float:right;">close</button>`],
+        [`<button id="a2hs-button" class="button" style="white-space:nowrap; width:200%;">Add To Home Screen</button>`],
+      ]
+    });
+    this.GuiMaker.add("#settings-ui", `<div id="settings-list" style="flex:1 1 auto;"></div>`)
+    this.GuiMaker.drawTable({
+      parentSelector: "#settings-list",
+      td: [
+        ['theme', `<select id="theme-select"><option>dark</option><option>light</option></select>`],
+        ['bruh'],
+        ['bruh'],
+        ['bruh'],
+        ['bruh'],
+        ['bruh'],
+        ['bruh'],
+        ['bruh'],
+        ['bruh'],
+        ['bruh'],
+        ['bruh'],
+        ['bruh'],
+        ['bruh'],
+        ['bruh'],
+        ['bruh'],
+        ['bruh'],
+        ['bruh'],
+        ['bruh'],
+        ['bruh'],
+        ['bruh'],
+        ['bruh'],
+        ['bruh'],
+        ['bruh'],
+        ['bruh'],
+        ['bruh'],
+        ['bottom'],
+      ]
+    });
   }
 
   attachEventListeners() {
+    this.GuiMaker.get("#settings-button").onclick = () => {
+      this.GuiMaker.get("#settings").style.display = "block";
+    }
+
+    this.GuiMaker.get("#settings-close-button").onclick = () => {
+      this.GuiMaker.get("#settings").style.display = "none";
+    }
+
+    this.GuiMaker.get('#theme-select').onchange = () => {
+      this.GuiMaker.setTheme(this.GuiMaker.get('#theme-select').value);
+    }
+
     var dirHandle, path, projectName;
     this.GuiMaker.get("#new-project-button").onclick = () => {
       this.GuiMaker.get("#new-project-prompt").style.display = "block";
@@ -259,6 +312,22 @@ export default class Engine {
     this.GuiMaker.get("#add-component").onclick = () => {
 
     }
+
+    let deferredPrompt;
+    const a2hs = this.GuiMaker.get("#a2hs-button");
+    a2hs.style.display = "none";
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      a2hs.style.display = "block";
+      a2hs.onclick = () => {
+        a2hs.style.display = "none";
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(() => {
+          deferredPrompt = null;
+        })
+      }
+    })
   }
 
   hideAllMenus() {

@@ -1,6 +1,6 @@
 // credit: https://www.youtube.com/watch?v=dXuvT4oollQ
 
-const cachName = "cach-v1";
+const cacheName = "cach-v1";
 const resourcesToPrecache = [
   '/',
   'index.html',
@@ -9,8 +9,6 @@ const resourcesToPrecache = [
   'src/Engine.js',
   'src/utilities/gui/GuiMaker.js',
   'src/utilities/gui/guiStyle.css',
-  'https://kit.fontawesome.com/014dcd9a0e.js',
-  // 'https://ka-f.fontawesome.com/releases/v6.2.0/css/free-v5-font-face.min.css?token=014dcd9a0e',
   'src/utilities/Canvas2D.js',
   'src/utilities/debounce.js',
   'src/utilities/ECS.js',
@@ -19,7 +17,7 @@ const resourcesToPrecache = [
 
 self.addEventListener("install", e => {
   e.waitUntil(
-    caches.open(cachName).then(cache => {
+    caches.open(cacheName).then(cache => {
       return cache.addAll(resourcesToPrecache);
     })
   );
