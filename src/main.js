@@ -6,7 +6,7 @@ import generatePage from "./menus.js";
     navigator.serviceWorker.register(`../sw.js`);
   }
   generatePage();
-  
+
   const engine = new Engine;
   engine.init();
 })();
