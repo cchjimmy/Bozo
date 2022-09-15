@@ -14,4 +14,8 @@
   for (let file in filesToAppend) {
     document.body.appendChild(Object.assign(document.createElement("script"), { src: filesToAppend[file] }));
   }
+
+  if (`serviceWorker` in navigator) {
+    navigator.serviceWorker.register(`../sw.js`);
+  }
 })();
