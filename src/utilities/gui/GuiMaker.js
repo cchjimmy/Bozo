@@ -1,4 +1,4 @@
-class GuiMaker {
+export default class GuiMaker {
   remove(selector = "") {
     let element = this.get(selector);
     if (element) {
@@ -55,4 +55,3 @@ class GuiMaker {
     </table>`);
   }
 }
-window.GuiMaker = new GuiMaker;

@@ -1,5 +1,9 @@
-(function() {
-  function Engine(options = {
+import ECS from "./ECS.js";
+import debounce from "./debounce.js";
+import Canvas2D from "./Canvas2D.js";
+
+export default class Engine {
+  constructor(options = {
     resolution: { width: 848, height: 480 },
     pixelDensity: 1,
     unitScale: 10,
@@ -28,7 +32,7 @@
     this.renderer = new Canvas2D;
   }
 
-  Engine.prototype.init = () => {
+  init() {
     if (!this.renderer.context) {
       return;
     }
@@ -51,12 +55,11 @@
     this.loop();
   }
 
-  Engine.prototype.loop = () => {
+  loop() {
     // draw only when not resizing
     if (this.isLooping) {
       this.renderer.clear("blue");
     }
     requestAnimationFrame(() => { this.loop(); });
   }
-  window.Engine = Engine;
-})();
+}

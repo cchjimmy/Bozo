@@ -1,4 +1,4 @@
-class Canvas2D {
+export default class Canvas2D {
   constructor() {
     this.canvas = document.createElement("canvas");
     this.context = this.canvas.getContext("2d", { alpha: false });
@@ -71,4 +71,3 @@ class Canvas2D {
     parent.appendChild(this.canvas);
   }
 }
-window.Canvas2D = Canvas2D;
