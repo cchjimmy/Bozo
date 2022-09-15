@@ -11,7 +11,7 @@
   defineMenus();
   attachEventListeners();
 
-  switchMenu(menus.editor);
+  switchMenu(menus.main);
 
   setInterval(() => {
     guiUpdate();

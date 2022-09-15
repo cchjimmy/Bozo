@@ -16,6 +16,7 @@ const resourcesToPrecache = [
   'site.webmanifest',
   'res/icons/android-chrome-192x192.png',
   'res/icons/favicon-32x32.png',
+  'src/entry.js'
 ]
 
 self.addEventListener("install", e => {
