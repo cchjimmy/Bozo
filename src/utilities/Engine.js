@@ -1,5 +1,5 @@
-class Engine {
-  constructor(options = {
+(function() {
+  function Engine(options = {
     resolution: { width: 848, height: 480 },
     pixelDensity: 1,
     unitScale: 10,
@@ -28,7 +28,7 @@ class Engine {
     this.renderer = new Canvas2D;
   }
 
-  init() {
+  Engine.prototype.init = () => {
     if (!this.renderer.context) {
       return;
     }
@@ -51,11 +51,12 @@ class Engine {
     this.loop();
   }
 
-  loop() {
+  Engine.prototype.loop = () => {
     // draw only when not resizing
     if (this.isLooping) {
       this.renderer.clear("blue");
     }
     requestAnimationFrame(() => { this.loop(); });
   }
-}
+  window.Engine = Engine;
+})();

@@ -6,17 +6,19 @@ const resourcesToPrecache = [
   'index.html',
   'style.css',
   'src/main.js',
-  'src/Engine.js',
   'src/menus.js',
+  'src/utilities/Engine.js',
   'src/utilities/gui/GuiMaker.js',
   'src/utilities/gui/guiStyle.css',
   'src/utilities/Canvas2D.js',
   'src/utilities/debounce.js',
   'src/utilities/ECS.js',
+  'src/utilities/randomRange.js',
+  'src/utilities/uuidv4.js',
   'site.webmanifest',
   'res/icons/android-chrome-192x192.png',
   'res/icons/favicon-32x32.png',
-  'src/entry.js'
+  'entry.js'
 ]
 
 self.addEventListener("install", e => {
@@ -33,7 +35,6 @@ self.onactivate = (e) => {
 }
 
 self.addEventListener("fetch", e => {
-  // console.log(e.request.url);
   e.respondWith(caches.match(e.request).then(response => {
     return response || fetch(e.request);
   }));

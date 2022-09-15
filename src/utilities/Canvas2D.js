@@ -71,3 +71,4 @@ class Canvas2D {
     parent.appendChild(this.canvas);
   }
 }
+window.Canvas2D = Canvas2D;

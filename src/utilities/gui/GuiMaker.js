@@ -55,3 +55,4 @@ class GuiMaker {
     </table>`);
   }
 }
+window.GuiMaker = new GuiMaker;

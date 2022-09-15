@@ -1,5 +1,4 @@
 (function () {
-  const GM = new GuiMaker;
   const menus = {
     main: "#main",
     editor: "#editor",
@@ -159,7 +158,7 @@
       parentSelector: "#settings-list",
       td: [
         [`<button id="a2hs-button" style="white-space:nowrap; width:200%; padding:5px;">Add To Home Screen</button>`],
-        ['theme', `<select id="theme-select" style="padding:5px;"><option>dark</option><option>light</option></select>`],
+        ['themes', `<select id="theme-select" style="padding:5px;"><option>dark</option><option>light</option></select>`],
       ]
     });
   

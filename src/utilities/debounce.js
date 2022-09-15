@@ -1,6 +1,6 @@
 // https://stackoverflow.com/questions/63301553/debounce-function-not-working-in-javascript
 // https://www.freecodecamp.org/news/javascript-debounce-example/
-(() => {
+(function() {
   var timer = {};
   /**
    * when called, timeout is cleared and the input function is called after the timeout

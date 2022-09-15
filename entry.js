@@ -1,12 +1,12 @@
-(function() {
+(function () {
   const filesToAppend = [
     'src/utilities/Canvas2D.js',
-    'src/utilities/debounce.js',
     'src/utilities/ECS.js',
+    'src/utilities/gui/GuiMaker.js',
+    'src/utilities/debounce.js',
     'src/utilities/randomRange.js',
     'src/utilities/uuidv4.js',
-    'src/utilities/gui/GuiMaker.js',
-    'src/Engine.js',
+    'src/utilities/Engine.js',
     'src/menus.js',
     'src/main.js',
   ];
