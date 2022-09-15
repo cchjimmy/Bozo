@@ -1,9 +1,4 @@
-import debounce from "./utilities/debounce.js";
-import Canvas2D from "./utilities/Canvas2D.js";
-import GuiMaker from "./utilities/gui/GuiMaker.js";
-import ECS from "./utilities/ECS.js";
-
-export default class Engine {
+class Engine {
   constructor(options = {
     resolution: { width: 848, height: 480 },
     pixelDensity: 1,
@@ -35,7 +30,7 @@ export default class Engine {
 
   init() {
     if (!this.renderer.context) {
-      return console.error("Unable to initialize renderer.");
+      return;
     }
     this.renderer.setResolution(this.options.resolution.width, this.options.resolution.height);
     this.renderer.setUnitScale = this.options.unitScale;
@@ -60,12 +55,7 @@ export default class Engine {
     // draw only when not resizing
     if (this.isLooping) {
       this.renderer.clear("blue");
-      // this.renderer.draw(this.sceneManager.getTransforms(), this.sceneManager.getColors());
     }
-
-    // if (this.options.showQuadtree) {
-    //   this.renderer.qtree.show(this.renderer.context);
-    // }
     requestAnimationFrame(() => { this.loop(); });
   }
 }

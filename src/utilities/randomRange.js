@@ -4,6 +4,6 @@
  * @param {number} max 
  * @returns a number
  */
-export default function randomRange (min = 0, max = 1) {
+function randomRange(min = 0, max = 1) {
   return Math.random() * (max - min) + min;
 }

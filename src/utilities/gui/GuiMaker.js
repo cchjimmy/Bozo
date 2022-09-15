@@ -1,4 +1,4 @@
-export default class GuiMaker {
+class GuiMaker {
   remove(selector = "") {
     let element = this.get(selector);
     if (element) {

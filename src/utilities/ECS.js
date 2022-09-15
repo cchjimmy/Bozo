@@ -1,6 +1,6 @@
 // credit: http://vasir.net/blog/game-development/how-to-build-entity-component-system-in-javascript
 // credit: https://github.com/ecsyjs/ecsy
-export default class ECS {
+class ECS {
   constructor() {
     this.worlds = {};
   }
