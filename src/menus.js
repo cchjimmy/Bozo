@@ -4,7 +4,7 @@ const menus = {
   editor: "#editor",
 }
 
-(() => {
+(function() {
   // credit: https://medium.com/hypersphere-codes/detecting-system-theme-in-javascript-css-react-f6b961916d48
   const darkThemeMq = window.matchMedia("(prefers-color-scheme: dark)");
   darkThemeMq.matches ? document.body.classList = "dark" : document.body.classList = "light";
