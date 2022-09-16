@@ -1,4 +1,5 @@
 import GuiMaker from "./utilities/gui/GuiMaker.js";
+import { files } from "./files.js";
 
 const GM = new GuiMaker;
 const menus = {
@@ -63,7 +64,7 @@ function defineMenus() {
 
   // menu id="editor"
   GM.add("body", `<div id="editor" style="display:none; width:100%; height:100%;"></div>`);
-
+  GM.add("#editor", '<canvas></canvas>')
   // credit for clipboard icon https://www.w3schools.com/icons/tryit.asp?filename=tryicons_fa-clipboard
   // credit for grid style https://dev.to/dawnind/3-ways-to-display-two-divs-side-by-side-3d8b
   // credit for input https://www.w3schools.com/tags/att_input_value.asp
@@ -78,7 +79,7 @@ function defineMenus() {
         </div>
         `, `
         <div class="scrollmenu">
-          <div class="tab has-menu" id="current-scene-info-tab">current-scene-info</div>
+          <div class="tab has-menu" id="scenes-tab">scenes</div>
           <div class="tab has-menu" id="entities-tab">entities</div>
           <div class="tab has-menu" id="components-tab">components</div>
           <div class="tab has-menu" id="systems-tab">systems</div>
@@ -92,6 +93,7 @@ function defineMenus() {
   for (let i = 0; i < tabs.length; i++) {
     GM.add("body", `<div class="table-container" id="${tabs[i].id.slice(0, -4)}" style="display: none; width:100%; position:fixed; bottom:${editorScrollMenuHeight}; height:185px;"></div>`);
 
+    // creates a menu for all .tab.has-menu elements
     tabs[i].addEventListener("click", () => {
       currentMenuHTML = GM.get("#" + tabs[i].id.slice(0, -4));
       if (lastMenuHTML && lastMenuHTML != currentMenuHTML) {
@@ -109,19 +111,18 @@ function defineMenus() {
     });
   }
 
-  // submenu id="current-scene-info"
+  // submenu id="scenes"
   GM.drawTable({
-    parentSelector: "#current-scene-info",
-    td: [[`name: `, `<span id="scene-name"></span>`],
-    [`entity count: `, `<span id="entity-count"></span>`]]
+    parentSelector: "#scenes",
+    td: []
   });
 
   // submenu id="entities"
-  GM.add("#entities", `<div id="draw-components"></div>`);
+  GM.add("#entities", `<div id="world-assemblages"></div>`);
   GM.add("#entities", `<div style="position:sticky;bottom:0px;" id="entities-buttons"></div>`);
   GM.drawTable({
     parentSelector: "#entities-buttons",
-    td: [[`<button id="create-entity" style="text-align:center; width:100%;">Add component</button>`, `<button id="add-component" style="text-align:center; width:100%;">Add entity</button>`]]
+    td: [[`<button id="new-assemblage-button" style="text-align:center; width:100%;">New entity</button>`]]
   });
 
   // submenu id="components"
@@ -129,7 +130,7 @@ function defineMenus() {
   GM.add("#components", `<div style="position:sticky; bottom:0px;" id="components-buttons"></div>`);
   GM.drawTable({
     parentSelector: "#components-buttons",
-    td: [[`<button style="text-align:center; width:100%;">New component</button>`]]
+    td: [[`<button id="new-component-button" style="text-align:center; width:100%;">New component</button>`]]
   });
 
   // submenu id="systems"
@@ -137,7 +138,7 @@ function defineMenus() {
   GM.add("#systems", `<div style="position:sticky; bottom:0px;" id="systems-buttons"></div>`);
   GM.drawTable({
     parentSelector: "#systems-buttons",
-    td: [[`<button style="text-align:center; width:100%;">New system</button>`]]
+    td: [[`<button id="new-system-button" style="text-align:center; width:100%;">New system</button>`]]
   });
 
   // submenu id="editor-settings"
@@ -162,19 +163,19 @@ function defineMenus() {
     parentSelector: "#settings-list",
     td: [
       [`<button id="a2hs-button" style="white-space:nowrap; width:200%; padding:5px;">Add To Home Screen</button>`],
-      ['themes', `<select id="theme-select" style="padding:5px;"><option>dark</option><option>light</option></select>`],
+      ['Themes', `<select id="theme-select" style="padding:5px;"><option>dark</option><option>light</option></select>`],
     ]
   });
 
-  let themeOptions = GM.getAll("#theme-select option");
+  var themeOptions = GM.getAll("#theme-select option");
   for (let i = 0; i < themeOptions.length; i++) {
-    if (themeOptions[i].innerText == document.body.classList) {
-      themeOptions[i].toggleAttribute("selected");
-    }
+    if (themeOptions[i].innerText !== document.body.classList) return;
+    themeOptions[i].toggleAttribute("selected");
   }
 }
 
 function attachEventListeners() {
+  // settings
   GM.get("#settings-button").onclick = () => {
     GM.get("#settings").style.display = "block";
   }
@@ -185,60 +186,6 @@ function attachEventListeners() {
 
   GM.get('#theme-select').onchange = () => {
     document.body.classList = GM.get('#theme-select').value;
-  }
-
-  var dirHandle, path, projectName;
-  GM.get("#new-project-button").onclick = () => {
-    GM.get("#new-project-prompt").style.display = "block";
-  }
-
-  // credit: https://thewebdev.info/2021/04/25/how-to-create-a-file-object-in-javascript/#:~:text=We%20can%20create%20a%20file,File(parts%2C%20'sample.
-  GM.get("#new-project-location-button").onclick = async () => {
-    try {
-      dirHandle = await window.showDirectoryPicker();
-      path = "./" + dirHandle.name;
-      GM.get("#location-path").innerText = path;
-    } catch (err) { }
-  }
-
-  GM.get(`#new-project-confirm`).onclick = async () => {
-    projectName = GM.get(`#project-name`).value;
-    try {
-      let projectRootHandle = await dirHandle.getDirectoryHandle(projectName, { create: true });
-      // let projectSrcDirHandle = await projectDirHandle.getDirectoryHandle("src", { create: true });
-      let htmlFileHandle = await projectRootHandle.getFileHandle("index.html", { create: true });
-      let stream = await htmlFileHandle.createWritable();
-      await stream.write(`
-          <!DOCTYPE html>
-          <html lang="en">
-          <head>
-            <meta charset="UTF-8">
-            <meta http-equiv="X-UA-Compatible" content="IE=edge">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>${projectName}</title>
-          </head>
-          <body>
-            <h1>nice</h1>
-          </body>
-          </html>`);
-      await stream.close();
-      GM.get(`#new-project-prompt`).style.display = "none";
-      switchMenu(menus.editor);
-    } catch (err) {
-
-    }
-  }
-
-  GM.get(`#new-project-cancel`).onclick = () => {
-    GM.get(`#new-project-prompt`).style.display = "none";
-  }
-
-  GM.get("#create-entity").onclick = () => {
-
-  }
-
-  GM.get("#add-component").onclick = () => {
-
   }
 
   let deferredPrompt;
@@ -256,6 +203,68 @@ function attachEventListeners() {
       })
     }
   })
+
+  // new-project-prompt
+  var dirHandle, buffer;
+  var project = {};
+  GM.get("#new-project-button").onclick = () => {
+    GM.get("#new-project-prompt").style.display = "block";
+  }
+
+  // credit: https://developer.mozilla.org/en-US/docs/Web/API/File_System_Access_API
+  GM.get("#new-project-location-button").onclick = async () => {
+    try {
+      dirHandle = await window.showDirectoryPicker();
+      GM.get('#location-path').innerText = "./" + dirHandle.name;
+    } catch (err) {
+      console.trace(err);
+    }
+  }
+
+  GM.get(`#new-project-confirm`).onclick = async () => {
+    if (GM.get(`#project-name`).value === undefined || dirHandle === undefined) return;
+
+    project.title = GM.get(`#project-name`).value;
+    project.root = await dirHandle.getDirectoryHandle(project.title, { create: true });
+    project.src = await project.root.getDirectoryHandle("src", { create: true });
+    let srcFile = await project.root.getFileHandle("index.html", { create: true });
+    let stream = await srcFile.createWritable();
+    
+    // index.html
+    buffer = files.index;
+    buffer = buffer.replace("$PROJECT_TITLE", project.title);
+    await stream.write(buffer);
+    await stream.close();
+
+    // ./src/ECS.js
+    srcFile = await project.src.getFileHandle("ECS.js", {create:true});
+    stream = await srcFile.createWritable();
+    buffer = files.ECS;
+    await stream.write(buffer);
+    await stream.close();
+
+    GM.get(`#new-project-prompt`).style.display = "none";
+    switchMenu(menus.editor);
+  }
+
+  GM.get(`#new-project-cancel`).onclick = () => {
+    GM.get(`#new-project-prompt`).style.display = "none";
+  }
+
+  // entities
+  GM.get("#new-assemblage-button").onclick = () => {
+    console.log("new assemblage");
+  }
+
+  // components
+  GM.get("#new-component-button").onclick = () => {
+    console.log("new component");
+  }
+
+  // system
+  GM.get("#new-system-button").onclick = () => {
+    console.log('new system');
+  }
 }
 
 function hideAllMenus() {
@@ -265,7 +274,4 @@ function hideAllMenus() {
 }
 
 function guiUpdate() {
-  // GM.update("#scene-id", sceneManager.getCurrentSceneId());
-  // GM.update("#scene-name", sceneManager.currentScene.name);
-  // GM.update("#entity-count", sceneManager.currentEntityPool.count);
 }

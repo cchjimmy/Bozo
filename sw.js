@@ -40,10 +40,11 @@ self.onfetch = (e) => {
   e.respondWith(
     caches.match(e.request).then(
       response => response
-    ).catch(fetch(e.request).then(response => {
-      caches.open(cacheName).then(
-        cache => cache.put(e.request, response)
-      )
-    }).catch((err) => { console.log(err); }))
+    ).catch(fetch(e.request).then(
+      response => {
+        caches.open(cacheName).then(
+          cache => cache.put(e.request, response)
+        )
+      }).catch((err) => { console.log(err); }))
   )
 }

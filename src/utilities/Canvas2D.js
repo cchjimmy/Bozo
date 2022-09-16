@@ -63,11 +63,12 @@ export default class Canvas2D {
     this.context.restore();
   }
 
+  changeCanvas(canvas) {
+    this.canvas = canvas;
+    this.context = this.canvas.getContext("2d", { alpha: false });
+  }
+
   showCanvas(parentSelector) {
-    let parent = document.querySelector(parentSelector);
-    if (!parent) {
-      return;
-    }
-    parent.appendChild(this.canvas);
+    document.querySelector(parentSelector).appendChild(this.canvas);
   }
 }

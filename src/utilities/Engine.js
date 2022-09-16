@@ -33,9 +33,9 @@ export default class Engine {
   }
 
   init() {
-    if (!this.renderer.context) {
-      return;
-    }
+    this.renderer.changeCanvas(document.querySelector("canvas"));
+    if (!this.renderer.context) return;
+
     this.renderer.setResolution(this.options.resolution.width, this.options.resolution.height);
     this.renderer.setUnitScale = this.options.unitScale;
     this.renderer.setPixelDensity = this.options.pixelDensity;
@@ -59,6 +59,8 @@ export default class Engine {
     // draw only when not resizing
     if (this.isLooping) {
       this.renderer.clear("blue");
+
+      this.renderer.context.fillRect(0, 0, 10, 10);
     }
     requestAnimationFrame(() => { this.loop(); });
   }
