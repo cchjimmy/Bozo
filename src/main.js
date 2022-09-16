@@ -16,7 +16,7 @@ export default function generatePage() {
   defineMenus();
   attachEventListeners();
 
-  switchMenu(menus.editor);
+  switchMenu(menus.main);
 
   E.init();
 
