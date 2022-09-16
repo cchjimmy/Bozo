@@ -4,6 +4,7 @@ export default class Canvas2D {
     this.context = this.canvas.getContext("2d", { alpha: false });
     this._unitScale = 10;
     this._pixelDensity = 1;
+    this._clearColor = "black";
   }
 
   /**
@@ -56,9 +57,9 @@ export default class Canvas2D {
     this.context.scale(zoom, zoom);
   }
 
-  clear(clearColor = "black") {
+  clear() {
     this.context.save();
-    this.context.fillStyle = clearColor;
+    this.context.fillStyle = this._clearColor;
     this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
     this.context.restore();
   }
@@ -70,5 +71,9 @@ export default class Canvas2D {
 
   showCanvas(parentSelector) {
     document.querySelector(parentSelector).appendChild(this.canvas);
+  }
+
+  set clearColor(color) {
+    this._clearColor = color;
   }
 }

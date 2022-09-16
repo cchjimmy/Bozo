@@ -67,9 +67,13 @@ table {
 .table-container {
   overflow: auto;
   background-color: var(--background-color);
+  margin: 10px;
+  padding: 10px;
+  border-radius: 10px;
 }
 
-button, select {
+button,
+select {
   border: none;
   padding: 5px;
   border-radius: 5px;

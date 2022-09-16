@@ -11,7 +11,6 @@ export default class Engine {
     zoom: 3,
     showFps: true,
     showQuadtree: true,
-    uiTheme: "dark"
   }) {
     this.options = {
       resolution: { width: 848, height: 480 },
@@ -21,7 +20,6 @@ export default class Engine {
       zoom: 3,
       showFps: true,
       showQuadtree: true,
-      uiTheme: "dark"
     };
     if (options) {
       for (let option in options) {
@@ -30,6 +28,7 @@ export default class Engine {
     }
     this.ecs = new ECS;
     this.renderer = new Canvas2D;
+    this._isLooping = false;
   }
 
   init() {
@@ -44,24 +43,28 @@ export default class Engine {
     this.renderer.canvas.classList.add("centered");
 
     window.onresize = () => {
-      this.isLooping = false;
+      this._isLooping = false;
       debounce({
         func: () => {
-          this.isLooping = true;
+          this._isLooping = true;
         }
       });
     }
-    this.isLooping = true;
-    this.loop();
+
+    this._isLooping = true;
+    this.animate();
+  }
+
+  animate() {
+    // draw only when not resizing
+    if (this.isLooping) {
+      this.renderer.clear();
+      this.loop();
+    }
+    requestAnimationFrame(() => { this.animate(); });
   }
 
   loop() {
-    // draw only when not resizing
-    if (this.isLooping) {
-      this.renderer.clear("blue");
 
-      this.renderer.context.fillRect(0, 0, 10, 10);
-    }
-    requestAnimationFrame(() => { this.loop(); });
   }
 }

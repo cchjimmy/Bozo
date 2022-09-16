@@ -1,25 +1,22 @@
 export default class GuiMaker {
   remove(selector = "") {
     let element = this.get(selector);
-    if (element) {
-      element.remove();
-    }
+    if (!element) return;
+    element.remove();
   }
 
   update(selector = "", innerHTML) {
     let element = this.get(selector);
-    if (element) {
-      element.innerHTML = innerHTML;
-    }
+    if (!element) return;
+    element.innerHTML = innerHTML;
   }
 
   // credit https://codesource.io/how-to-convert-a-string-to-html-in-javascript/
-  add(parentSelector = "", param) {
+  add(parentSelector = "", innerHTML) {
     let parent = this.get(parentSelector);
-    if (parent) {
-      parent.insertAdjacentHTML("beforeend", param);
-      return parent.lastChild;
-    }
+    if (!parent) return;
+    parent.insertAdjacentHTML("beforeend", innerHTML);
+    return parent.lastChild;
   }
 
   get(selector = "") {

@@ -3,20 +3,24 @@
 
 export default class ECS {
   constructor() {
-    this.worlds = {};
+    this.worlds = [];
   }
 
   createWorld() {
     const world = new this.World(this);
-    this.worlds[world.id] = world;
+    this.worlds.push(world);
     return world;
   }
 
+  /**
+   * removes a world
+   * @param {string} id 
+   * @returns the removed world
+   */
   removeWorld(id) {
-    if (!this.worlds[id]) {
-      return;
+    for (let i = 0; i < this.worlds.length; i++) {
+      if (this.worlds[i].id === id) return this.worlds.splice(i, 1);
     }
-    delete this.worlds[id];
   }
 }
 
@@ -28,9 +32,7 @@ ECS.prototype.Component = class Component {
 
   copy(component) {
     for (let prop in component) {
-      if (!this.hasOwnProperty(prop)) {
-        continue;
-      }
+      if (!this.hasOwnProperty(prop)) continue;
       if (typeof component[prop] == "object") {
         Object.assign(this[prop], component[prop]);
         continue;
@@ -96,18 +98,14 @@ ECS.prototype.Entity = class Entity {
   }
 
   addComponent(component) {
-    if (!component.prototype.isComponent && !component.prototype.isTagComponent || !this.world.registeredComponents[component.name] || this.hasComponent(component)) {
-      return this;
-    }
+    if (!component.prototype.isComponent && !component.prototype.isTagComponent || !this.world.registeredComponents[component.name] || this.hasComponent(component)) return this;
     this._components[component.name] = new this.world.registeredComponents[component.name];;
     debounce({ context: this.world, func: this.world.newSystemsQuery });
     return this;
   }
 
   removeComponent(component) {
-    if (!component.prototype.isComponent && !component.prototype.isTagComponent || !this.world.registeredComponents[component.name] || !this.hasComponent(component)) {
-      return this;
-    }
+    if (!component.prototype.isComponent && !component.prototype.isTagComponent || !this.world.registeredComponents[component.name] || !this.hasComponent(component)) return this;
     delete this._components[component.name];
     debounce({ context: this.world, func: this.world.newSystemsQuery });
     return this;
@@ -120,17 +118,13 @@ ECS.prototype.Entity = class Entity {
 
   hasAllComponents(components = []) {
     for (let i = 0; i < components.length; i++) {
-      if (!this.hasComponent(components[i])) {
-        return false;
-      }
+      if (!this.hasComponent(components[i])) return false;
     }
     return true;
   }
 
   getComponent(component, clone = false) {
-    if (!this.hasComponent(component)) {
-      return;
-    }
+    if (!this.hasComponent(component)) return;
     let comp = this._components[component.name];
     return clone ? comp.clone() : comp;
   }
@@ -140,6 +134,7 @@ ECS.prototype.World = class World {
   constructor(ecs) {
     this.ecs = ecs;
     this._id = uuidv4();
+    this._title = "New world";
     this.registeredComponents = {};
     this.assemblages = {};
     this.registeredSystems = {};
@@ -167,18 +162,26 @@ ECS.prototype.World = class World {
     return this._id;
   }
 
+  get title() {
+    return this._title;
+  }
+
+  /**
+   * sets title of world
+   * @param {string} title
+   */
+  set setTitle(title) {
+    this._title = title;
+  }
+
   registerComponent(component) {
-    if (this.registeredComponents[component] || !component.prototype.isComponent && !component.prototype.isTagComponent) {
-      return this;
-    }
+    if (this.registeredComponents[component] || !component.prototype.isComponent && !component.prototype.isTagComponent) return this;
     this.registeredComponents[component.name] = component;
     return this;
   }
 
   registerSystem(system) {
-    if (this.registeredSystems[system] || !system.prototype.isSystem) {
-      return this;
-    }
+    if (this.registeredSystems[system] || !system.prototype.isSystem) return this;
     this.registeredSystems[system.name] = new system(this);
     this.enableSystem(system);
     return this;
@@ -194,9 +197,7 @@ ECS.prototype.World = class World {
       this.entities.push(e);
       return e;
     }
-    if (!this.assemblages[assemblageName]) {
-      return;
-    }
+    if (!this.assemblages[assemblageName]) return;
     return this.assemblages[assemblageName]();
   }
 
@@ -205,9 +206,7 @@ ECS.prototype.World = class World {
   }
 
   newAssemblage(name = "", components = []) {
-    if (!components.length) {
-      return;
-    }
+    if (!components.length) return;
     this.assemblages[name] = () => {
       let e = this.createEntity();
       for (let i = 0; i < components.length; i++) {
@@ -218,13 +217,11 @@ ECS.prototype.World = class World {
   }
 
   update(param) {
-    if (!this.isEnabled) {
-      return;
-    }
+    if (!this.isEnabled) return;
+    
     for (let rs in this.registeredSystems) {
-      if (this.registeredSystems[rs].isEnabled && this.registeredSystems[rs].isReady) {
-        this.registeredSystems[rs].update(param);
-      }
+      if (!this.registeredSystems[rs].isEnabled || !this.registeredSystems[rs].isReady) continue;
+      this.registeredSystems[rs].update(param);
     }
   }
 
@@ -236,9 +233,8 @@ ECS.prototype.World = class World {
   query(components = []) {
     let results = [];
     for (let entity in this.entities) {
-      if (this.entities[entity].hasAllComponents(components)) {
-        results.push(this.entities[entity]);
-      }
+      if (!this.entities[entity].hasAllComponents(components)) continue;
+      results.push(this.entities[entity]);
     }
     return results;
   }
