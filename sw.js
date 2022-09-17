@@ -3,7 +3,7 @@ const cacheName = "cache";
 const resourcesToPrecache = [
   './',
   './entry.js',
-  // './res/icons/android-chrome-192x192.png',
+  './res/icons/android-chrome-192x192.png',
   './res/icons/favicon-16x16.png',
   './res/icons/favicon-32x32.png',
   './site.webmanifest',
