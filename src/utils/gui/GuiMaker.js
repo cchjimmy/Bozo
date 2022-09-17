@@ -27,14 +27,14 @@ export default class GuiMaker {
     return document.querySelectorAll(selector);
   }
 
-  drawTable({ parentSelector = "", tableAttributes = "", td = [], colgroupAttributes = [], caption = "" }) {
+  drawTable({ parentSelector = "", td = [], trAttributes = [], tableAttributes = "", colgroupAttributes = [], caption = "" }) {
     let Column, Row, Colgroup;
     Column = Row = Colgroup = "";
     for (let i = 0; i < td.length; i++) {
       for (let j = 0; j < td[i].length; j++) {
         Row += `<td>${td[i][j]}</td>`;
       }
-      Column += `<tr>${Row}</tr>`;
+      Column += `<tr ${trAttributes[i]}>${Row}</tr>`;
       Row = "";
     }
     for (let i = 0; i < colgroupAttributes.length; i++) {

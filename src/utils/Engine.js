@@ -36,8 +36,6 @@ export default class Engine {
     this.renderer.setPixelDensity = this.options.pixelDensity;
     this.renderer.setZoom(this.options.zoom);
 
-    this.renderer.canvas.classList.add("centered");
-
     window.onresize = () => {
       this._isLooping = false;
       debounce({
