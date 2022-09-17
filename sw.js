@@ -1,5 +1,5 @@
 // credit: https://www.youtube.com/watch?v=dXuvT4oollQ
-const cacheName = "cach-v1";
+const cacheName = "cache";
 const resourcesToPrecache = [
   '/',
   '/index.html',
@@ -25,9 +25,9 @@ const resourcesToPrecache = [
 self.addEventListener("install", e => {
   self.skipWaiting();
   e.waitUntil(
-    caches.open(cacheName).then(cache => {
-      return cache.addAll(resourcesToPrecache);
-    })
+    caches.open(cacheName).then(
+      cache => cache.addAll(resourcesToPrecache)
+    )
   );
 });
 
@@ -39,13 +39,15 @@ self.onactivate = (e) => {
 // credit: https://medium.com/swlh/how-to-make-your-web-apps-work-offline-be6f27dd28e
 self.onfetch = (e) => {
   e.respondWith(
-    caches.match(e.request).then(
-      response => response
-    ).catch(fetch(e.request).then(
-      response => {
-        caches.open(cacheName).then(
-          cache => cache.put(e.request, response)
+    caches.open(cacheName).then(
+      cache => cache.match(e.request).catch(
+        fetch(e.request).then(
+          response => {
+            cache.put(e.request, response.clone());
+            return response;
+          }
         )
-      }).catch((err) => { console.log(err); }))
+      )
+    )
   )
 }
