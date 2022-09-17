@@ -6,8 +6,9 @@ export default class ECS {
     this.worlds = [];
   }
 
-  createWorld() {
+  createWorld(isEnabled = true) {
     const world = new this.World(this);
+    isEnabled ? world.enable() : world.disable();
     this.worlds.push(world);
     return world;
   }

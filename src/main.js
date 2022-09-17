@@ -1,5 +1,5 @@
-import GuiMaker from "./utilities/gui/GuiMaker.js";
-import Engine from "./utilities/Engine.js";
+import GuiMaker from "./utils/gui/GuiMaker.js";
+import Engine from "./utils/Engine.js";
 import { files } from "./files.js";
 
 const GM = new GuiMaker;
@@ -16,7 +16,7 @@ export default function generatePage() {
   defineMenus();
   attachEventListeners();
 
-  switchMenu(menus.main);
+  switchMenu(menus.editor);
 
   E.init();
 
@@ -82,8 +82,8 @@ function defineMenus() {
     td: [
       [`
         <div style="text-align:center;">
-          <div id="editor-settings-tab" class="tab has-menu" style="width:40px; font-size:30px;">☰</div>
-          <div class="tab" style="width:40px; font-size:30px;">➤</div>
+          <div id="editor-settings-tab" class="tab has-menu" style="width:40px; font-size:30px; height:100%;">☰</div>
+          <div class="tab" style="width:40px; font-size:30px; height:100%;">➤</div>
         </div>
         `, `
         <div class="scrollmenu">
@@ -245,7 +245,7 @@ function attachEventListeners() {
 
   // scenes
   GM.get("#new-scene-button").onclick = () => {
-    E.ecs.createWorld();
+    E.ecs.createWorld(false);
     GM.update("#all-scenes", '');
 
     for (let i = 0; i < E.ecs.worlds.length; i++) {
@@ -263,7 +263,17 @@ function attachEventListeners() {
           ['id:', `<div style="white-space:nowrap; overflow:auto;">${world.id}</div>`],
         ],
         colgroupAttributes: [`style="width:100px;"`]
-      });
+      })
+      // let element = GM.get(`#scene-info-${i}`);
+      // element.onclick = () => {
+      //   if (world.isEnabled) {
+      //     element.toggleAttribute("style");
+      //     world.disable();
+      //   } else {
+      //     element.setAttribute("style", `background:green;`);
+      //     world.enable();
+      //   }
+      // };
       GM.get(`#scene-info-${i}-button`).onclick = () => {
         GM.remove(`#scene-${i}`);
         E.ecs.removeWorld(world.id);

@@ -9,8 +9,6 @@ export default class Engine {
     unitScale: 10,
     frameRate: 30,
     zoom: 3,
-    showFps: true,
-    showQuadtree: true,
   }) {
     this.options = {
       resolution: { width: 848, height: 480 },
@@ -18,8 +16,6 @@ export default class Engine {
       unitScale: 10,
       frameRate: 30,
       zoom: 3,
-      showFps: true,
-      showQuadtree: true,
     };
     if (options) {
       for (let option in options) {

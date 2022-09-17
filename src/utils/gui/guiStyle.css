@@ -17,7 +17,7 @@
 }
 
 .dark {
-  --body-background-color: black;
+  --body-background-color: #131212;
   --background-color: rgba(30, 30, 30);
   --header-background: #181818;
   --primary-text-color: #FFFFFF;
