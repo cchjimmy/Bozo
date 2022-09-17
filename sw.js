@@ -1,21 +1,21 @@
 // credit: https://www.youtube.com/watch?v=dXuvT4oollQ
 const cacheName = "cache";
 const resourcesToPrecache = [
-  '/',
-  '/entry.js',
-  '/res/icons/android-chrome-192x192.png',
-  '/res/icons/favicon-16x16.png',
-  '/res/icons/favicon-32x32.png',
-  '/site.webmanifest',
-  '/src/files.js',
-  '/src/main.js',
-  '/src/utils/Canvas2D.js',
-  '/src/utils/ECS.js',
-  '/src/utils/Engine.js',
-  '/src/utils/debounce.js',
-  '/src/utils/gui/GuiMaker.js',
-  '/src/utils/gui/guiStyle.css',
-  '/style.css',
+  './',
+  './entry.js',
+  './res/icons/android-chrome-192x192.png',
+  './res/icons/favicon-16x16.png',
+  './res/icons/favicon-32x32.png',
+  './site.webmanifest',
+  './src/files.js',
+  './src/main.js',
+  './src/utils/Canvas2D.js',
+  './src/utils/ECS.js',
+  './src/utils/Engine.js',
+  './src/utils/debounce.js',
+  './src/utils/gui/GuiMaker.js',
+  './src/utils/gui/guiStyle.css',
+  './style.css',
 ]
 
 self.addEventListener("install", e => {

@@ -229,12 +229,16 @@ function attachEventListeners() {
       })
     }
   })
+  window.addEventListener("appinstalled", () => {
+    console.log("app installed");
+    deferredPrompt = null;
+  })
 
   // tab behavior
   const tabs = GM.getAll(".tab");
   for (let i = 0; i < tabs.length; i++) {
     tabs[i].onclick = () => {
-      tabs[i].classList.contains("active") ? tabs[i].classList.remove("active") : tabs[i].classList.add("active");
+      tabs[i].classList.toggle("active");
     };
   }
 
