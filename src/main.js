@@ -1,6 +1,7 @@
 import GuiMaker from "./utils/gui/GuiMaker.js";
 import Engine from "./utils/Engine.js";
 import { files } from "./files.js";
+import debounce from "./utils/debounce.js";
 
 const GM = new GuiMaker;
 const E = new Engine;
@@ -8,6 +9,19 @@ const menus = {
   // main: "#main",
   editor: "#editor",
 }
+// credit for symbols https://www.toptal.com/designers/htmlarrows/symbols/#, https://www.rapidtables.com/web/html/html-codes.html#
+const symbols = {
+  circle: {
+    normal: '●',
+    outline: '◯',
+    cross: '⨂'
+  },
+  play: '‣',
+  bars: '☰',
+  undefined: 'N/A',
+  cross: 'x'
+}
+
 // credit: https://medium.com/hypersphere-codes/detecting-system-theme-in-javascript-css-react-f6b961916d48
 const darkThemeMq = window.matchMedia("(prefers-color-scheme: dark)");
 darkThemeMq.matches ? document.body.classList = "dark" : document.body.classList = "light";
@@ -61,7 +75,7 @@ function defineMenus() {
     parentSelector: "#new-project-prompt-list",
     td: [
       [`Project name:`, `<input id="project-title" placeholder="Project name" style="width:100%;"></input>`],
-      [`Location:`, `<div id="location-path" style="white-space:nowrap; width:100%; overflow:auto;">N/A</div>`],
+      [`Location:`, `<div id="location-path" style="white-space:nowrap; width:100%; overflow:auto;">${symbols.undefined}</div>`],
     ]
   });
   GM.add("#new-project-prompt-ui", `<div id="new-project-prompt-footer" style="margin:10px;"></div>`)
@@ -71,10 +85,9 @@ function defineMenus() {
   })
 
   // menu id="editor"
-  // credit for clipboard icon https://www.w3schools.com/icons/tryit.asp?filename=tryicons_fa-clipboard
   // credit for grid style https://dev.to/dawnind/3-ways-to-display-two-divs-side-by-side-3d8b
   // credit for input https://www.w3schools.com/tags/att_input_value.asp
-  // credit for symbols https://www.toptal.com/designers/htmlarrows/symbols/#
+
   let editorScrollMenuHeight = '53px';
   GM.add("body", `<div id="editor" style="display:none; width:100%; height:100%;"></div>`);
   GM.drawTable({
@@ -91,8 +104,8 @@ function defineMenus() {
     td: [
       [`
         <div style="text-align:center;">
-          <div id="settings-tab" class="tab" style="width:40px; font-size:30px; height:100%;">☰</div>
-          <div class="tab" style="width:40px; font-size:30px; height:100%;">➤</div>
+          <div id="settings-tab" class="tab" style="width:40px; font-size:30px; height:100%;">${symbols.bars}</div>
+          <div class="tab" style="width:40px; font-size:30px; height:100%;">${symbols.play}</div>
         </div>
         `, `
         <div class="scrollmenu">
@@ -281,24 +294,52 @@ function attachEventListeners() {
     GM.drawTable({
       parentSelector: `#scene-info-${world.id}`,
       td: [
-        ['title:', `<div style="white-space:nowrap; overflow:auto;">${world.title}</div>`],
+        [`<div id="info-list-${world.id}"></div>`, `<div id="is-enabled-${world.id}" style="text-align:center;">${symbols.circle.outline}</div>`]
+      ],
+      colgroupAttributes: ['', `style="width:100px;"`]
+    })
+    world.isEnabled ? GM.update(`#is-enabled-${world.id}`, `<div style="color:green;">${symbols.circle.normal}</div>`) : GM.update(`#is-enabled-${world.id}`, symbols.circle.outline);
+
+    GM.drawTable({
+      parentSelector: `#info-list-${world.id}`,
+      td: [
+        ['title:', `<div id="world-title-${world.id}" style="white-space:nowrap; overflow:auto;" contenteditable>${world.title}</div>`],
         // ['id:', `<div style="white-space:nowrap; overflow:auto;">${world.id}</div>`],
       ],
       colgroupAttributes: [`style="width:100px;"`]
     })
-    // let element = GM.get(`#scene-info-${i}`);
-    // element.onclick = () => {
-    //   if (world.isEnabled) {
-    //     element.toggleAttribute("style");
-    //     world.disable();
-    //   } else {
-    //     element.setAttribute("style", `background:green;`);
-    //     world.enable();
-    //   }
-    // };
+    // docs on MutationObservers: https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
+    let target = GM.get(`#world-title-${world.id}`);
+    const observer = new MutationObserver((mutations, observer) => {
+      debounce({
+        func: () => {
+          world.setTitle = mutations[0].target.data;
+        },
+        timeout: 1000
+      })
+    })
+    observer.observe(target, {
+      subtree: true,
+      characterData: true
+    })
+
+    // enable world by clicking id="is-enabled-${world.id}" div
+    let element = GM.get(`#is-enabled-${world.id}`);
+    element.onclick = () => {
+      if (world.isEnabled) {
+        // update enable indicator
+        GM.update(`#is-enabled-${world.id}`, symbols.circle.outline);
+        world.disable();
+      } else {
+        // update enable indicator
+        GM.update(`#is-enabled-${world.id}`, `<div style="color:green;">${symbols.circle.normal}</div>`);
+        world.enable();
+      }
+    };
     GM.get(`#scene-info-${world.id}-remove`).onclick = () => {
       GM.remove(`#scene-${world.id}`);
       E.ecs.removeWorld(world.id);
+      observer.disconnect();
     }
   }
 

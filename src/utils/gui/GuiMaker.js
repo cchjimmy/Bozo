@@ -9,6 +9,7 @@ export default class GuiMaker {
     let element = this.get(selector);
     if (!element) return;
     element.innerHTML = innerHTML;
+    return element;
   }
 
   // credit https://codesource.io/how-to-convert-a-string-to-html-in-javascript/
