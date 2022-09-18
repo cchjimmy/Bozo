@@ -378,7 +378,6 @@ function attachEventListeners() {
       GM.get(`#scene-${world.id}-remove`).onclick = () => {
         GM.remove(`#scene-${world.id}`);
         E.ecs.removeWorld(world.id);
-        observer.disconnect();
       }
       GM.get(`#scene-${world.id}-enable`).onclick = () => {
         if (world.isEnabled) {
