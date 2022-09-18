@@ -1,7 +1,5 @@
 import GuiMaker from "./utils/gui/GuiMaker.js";
 import Engine from "./utils/Engine.js";
-import { files } from "./files.js";
-import debounce from "./utils/debounce.js";
 
 const GM = new GuiMaker;
 const E = new Engine;
@@ -9,6 +7,7 @@ const menus = {
   // main: "#main",
   editor: "#editor",
 }
+const themes = ['light', 'dark'];
 // credit for symbols https://www.toptal.com/designers/htmlarrows/symbols/#, https://www.rapidtables.com/web/html/html-codes.html#
 const symbols = {
   circle: {
@@ -16,10 +15,16 @@ const symbols = {
     outline: '◯',
     cross: '⨂'
   },
-  play: '‣',
-  bars: '☰',
+  play: '<i class="fa-solid fa-play"></i>',
+  bars: '<i class="fa-solid fa-bars"></i>',
   undefined: 'N/A',
-  cross: 'x'
+  cross: 'x',
+  download: '<i class="fa-solid fa-download"></i>',
+  pause: '<i class="fa-solid fa-pause"></i>',
+  expand: {
+    normal: '<i class="fa-solid fa-chevron-right"></i>',
+    expanded: '<i class="fa-solid fa-chevron-down"></i>'
+  }
 }
 
 // credit: https://medium.com/hypersphere-codes/detecting-system-theme-in-javascript-css-react-f6b961916d48
@@ -27,12 +32,11 @@ const darkThemeMq = window.matchMedia("(prefers-color-scheme: dark)");
 darkThemeMq.matches ? document.body.classList = "dark" : document.body.classList = "light";
 
 export default function generatePage() {
+  E.init();
   defineMenus();
   attachEventListeners();
-
+  E.renderer.changeCanvas(GM.get("canvas"));
   switchMenu(menus.editor);
-
-  E.init();
 
   setInterval(() => {
     guiUpdate();
@@ -104,8 +108,8 @@ function defineMenus() {
     td: [
       [`
         <div style="text-align:center;">
-          <div id="settings-tab" class="tab" style="width:40px; font-size:30px; height:100%;">${symbols.bars}</div>
-          <div class="tab" style="width:40px; font-size:30px; height:100%;">${symbols.play}</div>
+          <div id="settings-tab" class="tab" style="width:40px; font-size:20px; height:100%;">${symbols.bars}</div>
+          <div class="tab" style="width:40px; font-size:20px; height:100%;">${symbols.play}</div>
         </div>
         `, `
         <div class="scrollmenu">
@@ -146,27 +150,63 @@ function defineMenus() {
   GM.add("#settings", mask).onclick = () => {
     GM.get("#settings").style.display = 'none';
   };
-  GM.add("#settings", `<div id="settings-ui" style="height:100%; width:300px; position:absolute; overflow:hidden; background:var(--header-background);"></div>`);
+  GM.add("#settings", `<div id="settings-ui" style="height:100%; width:50%; min-width:270px; position:absolute; overflow:hidden; background:var(--header-background);"></div>`);
   GM.add("#settings-ui", `<div id="settings-header" style="margin:10px; height:${settingsHeaderHeight};"></div>`);
   GM.drawTable({
     parentSelector: "#settings-header",
     td: [
-      [`<div style="color:var(--primary-text-color); font-size:25px;">Settings</div>`, `<button id="settings-close-button" style="float:right;">close</button>`],
-    ]
+      [`<div style="color:var(--primary-text-color); font-size:25px; white-space:nowrap;"><div style="text-align:center; background:#ff8c00; line-height:${settingsHeaderHeight}; width:${settingsHeaderHeight}; height:${settingsHeaderHeight}; border-radius:${parseInt(settingsHeaderHeight) / 10}px; display:inline-block;">B</div> Settings</div>`, `<button id="settings-close-button" style="float:right;">close</button>`],
+    ],
+    colgroupAttributes: ['', 'style="width:60px;"']
   });
   GM.add("#settings-ui", `<div id="settings-list" style="overflow:auto; height:calc(100% - ${settingsHeaderHeight} - 30px);" class="table-container"><div>`)
   GM.drawTable({
     parentSelector: "#settings-list",
     td: [
-      [`<button id="a2hs-button" style="white-space:nowrap; width:200%; padding:5px;">Add To Home Screen</button>`],
-      ['Themes', `<select id="theme-select" style="padding:5px;"><option>dark</option><option>light</option></select>`],
-    ]
+      [`<button id="a2hs-button" style="white-space:nowrap; width:200%; padding:5px;">${symbols.download} Install Bozo</button>`],
+      ['Themes', `<select id="theme-select" style="padding:5px;"></select>`],
+      [`<div style="width:200%;">Renderer <span>${symbols.expand.normal}</span></div>`],
+      [`<div class="table-container" id="renderer-options" style="display:none; width:200%; background:var(--header-background);"></div>`]
+    ],
+    trAttributes: ['', '', 'id="renderer-options-collapse" class="collapsible"']
   });
 
-  var themeOptions = GM.getAll("#theme-select option");
-  for (let i = 0; i < themeOptions.length; i++) {
-    if (themeOptions[i].innerText !== document.body.classList) return;
-    themeOptions[i].toggleAttribute("selected");
+  for (let i = 0; i < themes.length; i++) {
+    let option = GM.add("#theme-select", `<option>${themes[i]}</option>`);
+    if (!document.body.classList.contains(option.innerText)) continue;
+    option.toggleAttribute("selected");
+  }
+  GM.drawTable({
+    parentSelector: "#renderer-options",
+    td: [
+      [`<div id="resolution-vec2-input"></div>`],
+      [`<div id="display-size-vec2-input"></div>`],
+      ['<div id="clear-color-input"></div>'],
+      [`<div id="renderer-options-apply" style="float:right;"><button>apply</button></div>`]
+    ],
+  })
+  drawVec2Input("resolution", `#resolution-vec2-input`, { x: E.renderer.canvas.width, y: E.renderer.canvas.height });
+  drawVec2Input("display size", `#display-size-vec2-input`, { x: parseInt(E.renderer.canvas.style.width), y: parseInt(E.renderer.canvas.style.height) });
+  drawColorInput("clear color", "#clear-color-input");
+  function drawColorInput(name, parentSelector, defaultValue = "#000000") {
+    GM.drawTable({
+      parentSelector,
+      td: [
+        [`${name}:`, `<input id="${parentSelector.slice(1)}-color" type="color" value="${defaultValue}"></input>`]
+      ]
+    })
+  }
+  function drawVec2Input(name, parentSelector, defaultValues = { x: 0, y: 0 }) {
+    GM.add(parentSelector, `<div id=""></div>`)
+    GM.drawTable({
+      parentSelector,
+      td: [
+        [`<div style="white-space:nowrap;">${name}:</div>`],
+        [`<div style="background:red;">x</div>`, `<div style="background:green;">y</div>`],
+        [`<input id="${parentSelector.slice(1)}-x" type="number" style="width:100%;" value="${defaultValues.x}"></input>`, `<input id="${parentSelector.slice(1)}-y" type="number" style="width:100%;" value="${defaultValues.y}"></input>`]
+      ],
+      tableAttributes: `style="width:100%;"`
+    });
   }
 }
 
@@ -217,35 +257,55 @@ function attachEventListeners() {
   //   GM.get(`#new-project-prompt`).style.display = "none";
   // }
 
-  // settings
-  GM.get("#settings-close-button").onclick = () => {
-    GM.get("#settings").style.display = "none";
-  }
-
-  GM.get('#theme-select').onchange = () => {
-    document.body.classList = GM.get('#theme-select').value;
-  }
-
-  // credit: https://github.com/mdn/pwa-examples/tree/master/a2hs
-  let deferredPrompt;
-  const a2hs = GM.get("#a2hs-button");
-  a2hs.style.display = "none";
-  window.addEventListener("beforeinstallprompt", (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    a2hs.style.display = "block";
-    a2hs.onclick = () => {
-      a2hs.style.display = "none";
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then(() => {
-        deferredPrompt = null;
-      })
+  {
+    // settings
+    GM.get("#settings-close-button").onclick = () => {
+      GM.get("#settings").style.display = "none";
     }
-  })
-  window.addEventListener("appinstalled", () => {
-    console.log("app installed");
-    deferredPrompt = null;
-  })
+    GM.get('#theme-select').onchange = () => {
+      document.body.classList = GM.get('#theme-select').value;
+    }
+    GM.get("#renderer-options-collapse").onclick = () => {
+      let span = GM.get("#renderer-options-collapse span");
+      let option = GM.get(`#renderer-options`);
+      if (option.style.display == "none") {
+        span.innerHTML = symbols.expand.expanded;
+        option.style.display = "block";
+      } else {
+        span.innerHTML = symbols.expand.normal;
+        option.style.display = "none";
+      }
+    }
+    GM.get("#renderer-options").onchange = () => {
+      if (!GM.get("#renderer-unapplied-changes")) GM.add("#renderer-options", `<div id="renderer-unapplied-changes">There are unapplied changes</div>`)
+    }
+    GM.get("#renderer-options-apply").onclick = () => {
+      E.renderer.setResolution = { width: GM.get("#resolution-vec2-input-x").value, height: GM.get("#resolution-vec2-input-y").value };
+      E.renderer.setSize = { width: GM.get("#display-size-vec2-input-x").value, height: GM.get("#display-size-vec2-input-y").value };
+      E.renderer.setClearColor = GM.get("#clear-color-input-color").value;
+      GM.remove("#renderer-unapplied-changes");
+    }
+    // credit: https://github.com/mdn/pwa-examples/tree/master/a2hs
+    let deferredPrompt;
+    const a2hs = GM.get("#a2hs-button");
+    a2hs.style.display = "none";
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      a2hs.style.display = "block";
+      a2hs.onclick = () => {
+        a2hs.style.display = "none";
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(() => {
+          deferredPrompt = null;
+        })
+      }
+    })
+    window.addEventListener("appinstalled", () => {
+      console.log("app installed");
+      deferredPrompt = null;
+    })
+  }
 
   // tab behavior
   const tabs = GM.getAll(".tab");
@@ -276,70 +336,59 @@ function attachEventListeners() {
       last = current;
     }
   }
-
-  // editor-settings
   GM.get('#settings-tab').onclick = () => {
     GM.get('#settings').style.display = "block";
   }
 
   // scenes
-  GM.get("#new-scene-button").onclick = () => {
-    let world = E.ecs.createWorld(false);
-    GM.drawTable({
-      parentSelector: "#all-scenes",
-      td: [[`<div id="scene-info-${world.id}" class="table-container"></div>`, `<div style="text-align:center;"><button id="scene-info-${world.id}-remove">remove</button></div>`]],
-      colgroupAttributes: [, `style="width:70px;"`],
-      tableAttributes: `id="scene-${world.id}"`
-    });
-    GM.drawTable({
-      parentSelector: `#scene-info-${world.id}`,
-      td: [
-        [`<div id="info-list-${world.id}"></div>`, `<div id="is-enabled-${world.id}" style="text-align:center;">${symbols.circle.outline}</div>`]
-      ],
-      colgroupAttributes: ['', `style="width:100px;"`]
-    })
-    world.isEnabled ? GM.update(`#is-enabled-${world.id}`, `<div style="color:green;">${symbols.circle.normal}</div>`) : GM.update(`#is-enabled-${world.id}`, symbols.circle.outline);
-
-    GM.drawTable({
-      parentSelector: `#info-list-${world.id}`,
-      td: [
-        ['title:', `<div id="world-title-${world.id}" style="white-space:nowrap; overflow:auto;" contenteditable>${world.title}</div>`],
-        // ['id:', `<div style="white-space:nowrap; overflow:auto;">${world.id}</div>`],
-      ],
-      colgroupAttributes: [`style="width:100px;"`]
-    })
-    // docs on MutationObservers: https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
-    let target = GM.get(`#world-title-${world.id}`);
-    const observer = new MutationObserver((mutations, observer) => {
-      debounce({
-        func: () => {
-          world.setTitle = mutations[0].target.data;
-        },
-        timeout: 1000
+  {
+    GM.get("#new-scene-button").onclick = () => {
+      let world = E.ecs.createWorld(false);
+      GM.drawTable({
+        parentSelector: "#all-scenes",
+        td: [[`<div id="scene-info-${world.id}" class="table-container"></div>`, `<div id="scene-buttons-${world.id}" style="text-align:center;"></div>`]],
+        colgroupAttributes: [, `style="width:70px;"`],
+        tableAttributes: `id="scene-${world.id}"`
+      });
+      GM.drawTable({
+        parentSelector: `#scene-buttons-${world.id}`,
+        td: [
+          [`<button id="scene-${world.id}-enable">enable</button>`],
+          [`<button id="scene-${world.id}-remove">remove</button>`],
+        ]
       })
-    })
-    observer.observe(target, {
-      subtree: true,
-      characterData: true
-    })
-
-    // enable world by clicking id="is-enabled-${world.id}" div
-    let element = GM.get(`#is-enabled-${world.id}`);
-    element.onclick = () => {
-      if (world.isEnabled) {
-        // update enable indicator
-        GM.update(`#is-enabled-${world.id}`, symbols.circle.outline);
-        world.disable();
-      } else {
-        // update enable indicator
-        GM.update(`#is-enabled-${world.id}`, `<div style="color:green;">${symbols.circle.normal}</div>`);
-        world.enable();
+      GM.drawTable({
+        parentSelector: `#scene-info-${world.id}`,
+        td: [
+          [`<div id="info-list-${world.id}"></div>`, `<div id="is-enabled-${world.id}" style="text-align:center;">${symbols.circle.outline}</div>`]
+        ],
+        colgroupAttributes: ['', `style="width:70px;"`]
+      })
+      GM.drawTable({
+        parentSelector: `#info-list-${world.id}`,
+        td: [
+          ['title:', `<input id="world-title-${world.id}" style="width:100%; padding:5px; background:var(--body-background-color);" value="${world.title}"></input>`],
+          ['id:', `<div style="white-space:nowrap; overflow:auto;">${world.id}</div>`],
+        ],
+        colgroupAttributes: [`style="width:80px;"`]
+      })
+      GM.get(`#world-title-${world.id}`).onchange = () => {
+        world.setTitle = GM.get(`#world-title-${world.id}`).value;
       }
-    };
-    GM.get(`#scene-info-${world.id}-remove`).onclick = () => {
-      GM.remove(`#scene-${world.id}`);
-      E.ecs.removeWorld(world.id);
-      observer.disconnect();
+      GM.get(`#scene-${world.id}-remove`).onclick = () => {
+        GM.remove(`#scene-${world.id}`);
+        E.ecs.removeWorld(world.id);
+        observer.disconnect();
+      }
+      GM.get(`#scene-${world.id}-enable`).onclick = () => {
+        if (world.isEnabled) {
+          GM.update(`#is-enabled-${world.id}`, symbols.circle.outline);
+          world.disable();
+        } else {
+          GM.update(`#is-enabled-${world.id}`, `<div style="color:lightgreen;">${symbols.circle.normal}</div>`);
+          world.enable();
+        }
+      }
     }
   }
 

@@ -219,7 +219,6 @@ ECS.prototype.World = class World {
 
   update(param) {
     if (!this.isEnabled) return;
-    
     for (let rs in this.registeredSystems) {
       if (!this.registeredSystems[rs].isEnabled || !this.registeredSystems[rs].isReady) continue;
       this.registeredSystems[rs].update(param);

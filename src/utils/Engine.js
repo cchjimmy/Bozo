@@ -28,13 +28,12 @@ export default class Engine {
   }
 
   init() {
-    this.renderer.changeCanvas(document.querySelector("canvas"));
     if (!this.renderer.context) return;
 
-    this.renderer.setResolution(this.options.resolution.width, this.options.resolution.height);
+    this.renderer.setResolution = this.options.resolution;
     this.renderer.setUnitScale = this.options.unitScale;
     this.renderer.setPixelDensity = this.options.pixelDensity;
-    this.renderer.setZoom(this.options.zoom);
+    this.renderer.setZoom = this.options.zoom;
 
     window.onresize = () => {
       this._isLooping = false;
@@ -51,7 +50,7 @@ export default class Engine {
 
   animate() {
     // draw only when not resizing
-    if (this.isLooping) {
+    if (this._isLooping) {
       this.renderer.clear();
       this.loop();
     }

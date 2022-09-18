@@ -5,20 +5,33 @@ export default class Canvas2D {
     this._unitScale = 10;
     this._pixelDensity = 1;
     this._clearColor = "black";
+    this._zoom = 1;
+    this._resolution = {
+      width: this.canvas.width,
+      height: this.canvas.height
+    }
+    this._size = {
+      width: parseInt(this.canvas.style.width),
+      height: parseInt(this.canvas.style.height)
+    }
   }
 
   /**
    * sets resolution of canvas
-   * @param {number} width 
-   * @param {number} height 
+   * @param {{ width:number, height:number }} resolution
    */
-  setResolution(width, height) {
-    this.canvas.width = width;
-    this.canvas.height = height;
+  set setResolution(resolution = { width: this.canvas.width, height: this.canvas.height }) {
+    this._resolution = resolution
+    this.canvas.width = resolution.width;
+    this.canvas.height = resolution.height;
+  }
+
+  get resolution() {
+    return this._resolution;
   }
 
   /**
-   * @param {(arg0: number) => void} scale
+   * @param {number} scale
    */
   set setUnitScale(scale) {
     this._unitScale = scale;
@@ -29,14 +42,14 @@ export default class Canvas2D {
   }
 
   /**
-   * @param {(arg0: number) => void} pixelDensity
+   * @param {number} pixelDensity
    */
   set setPixelDensity(pixelDensity) {
     this._pixelDensity = pixelDensity;
     let oldW = this.canvas.width;
     let oldH = this.canvas.height;
-    this.setResolution(oldW * this._pixelDensity, oldH * this._pixelDensity);
-    this.setSize(oldW, oldH);
+    this.setResolution = { width: oldW * this._pixelDensity, height: oldH * this._pixelDensity };
+    this.setSize = { width: oldW, height: oldH };
   }
 
   get pixelDensity() {
@@ -45,16 +58,24 @@ export default class Canvas2D {
 
   /**
    * sets drawn size of canvas (CSS)
-   * @param {number} width 
-   * @param {number} height 
+   * @param {{ width: number; height: number; }} size
    */
-  setSize(width, height) {
-    this.canvas.style.width = `${width}px`;
-    this.canvas.style.height = `${height}px`;
+  set setSize(size) {
+    this._size = size;
+    this.canvas.style.width = `${size.width}px`;
+    this.canvas.style.height = `${size.height}px`;
   }
 
-  setZoom(zoom) {
+  /**
+   * @param {number} zoom
+   */
+  set setZoom(zoom) {
+    this._zoom = zoom;
     this.context.scale(zoom, zoom);
+  }
+
+  get zoom() {
+    return this._zoom;
   }
 
   clear() {
@@ -65,6 +86,10 @@ export default class Canvas2D {
   }
 
   changeCanvas(canvas) {
+    canvas.width = this.canvas.width;
+    canvas.style.width = this.canvas.style.width;
+    canvas.height = this.canvas.height;
+    canvas.style.height = this.canvas.style.height;
     this.canvas = canvas;
     this.context = this.canvas.getContext("2d", { alpha: false });
   }
@@ -73,7 +98,14 @@ export default class Canvas2D {
     document.querySelector(parentSelector).appendChild(this.canvas);
   }
 
-  set clearColor(color) {
+  get clearColor() {
+    return this._clearColor;
+  }
+
+  /**
+   * @param {string} color
+   */
+  set setClearColor(color) {
     this._clearColor = color;
   }
 }

@@ -2,21 +2,22 @@
 <html lang="en">
 
 <head>
-  <link rel="apple-touch-icon" sizes="180x180" href="res/icons/apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="res/icons/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="res/icons/favicon-16x16.png">
-  <link rel="manifest" href="site.webmanifest">
+  <link rel="apple-touch-icon" sizes="180x180" href="./res/icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="./res/icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="./res/icons/favicon-16x16.png">
+  <link rel="manifest" href="./site.webmanifest">
 
   <meta charset="utf-8">
   <meta name="HandheldFriendly" content="true" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Bozo</title>
 
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="./style.css">
+  <script src="https://kit.fontawesome.com/014dcd9a0e.js" crossorigin="anonymous"></script>
 </head>
 
 <body>
-  <script defer type="module" src="entry.js"></script>
+  <script defer type="module" src="./entry.js"></script>
 
   <script>
     document.addEventListener('gesturestart', function (e) {
@@ -39,7 +40,7 @@
   </script>
   <script>
     if (`serviceWorker` in navigator) {
-      navigator.serviceWorker.register(`sw.js`).then(() => { console.log("Service worker regisered") });
+      navigator.serviceWorker.register(`./sw.js`).then(() => { console.log("Service worker regisered") });
     }
   </script>
 </body>
