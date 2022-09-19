@@ -363,23 +363,17 @@ function attachEventListeners() {
     GM.drawTable({
       parentSelector: `#scene-info-${world.id}`,
       td: [
-        [`<div id="info-list-${world.id}"></div>`, `<div id="is-active-${world.id}" style="text-align:center;">${symbols.circle.outline}</div>`]
+        ['title:', `<input id="world-title-${world.id}" style="width:100%; padding:5px; background:var(--body-background-color);" value="${world.title}"></input>`],
+        ['id:', `<div style="white-space:nowrap; overflow:auto;">${world.id}</div>`],
+        ['active status:', `<div id="is-active-${world.id}">${symbols.circle.outline}</div>`]
       ],
-      colgroupAttributes: ['', `style="width:70px;"`]
+      colgroupAttributes: [`style="width:20%; min-width:100px;"`]
     })
     GM.drawTable({
       parentSelector: `#scene-info-${world.id}`,
       td: [
         [`<button id="scene-${world.id}-active" style="width:100%;">${symbols.check} set active</button>`, `<button id="scene-${world.id}-remove" style="width:100%;">${symbols.trashCan} remove</button>`],
       ],
-    })
-    GM.drawTable({
-      parentSelector: `#info-list-${world.id}`,
-      td: [
-        ['title:', `<input id="world-title-${world.id}" style="width:100%; padding:5px; background:var(--body-background-color);" value="${world.title}"></input>`],
-        ['id:', `<div style="white-space:nowrap; overflow:auto;">${world.id}</div>`],
-      ],
-      colgroupAttributes: [`style="width:70px;"`],
     })
     GM.get(`#world-title-${world.id}`).onchange = () => {
       world.setTitle = GM.get(`#world-title-${world.id}`).value;
