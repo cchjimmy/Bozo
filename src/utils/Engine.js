@@ -4,14 +4,14 @@ import Canvas2D from "./Canvas2D.js";
 
 export default class Engine {
   constructor(options = {
-    resolution: { width: 848, height: 480 },
+    resolution: { x: 848, y: 480 },
     pixelDensity: 1,
     unitScale: 10,
     frameRate: 30,
     zoom: 3,
   }) {
     this.options = {
-      resolution: { width: 848, height: 480 },
+      resolution: { x: 848, y: 480 },
       pixelDensity: 1,
       unitScale: 10,
       frameRate: 30,
@@ -30,7 +30,8 @@ export default class Engine {
   init() {
     if (!this.renderer.context) return;
 
-    this.renderer.setResolution = this.options.resolution;
+    this.renderer.setResolution = { x: this.options.resolution.x, y: this.options.resolution.y };
+    this.renderer.setSize = { x: this.options.resolution.x, y: this.options.resolution.y };
     this.renderer.setUnitScale = this.options.unitScale;
     this.renderer.setPixelDensity = this.options.pixelDensity;
     this.renderer.setZoom = this.options.zoom;

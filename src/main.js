@@ -35,8 +35,8 @@ export default function generatePage() {
   E.init();
   defineMenus();
   attachEventListeners();
-  E.renderer.changeCanvas(GM.get("canvas"));
   switchMenu(menus.editor);
+  E.renderer.changeCanvas(GM.get("canvas"));
 
   setInterval(() => {
     guiUpdate();
@@ -179,34 +179,40 @@ function defineMenus() {
   GM.drawTable({
     parentSelector: "#renderer-options",
     td: [
-      [`<div id="resolution-vec2-input"></div>`],
       [`<div id="display-size-vec2-input"></div>`],
+      [`<div id="pixel-density"></div>`],
       ['<div id="clear-color-input"></div>'],
       [`<div id="renderer-options-apply" style="float:right;"><button>apply</button></div>`]
     ],
   })
-  drawVec2Input("resolution", `#resolution-vec2-input`, { x: E.renderer.canvas.width, y: E.renderer.canvas.height });
-  drawVec2Input("display size", `#display-size-vec2-input`, { x: parseInt(E.renderer.canvas.style.width), y: parseInt(E.renderer.canvas.style.height) });
-  drawColorInput("clear color", "#clear-color-input");
+  drawVec2Input("display size", `#display-size-vec2-input`, { x: E.renderer.size.x, y: E.renderer.size.y });
+  drawNumberInput("pixel density", "#pixel-density", E.renderer.pixelDensity);
+  drawColorInput("clear color", "#clear-color-input", E.renderer.clearColor);
   function drawColorInput(name, parentSelector, defaultValue = "#000000") {
     GM.drawTable({
       parentSelector,
       td: [
-        [`${name}:`, `<input id="${parentSelector.slice(1)}-color" type="color" value="${defaultValue}"></input>`]
+        [`${name}:`, `<input id="${parentSelector.slice(1)}-color" type="color" value="${defaultValue}">`]
       ]
     })
   }
   function drawVec2Input(name, parentSelector, defaultValues = { x: 0, y: 0 }) {
-    GM.add(parentSelector, `<div id=""></div>`)
     GM.drawTable({
       parentSelector,
       td: [
         [`<div style="white-space:nowrap;">${name}:</div>`],
         [`<div style="background:red;">x</div>`, `<div style="background:green;">y</div>`],
-        [`<input id="${parentSelector.slice(1)}-x" type="number" style="width:100%;" value="${defaultValues.x}"></input>`, `<input id="${parentSelector.slice(1)}-y" type="number" style="width:100%;" value="${defaultValues.y}"></input>`]
+        [`<input id="${parentSelector.slice(1)}-x" type="number" style="width:100%;" value="${defaultValues.x}">`, `<input id="${parentSelector.slice(1)}-y" type="number" style="width:100%;" value="${defaultValues.y}">`]
       ],
-      tableAttributes: `style="width:100%;"`
     });
+  }
+  function drawNumberInput(name, parentSelector, defaultValue = 0) {
+    GM.drawTable({
+      parentSelector,
+      td: [
+        [`${name}:`, `<input id="${parentSelector.slice(1)}-number-input" type="number" value="${defaultValue}" style="width:100%;">`]
+      ],
+    })
   }
 }
 
@@ -280,9 +286,9 @@ function attachEventListeners() {
       if (!GM.get("#renderer-unapplied-changes")) GM.add("#renderer-options", `<div id="renderer-unapplied-changes">There are unapplied changes</div>`)
     }
     GM.get("#renderer-options-apply").onclick = () => {
-      E.renderer.setResolution = { width: GM.get("#resolution-vec2-input-x").value, height: GM.get("#resolution-vec2-input-y").value };
-      E.renderer.setSize = { width: GM.get("#display-size-vec2-input-x").value, height: GM.get("#display-size-vec2-input-y").value };
+      E.renderer.setSize = { x: parseInt(GM.get("#display-size-vec2-input-x").value), y: parseInt(GM.get("#display-size-vec2-input-y").value) };
       E.renderer.setClearColor = GM.get("#clear-color-input-color").value;
+      E.renderer.setPixelDensity = parseInt(GM.get("#pixel-density-number-input").value);
       GM.remove("#renderer-unapplied-changes");
     }
     // credit: https://github.com/mdn/pwa-examples/tree/master/a2hs
