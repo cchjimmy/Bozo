@@ -25,12 +25,12 @@ export default class Engine {
     this.ecs = new ECS;
     this.renderer = new Canvas2D;
     this._isLooping = false;
+    this.lastTime = performance.now();
   }
 
   init() {
     if (!this.renderer.context) return;
 
-    this.renderer.setResolution = { x: this.options.resolution.x, y: this.options.resolution.y };
     this.renderer.setSize = { x: this.options.resolution.x, y: this.options.resolution.y };
     this.renderer.setUnitScale = this.options.unitScale;
     this.renderer.setPixelDensity = this.options.pixelDensity;
@@ -40,6 +40,7 @@ export default class Engine {
       this._isLooping = false;
       debounce({
         func: () => {
+          this.renderer.handleFullscreen();
           this._isLooping = true;
         }
       });
@@ -53,12 +54,10 @@ export default class Engine {
     // draw only when not resizing
     if (this._isLooping) {
       this.renderer.clear();
-      this.loop();
+      let now = performance.now();
+      this.ecs.update(now - this.lastTime);
+      this.lastTime = now;
     }
     requestAnimationFrame(() => { this.animate(); });
-  }
-
-  loop() {
-
   }
 }

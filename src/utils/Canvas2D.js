@@ -8,6 +8,18 @@ export default class Canvas2D {
     this._zoom = 1;
     this._resolution = { x: 0, y: 0 };
     this._size = { x: 0, y: 0 };
+    this._isFullscreen = false;
+  }
+
+  /**
+   * @param {boolean} isFullscreen
+   */
+  set setFullscreen(isFullscreen) {
+    this._isFullscreen = isFullscreen;
+  }
+
+  get isFullscreen() {
+    return this._isFullscreen;
   }
 
   /**
@@ -79,7 +91,7 @@ export default class Canvas2D {
   /**
    * @param {string} color
    */
-   set setClearColor(color) {
+  set setClearColor(color) {
     this._clearColor = color;
   }
 
@@ -105,5 +117,11 @@ export default class Canvas2D {
 
   showCanvas(parentSelector) {
     document.querySelector(parentSelector).appendChild(this.canvas);
+  }
+
+  handleFullscreen() {
+    if (!this._isFullscreen) return;
+    this.setSize = { x: innerWidth, y: innerHeight };
+    this.setPixelDensity = this._pixelDensity;
   }
 }

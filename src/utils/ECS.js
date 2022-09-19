@@ -4,12 +4,14 @@
 export default class ECS {
   constructor() {
     this.worlds = [];
+    this._activeWorld
   }
 
   createWorld(isEnabled = true) {
     const world = new this.World(this);
     isEnabled ? world.enable() : world.disable();
     this.worlds.push(world);
+    this._activeWorld = world;
     return world;
   }
 
@@ -22,6 +24,11 @@ export default class ECS {
     for (let i = 0; i < this.worlds.length; i++) {
       if (this.worlds[i].id === id) return this.worlds.splice(i, 1);
     }
+  }
+
+  update(param) {
+    if (!this._activeWorld) return;
+    this._activeWorld.update(param);
   }
 }
 

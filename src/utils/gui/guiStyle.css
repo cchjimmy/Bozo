@@ -50,7 +50,7 @@
 }
 
 table tr td {
-  margin: 5px;
+  /* padding: 5px; */
   color: var(--secondary-text-color);
 }
 
@@ -66,8 +66,8 @@ table {
 .table-container {
   overflow: auto;
   background-color: var(--background-color);
-  margin: 10px;
-  padding: 10px;
+  margin: 5px;
+  padding: 5px;
   border-radius: 10px;
 }
 
@@ -99,7 +99,7 @@ input {
 }
 
 .tab {
-  background-color: var(--header-background);
+  /* background-color: var(--header-background); */
   display: inline-block;
   color: var(--primary-text-color);
   text-align: center;
@@ -124,4 +124,8 @@ input {
 
 .rounded {
   border-radius: 9999px;
+}
+
+.hidden {
+  display: none;
 }

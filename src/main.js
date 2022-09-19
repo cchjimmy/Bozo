@@ -8,7 +8,12 @@ const menus = {
   editor: "#editor",
 }
 const themes = ['light', 'dark'];
-// credit for symbols https://www.toptal.com/designers/htmlarrows/symbols/#, https://www.rapidtables.com/web/html/html-codes.html#
+/**
+ * credits for symbols
+ * https://www.toptal.com/designers/htmlarrows/symbols/#
+ * https://www.rapidtables.com/web/html/html-codes.html#
+ * https://fontawesome.com/search?o=r&m=free
+ */
 const symbols = {
   circle: {
     normal: '●',
@@ -21,10 +26,15 @@ const symbols = {
   cross: 'x',
   download: '<i class="fa-solid fa-download"></i>',
   pause: '<i class="fa-solid fa-pause"></i>',
-  expand: {
-    normal: '<i class="fa-solid fa-chevron-right"></i>',
-    expanded: '<i class="fa-solid fa-chevron-down"></i>'
-  }
+  chevron: {
+    right: '<i class="fa-solid fa-chevron-right"></i>',
+    down: '<i class="fa-solid fa-chevron-down"></i>',
+    up: '<i class="fa-solid fa-chevron-up"></i>',
+    left: '<i class="fa-solid fa-chevron-left"></i>'
+  },
+  trashCan: '<i class="fa-solid fa-trash-can"></i>',
+  powerOff: '<i class="fa-solid fa-power-off"></i>',
+  check: '<i class="fa-solid fa-check"></i>'
 }
 
 // credit: https://medium.com/hypersphere-codes/detecting-system-theme-in-javascript-css-react-f6b961916d48
@@ -92,17 +102,18 @@ function defineMenus() {
   // credit for grid style https://dev.to/dawnind/3-ways-to-display-two-divs-side-by-side-3d8b
   // credit for input https://www.w3schools.com/tags/att_input_value.asp
 
-  let editorScrollMenuHeight = '53px';
+  let editorScrollMenuHeight = '70px';
   GM.add("body", `<div id="editor" style="display:none; width:100%; height:100%;"></div>`);
+  GM.add("#editor", `<div class="centered"><canvas></canvas></div>`);
   GM.drawTable({
     parentSelector: "#editor",
     td: [
-      ['<canvas></canvas>'],
-      ['<div id="editor-scroll-menu"></div>']
+      [`<div id="scroll-menu-collapse" style="text-align:center; font-size:20px; height:50px; line-height:50px;">${symbols.chevron.up}</div>`],
+      [`<div id="editor-scroll-menu" style="height:${editorScrollMenuHeight}; background:var(--header-background);"></div>`]
     ],
-    trAttributes: [`style="text-align:center;"`, `style="height:${editorScrollMenuHeight}; background:var(--header-background);"`],
-    tableAttributes: `id="editor-ui" style="position:fixed; bottom:0px; height:100%;"`
+    tableAttributes: `style="position:absolute; bottom:0px;"`
   });
+  // GM.add("#editor", `<div id="editor-scroll-menu" style=" position:absolute; bottom:0px; height:${editorScrollMenuHeight}; background:var(--header-background);"></div>`)
   GM.drawTable({
     parentSelector: '#editor-scroll-menu',
     td: [
@@ -113,10 +124,10 @@ function defineMenus() {
         </div>
         `, `
         <div class="scrollmenu">
-          <div class="tab has-menu" id="scenes-tab">scenes</div>
-          <div class="tab has-menu" id="entities-tab">entities</div>
-          <div class="tab has-menu" id="components-tab">components</div>
-          <div class="tab has-menu" id="systems-tab">systems</div>
+          <div class="tab has-menu" id="scenes-tab" style="height:100%;">scenes</div>
+          <div class="tab has-menu" id="entities-tab" style="height:100%;">entities</div>
+          <div class="tab has-menu" id="components-tab" style="height:100%;">components</div>
+          <div class="tab has-menu" id="systems-tab" style="height:100%;">systems</div>
         </div>`],
     ],
     colgroupAttributes: [`style="width:120px;"`],
@@ -125,24 +136,30 @@ function defineMenus() {
   let hasMenuTabs = GM.getAll('.tab.has-menu');
   for (let i = 0; i < hasMenuTabs.length; i++) {
     // expecting id format: '...-tab'
-    GM.add('body', `<div id="${hasMenuTabs[i].id.slice(0, -4)}" style="overflow:auto; display:none; background:var(--header-background); width:100%; position:fixed; bottom:${editorScrollMenuHeight}; height:185px;"></div>`);
+    GM.add('body', `<div id="${hasMenuTabs[i].id.slice(0, -4)}" style="overflow:hidden; display:none; background:var(--header-background); width:100%; position:fixed; bottom:${editorScrollMenuHeight}; height:50%;"></div>`);
   }
 
   // submenu id="scenes"
-  GM.add("#scenes", `<div id="all-scenes" style="margin:10px;"></div>`);
-  GM.add("#scenes", `<div style="position:sticky; bottom:0px;"><button id="new-scene-button" style="text-align:center; width:100%;">New scene</button></div>`);
-
+  GM.drawTable({
+    parentSelector: "#scenes",
+    td: [
+      [`<div id="all-scenes" style="margin:10px; overflow:auto; height:100%;"></div>`],
+      [`<button id="new-scene-button" style="text-align:center; width:100%;">New scene</button>`]
+    ],
+    trAttributes: ['', 'style="height:30px;"'],
+    tableAttributes: `style="height:100%;"`
+  })
   // submenu id="entities"
   GM.add("#entities", `<div id="world-assemblages" style="margin:10px;"></div>`);
-  GM.add("#entities", `<div style="position:sticky; bottom:0px;"><button id="new-assemblage-button" style="text-align:center; width:100%;">New  entity</button></div>`);
+  GM.add("#entities", `<div style="position:fixed; width:100%; bottom:${editorScrollMenuHeight};"><button id="new-assemblage-button" style="text-align:center; width:100%;">New  entity</button></div>`);
 
   // submenu id="components"
   GM.add("#components", `<div id="world-components" style="margin:10px;"></div>`);
-  GM.add("#components", `<div style="position:sticky; bottom:0px;"><button id="new-component-button" style="text-align:center; width:100%;">New component</button></div>`);
+  GM.add("#components", `<div style="position:fixed; width:100%; bottom:${editorScrollMenuHeight};"><button id="new-component-button" style="text-align:center; width:100%;">New component</button></div>`);
 
   // submenu id="systems"
   GM.add("#systems", `<div id="all-scenes" style="margin:10px;"></div>`);
-  GM.add("#systems", `<div style="position:sticky; bottom:0px;"><button id="new-system-button" style="text-align:center; width:100%;">New system</button></div>`);
+  GM.add("#systems", `<div style="position:fixed; width:100%; bottom:${editorScrollMenuHeight};"><button id="new-system-button" style="text-align:center; width:100%;">New system</button></div>`);
 
   // menu id="settings"
   var settingsHeaderHeight = '30px';
@@ -151,7 +168,13 @@ function defineMenus() {
     GM.get("#settings").style.display = 'none';
   };
   GM.add("#settings", `<div id="settings-ui" style="height:100%; width:50%; min-width:270px; position:absolute; overflow:hidden; background:var(--header-background);"></div>`);
-  GM.add("#settings-ui", `<div id="settings-header" style="margin:10px; height:${settingsHeaderHeight};"></div>`);
+  GM.drawTable({
+    parentSelector: "#settings-ui",
+    td: [
+      [`<div id="settings-header" style="margin:10px; height:${settingsHeaderHeight};"></div>`],
+      [`<div id="settings-list" style="overflow:auto;" class="table-container"><div>`]
+    ]
+  })
   GM.drawTable({
     parentSelector: "#settings-header",
     td: [
@@ -159,61 +182,39 @@ function defineMenus() {
     ],
     colgroupAttributes: ['', 'style="width:60px;"']
   });
-  GM.add("#settings-ui", `<div id="settings-list" style="overflow:auto; height:calc(100% - ${settingsHeaderHeight} - 30px);" class="table-container"><div>`)
   GM.drawTable({
     parentSelector: "#settings-list",
     td: [
       [`<button id="a2hs-button" style="white-space:nowrap; width:200%; padding:5px;">${symbols.download} Install Bozo</button>`],
       ['Themes', `<select id="theme-select" style="padding:5px;"></select>`],
-      [`<div style="width:200%;">Renderer <span>${symbols.expand.normal}</span></div>`],
-      [`<div class="table-container" id="renderer-options" style="display:none; width:200%; background:var(--header-background);"></div>`]
-    ],
-    trAttributes: ['', '', 'id="renderer-options-collapse" class="collapsible"']
+      [`<div id="renderer-options" style="width:200%;"></div>`],
+    ]
   });
 
+  // themes
   for (let i = 0; i < themes.length; i++) {
     let option = GM.add("#theme-select", `<option>${themes[i]}</option>`);
     if (!document.body.classList.contains(option.innerText)) continue;
     option.toggleAttribute("selected");
   }
+
+  // renderer
+  drawCollapsible("Renderer", "#renderer-options", 'var(--header-background)');
   GM.drawTable({
-    parentSelector: "#renderer-options",
+    parentSelector: `#renderer-options-collapsible-container`,
     td: [
       [`<div id="display-size-vec2-input"></div>`],
       [`<div id="pixel-density"></div>`],
       ['<div id="clear-color-input"></div>'],
+      [`<div id="is-fullscreen"></div>`],
       [`<div id="renderer-options-apply" style="float:right;"><button>apply</button></div>`]
     ],
   })
   drawVec2Input("display size", `#display-size-vec2-input`, { x: E.renderer.size.x, y: E.renderer.size.y });
   drawNumberInput("pixel density", "#pixel-density", E.renderer.pixelDensity);
   drawColorInput("clear color", "#clear-color-input", E.renderer.clearColor);
-  function drawColorInput(name, parentSelector, defaultValue = "#000000") {
-    GM.drawTable({
-      parentSelector,
-      td: [
-        [`${name}:`, `<input id="${parentSelector.slice(1)}-color" type="color" value="${defaultValue}">`]
-      ]
-    })
-  }
-  function drawVec2Input(name, parentSelector, defaultValues = { x: 0, y: 0 }) {
-    GM.drawTable({
-      parentSelector,
-      td: [
-        [`<div style="white-space:nowrap;">${name}:</div>`],
-        [`<div style="background:red;">x</div>`, `<div style="background:green;">y</div>`],
-        [`<input id="${parentSelector.slice(1)}-x" type="number" style="width:100%;" value="${defaultValues.x}">`, `<input id="${parentSelector.slice(1)}-y" type="number" style="width:100%;" value="${defaultValues.y}">`]
-      ],
-    });
-  }
-  function drawNumberInput(name, parentSelector, defaultValue = 0) {
-    GM.drawTable({
-      parentSelector,
-      td: [
-        [`${name}:`, `<input id="${parentSelector.slice(1)}-number-input" type="number" value="${defaultValue}" style="width:100%;">`]
-      ],
-    })
-  }
+  drawCheckboxInput("Fullscreen", "#is-fullscreen", E.renderer.isFullscreen);
+
 }
 
 function attachEventListeners() {
@@ -263,32 +264,33 @@ function attachEventListeners() {
   //   GM.get(`#new-project-prompt`).style.display = "none";
   // }
 
+  // scroll-menu-collapse
+  GM.get("#scroll-menu-collapse").onclick = () => {
+    GM.get("#editor-scroll-menu").classList.toggle("hidden");
+    if (GM.get("#editor-scroll-menu").classList.contains("hidden")) {
+      GM.update("#scroll-menu-collapse", symbols.chevron.down);
+    } else {
+      GM.update("#scroll-menu-collapse", symbols.chevron.up);
+    }
+  }
+
+  // settings
   {
-    // settings
     GM.get("#settings-close-button").onclick = () => {
       GM.get("#settings").style.display = "none";
     }
     GM.get('#theme-select').onchange = () => {
       document.body.classList = GM.get('#theme-select').value;
     }
-    GM.get("#renderer-options-collapse").onclick = () => {
-      let span = GM.get("#renderer-options-collapse span");
-      let option = GM.get(`#renderer-options`);
-      if (option.style.display == "none") {
-        span.innerHTML = symbols.expand.expanded;
-        option.style.display = "block";
-      } else {
-        span.innerHTML = symbols.expand.normal;
-        option.style.display = "none";
-      }
-    }
     GM.get("#renderer-options").onchange = () => {
-      if (!GM.get("#renderer-unapplied-changes")) GM.add("#renderer-options", `<div id="renderer-unapplied-changes">There are unapplied changes</div>`)
+      if (!GM.get("#renderer-unapplied-changes")) GM.add("#renderer-options-collapsible-container", `<div id="renderer-unapplied-changes">There are unapplied changes</div>`)
     }
     GM.get("#renderer-options-apply").onclick = () => {
       E.renderer.setSize = { x: parseInt(GM.get("#display-size-vec2-input-x").value), y: parseInt(GM.get("#display-size-vec2-input-y").value) };
       E.renderer.setClearColor = GM.get("#clear-color-input-color").value;
       E.renderer.setPixelDensity = parseInt(GM.get("#pixel-density-number-input").value);
+      E.renderer.setFullscreen = GM.get("#is-fullscreen-boolean").checked;
+      E.renderer.handleFullscreen();
       GM.remove("#renderer-unapplied-changes");
     }
     // credit: https://github.com/mdn/pwa-examples/tree/master/a2hs
@@ -314,85 +316,88 @@ function attachEventListeners() {
   }
 
   // tab behavior
-  const tabs = GM.getAll(".tab");
-  for (let i = 0; i < tabs.length; i++) {
-    tabs[i].onclick = () => {
-      tabs[i].classList.toggle("active");
-    };
+  {
+    const tabs = GM.getAll(".tab");
+    for (let i = 0; i < tabs.length; i++) {
+      tabs[i].onclick = () => {
+        tabs[i].classList.toggle("active");
+      };
+    }
   }
 
   // hasMenuTabs
-  const hasMenuTabs = GM.getAll(".tab.has-menu");
-  var current;
-  var last;
-  for (let i = 0; i < hasMenuTabs.length; i++) {
-    hasMenuTabs[i].onclick = () => {
-      current = hasMenuTabs[i];
-      if (!current.classList.contains("active")) {
-        if (last && last != current) {
-          last.classList.remove("active");
-          GM.get(`#${last.id.slice(0, -4)}`).style.display = "none";
+  {
+    const hasMenuTabs = GM.getAll(".tab.has-menu");
+    var current;
+    var last;
+    for (let i = 0; i < hasMenuTabs.length; i++) {
+      hasMenuTabs[i].onclick = () => {
+        current = hasMenuTabs[i];
+        if (!current.classList.contains("active")) {
+          if (last && last != current) {
+            last.classList.remove("active");
+            GM.get(`#${last.id.slice(0, -4)}`).style.display = "none";
+          }
+          current.classList.add("active");
+          GM.get(`#${current.id.slice(0, -4)}`).style.display = "block";
+        } else {
+          current.classList.remove("active");
+          GM.get(`#${current.id.slice(0, -4)}`).style.display = "none";
         }
-        current.classList.add("active");
-        GM.get(`#${current.id.slice(0, -4)}`).style.display = "block";
-      } else {
-        current.classList.remove("active");
-        GM.get(`#${current.id.slice(0, -4)}`).style.display = "none";
+        last = current;
       }
-      last = current;
     }
-  }
-  GM.get('#settings-tab').onclick = () => {
-    GM.get('#settings').style.display = "block";
+    GM.get('#settings-tab').onclick = () => {
+      GM.get('#settings').style.display = "block";
+    }
   }
 
   // scenes
-  {
-    GM.get("#new-scene-button").onclick = () => {
-      let world = E.ecs.createWorld(false);
-      GM.drawTable({
-        parentSelector: "#all-scenes",
-        td: [[`<div id="scene-info-${world.id}" class="table-container"></div>`, `<div id="scene-buttons-${world.id}" style="text-align:center;"></div>`]],
-        colgroupAttributes: [, `style="width:70px;"`],
-        tableAttributes: `id="scene-${world.id}"`
-      });
-      GM.drawTable({
-        parentSelector: `#scene-buttons-${world.id}`,
-        td: [
-          [`<button id="scene-${world.id}-enable">enable</button>`],
-          [`<button id="scene-${world.id}-remove">remove</button>`],
-        ]
-      })
-      GM.drawTable({
-        parentSelector: `#scene-info-${world.id}`,
-        td: [
-          [`<div id="info-list-${world.id}"></div>`, `<div id="is-enabled-${world.id}" style="text-align:center;">${symbols.circle.outline}</div>`]
-        ],
-        colgroupAttributes: ['', `style="width:70px;"`]
-      })
-      GM.drawTable({
-        parentSelector: `#info-list-${world.id}`,
-        td: [
-          ['title:', `<input id="world-title-${world.id}" style="width:100%; padding:5px; background:var(--body-background-color);" value="${world.title}"></input>`],
-          ['id:', `<div style="white-space:nowrap; overflow:auto;">${world.id}</div>`],
-        ],
-        colgroupAttributes: [`style="width:80px;"`]
-      })
-      GM.get(`#world-title-${world.id}`).onchange = () => {
-        world.setTitle = GM.get(`#world-title-${world.id}`).value;
-      }
-      GM.get(`#scene-${world.id}-remove`).onclick = () => {
-        GM.remove(`#scene-${world.id}`);
-        E.ecs.removeWorld(world.id);
-      }
-      GM.get(`#scene-${world.id}-enable`).onclick = () => {
-        if (world.isEnabled) {
-          GM.update(`#is-enabled-${world.id}`, symbols.circle.outline);
-          world.disable();
-        } else {
-          GM.update(`#is-enabled-${world.id}`, `<div style="color:lightgreen;">${symbols.circle.normal}</div>`);
-          world.enable();
-        }
+  GM.get("#new-scene-button").onclick = () => {
+    let world = E.ecs.createWorld();
+    GM.drawTable({
+      parentSelector: "#all-scenes",
+      td: [[`<div id="scene-info-${world.id}" class="table-container"></div>`]],
+      tableAttributes: `id="scene-${world.id}"`
+    })
+    GM.drawTable({
+      parentSelector: `#scene-info-${world.id}`,
+      td: [
+        [`<div id="info-list-${world.id}"></div>`, `<div id="is-active-${world.id}" style="text-align:center;">${symbols.circle.outline}</div>`]
+      ],
+      colgroupAttributes: ['', `style="width:70px;"`]
+    })
+    GM.drawTable({
+      parentSelector: `#scene-info-${world.id}`,
+      td: [
+        [`<button id="scene-${world.id}-active" style="width:100%;">${symbols.check} set active</button>`, `<button id="scene-${world.id}-remove" style="width:100%;">${symbols.trashCan} remove</button>`],
+      ],
+    })
+    GM.drawTable({
+      parentSelector: `#info-list-${world.id}`,
+      td: [
+        ['title:', `<input id="world-title-${world.id}" style="width:100%; padding:5px; background:var(--body-background-color);" value="${world.title}"></input>`],
+        ['id:', `<div style="white-space:nowrap; overflow:auto;">${world.id}</div>`],
+      ],
+      colgroupAttributes: [`style="width:70px;"`],
+    })
+    GM.get(`#world-title-${world.id}`).onchange = () => {
+      world.setTitle = GM.get(`#world-title-${world.id}`).value;
+    }
+    GM.get(`#scene-${world.id}-remove`).onclick = () => {
+      GM.remove(`#scene-${world.id}`);
+      E.ecs.removeWorld(world.id);
+    }
+    GM.get(`#scene-${world.id}-active`).onclick = () => {
+      E.ecs._activeWorld = world;
+      checkActiveWorld();
+    }
+    checkActiveWorld();
+
+    function checkActiveWorld() {
+      for (let i = 0; i < E.ecs.worlds.length; i++) {
+        let result = E.ecs._activeWorld.id === E.ecs.worlds[i].id ? `<div style="color:lightgreen; font-size:25px;">${symbols.circle.normal}</div>` : `<div style="font-size:25px;">${symbols.circle.outline}</div>`;
+        GM.update(`#is-active-${E.ecs.worlds[i].id}`, result);
       }
     }
   }
@@ -401,10 +406,12 @@ function attachEventListeners() {
   GM.get("#new-assemblage-button").onclick = () => {
     console.log("new assemblage");
   }
+
   // components
   GM.get("#new-component-button").onclick = () => {
     console.log("new component");
   }
+
   // system
   GM.get("#new-system-button").onclick = () => {
     console.log('new system');
@@ -418,4 +425,67 @@ function hideAllMenus() {
 }
 
 function guiUpdate() {
+}
+
+function drawColorInput(name, parentSelector, defaultValue = "#000000") {
+  GM.drawTable({
+    parentSelector,
+    td: [
+      [`${name}:`, `<input id="${parentSelector.slice(1)}-color" type="color" value="${defaultValue}">`]
+    ]
+  })
+}
+
+function drawVec2Input(name, parentSelector, defaultValues = { x: 0, y: 0 }) {
+  GM.drawTable({
+    parentSelector,
+    td: [
+      [`<div style="white-space:nowrap;">${name}:</div>`],
+      [`<div style="background:red;">x</div>`, `<div style="background:green;">y</div>`],
+      [`<input id="${parentSelector.slice(1)}-x" type="number" style="width:100%;" value="${defaultValues.x}">`, `<input id="${parentSelector.slice(1)}-y" type="number" style="width:100%;" value="${defaultValues.y}">`]
+    ],
+  });
+}
+
+function drawNumberInput(name, parentSelector, defaultValue = 0) {
+  GM.drawTable({
+    parentSelector,
+    td: [
+      [`${name}:`, `<input id="${parentSelector.slice(1)}-number-input" type="number" value="${defaultValue}" style="width:100%;">`]
+    ],
+  })
+}
+
+function drawCheckboxInput(name, parentSelector, defaultValue = false) {
+  let isChecked = "";
+  if (defaultValue) {
+    isChecked = 'checked';
+  };
+  GM.drawTable({
+    parentSelector,
+    td: [
+      [`${name}:`, `<input id="${parentSelector.slice(1)}-boolean" type="checkbox" ${isChecked}>`]
+    ]
+  });
+}
+
+function drawCollapsible(name, parentSelector, containerBackground) {
+  GM.drawTable({
+    parentSelector,
+    td: [
+      [`<div id="${parentSelector.slice(1)}-collapsible-header" class="collapsible">${name} <span>${symbols.chevron.right}</span></div>`],
+      [`<div id="${parentSelector.slice(1)}-collapsible-container" class="table-container" style="display:none; background:${containerBackground};"></div>`]
+    ]
+  });
+  GM.get(`#${parentSelector.slice(1)}-collapsible-header`).onclick = () => {
+    let span = GM.get(`#${parentSelector.slice(1)}-collapsible-header span`);
+    let container = GM.get(`#${parentSelector.slice(1)}-collapsible-container`);
+    if (container.style.display == "none") {
+      span.innerHTML = symbols.chevron.down;
+      container.style.display = "block";
+    } else {
+      span.innerHTML = symbols.chevron.right;
+      container.style.display = "none";
+    }
+  }
 }
