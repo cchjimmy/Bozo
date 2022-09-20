@@ -20,6 +20,12 @@
   <script defer type="module" src="./entry.js"></script>
 
   <script>
+    // credit: https://stackoverflow.com/questions/59193062/how-to-disable-scrolling-on-body-in-ios-13-safari-when-saved-as-pwa-to-the-home
+    window.addEventListener("scroll", (e) => {
+      e.preventDefault();
+      window.scrollTo(0, 0);
+    });
+
     document.addEventListener('gesturestart', function (e) {
       e.preventDefault();
       // special hack to prevent zoom-to-tabs gesture in safari

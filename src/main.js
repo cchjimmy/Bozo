@@ -108,7 +108,7 @@ function defineMenus() {
   GM.drawTable({
     parentSelector: "#editor",
     td: [
-      [`<div id="scroll-menu-collapse" style="text-align:center; font-size:20px; height:50px; line-height:50px;">${symbols.chevron.up}</div>`],
+      [`<div id="scroll-menu-collapse" style="text-align:center; font-size:20px; height:50px; line-height:50px;">${symbols.chevron.down}</div>`],
       [`<div id="editor-scroll-menu" style="height:${editorScrollMenuHeight}; background:var(--header-background);"></div>`]
     ],
     tableAttributes: `style="position:absolute; bottom:0px;"`
@@ -268,9 +268,9 @@ function attachEventListeners() {
   GM.get("#scroll-menu-collapse").onclick = () => {
     GM.get("#editor-scroll-menu").classList.toggle("hidden");
     if (GM.get("#editor-scroll-menu").classList.contains("hidden")) {
-      GM.update("#scroll-menu-collapse", symbols.chevron.down);
-    } else {
       GM.update("#scroll-menu-collapse", symbols.chevron.up);
+    } else {
+      GM.update("#scroll-menu-collapse", symbols.chevron.down);
     }
   }
 
