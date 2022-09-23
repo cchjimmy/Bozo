@@ -1,8 +1,11 @@
 import GuiMaker from "./utils/gui/GuiMaker.js";
 import Engine from "./utils/Engine.js";
+import uuidv4 from "./utils/uuidv4.js";
+import config from './config.js';
 
 const GM = new GuiMaker;
 const E = new Engine;
+
 const menus = {
   // main: "#main",
   editor: "#editor",
@@ -23,7 +26,7 @@ const symbols = {
   play: '<i class="fa-solid fa-play"></i>',
   bars: '<i class="fa-solid fa-bars"></i>',
   undefined: 'N/A',
-  cross: 'x',
+  xMark: '<i class="fa-solid fa-xmark"></i>',
   download: '<i class="fa-solid fa-download"></i>',
   pause: '<i class="fa-solid fa-pause"></i>',
   chevron: {
@@ -34,7 +37,14 @@ const symbols = {
   },
   trashCan: '<i class="fa-solid fa-trash-can"></i>',
   powerOff: '<i class="fa-solid fa-power-off"></i>',
-  check: '<i class="fa-solid fa-check"></i>'
+  check: '<i class="fa-solid fa-check"></i>',
+  pen: '<i class="fa-solid fa-pen"></i>',
+  plus: '<i class="fa-solid fa-plus"></i>',
+  minus: '<i class="fa-solid fa-minus"></i>',
+  gear: '<i class="fa-solid fa-gear"></i>',
+  Bozo: {
+    '32x32': '<div style="text-align:center; background:#ff8c00; line-height:32px; width:32px; height:32px; border-radius:4px; display:inline-block;">B</div>'
+  }
 }
 
 // credit: https://medium.com/hypersphere-codes/detecting-system-theme-in-javascript-css-react-f6b961916d48
@@ -47,7 +57,6 @@ export default function generatePage() {
   attachEventListeners();
   switchMenu(menus.editor);
   E.renderer.changeCanvas(GM.get("canvas"));
-
   setInterval(() => {
     guiUpdate();
   }, 300);
@@ -71,37 +80,36 @@ function defineMenus() {
   //   ]
   // });
 
-  // menu id="new-project-prompt"
-  GM.add("body", `<div id="new-project-prompt" style="display:none;"></div>`);
-  GM.add("#new-project-prompt", mask).onclick = () => {
-    GM.get('#new-project-prompt').style.display = "none";
-  };
-  GM.add("#new-project-prompt", `<div id="new-project-prompt-ui" class="centered" style="background:var(--header-background); overflow:auto;"></div>`);
-  GM.add("#new-project-prompt-ui", `<div id="new-project-prompt-header" style="margin:10px;"></div>`);
-  GM.drawTable({
-    parentSelector: "#new-project-prompt-header",
-    td: [
-      [`<div style="color:var(--primary-text-color); font-size:20px;">New project</div>`, `<div style="float:right;"><button id="new-project-cancel">cancel</button></div>`]
-    ]
-  })
-  GM.add("#new-project-prompt-ui", `<div id="new-project-prompt-list" class="table-container"></div>`)
-  GM.drawTable({
-    parentSelector: "#new-project-prompt-list",
-    td: [
-      [`Project name:`, `<input id="project-title" placeholder="Project name" style="width:100%;"></input>`],
-      [`Location:`, `<div id="location-path" style="white-space:nowrap; width:100%; overflow:auto;">${symbols.undefined}</div>`],
-    ]
-  });
-  GM.add("#new-project-prompt-ui", `<div id="new-project-prompt-footer" style="margin:10px;"></div>`)
-  GM.drawTable({
-    parentSelector: "#new-project-prompt-footer",
-    td: [[`<button id="new-project-location-button">choose location</button>`, `<div style="float:right;"><button id="new-project-confirm">confirm</button></div>`]]
-  })
+  // // menu id="new-project-prompt"
+  // GM.add("body", `<div id="new-project-prompt" style="display:none;"></div>`);
+  // GM.add("#new-project-prompt", mask).onclick = () => {
+  //   GM.get('#new-project-prompt').style.display = "none";
+  // };
+  // GM.add("#new-project-prompt", `<div id="new-project-prompt-ui" class="centered" style="background:var(--header-background); overflow:auto;"></div>`);
+  // GM.add("#new-project-prompt-ui", `<div id="new-project-prompt-header" style="margin:10px;"></div>`);
+  // GM.drawTable({
+  //   parentSelector: "#new-project-prompt-header",
+  //   td: [
+  //     [`<div style="color:var(--primary-text-color); font-size:20px;">New project</div>`, `<div style="float:right;"><button id="new-project-cancel">cancel</button></div>`]
+  //   ]
+  // })
+  // GM.add("#new-project-prompt-ui", `<div id="new-project-prompt-list" class="table-container"></div>`)
+  // GM.drawTable({
+  //   parentSelector: "#new-project-prompt-list",
+  //   td: [
+  //     [`Project name:`, `<input id="project-title" placeholder="Project name" style="width:100%;"></input>`],
+  //     [`Location:`, `<div id="location-path" style="white-space:nowrap; width:100%; overflow:auto;">${symbols.undefined}</div>`],
+  //   ]
+  // });
+  // GM.add("#new-project-prompt-ui", `<div id="new-project-prompt-footer" style="margin:10px;"></div>`)
+  // GM.drawTable({
+  //   parentSelector: "#new-project-prompt-footer",
+  //   td: [[`<button id="new-project-location-button">choose location</button>`, `<div style="float:right;"><button id="new-project-confirm">confirm</button></div>`]]
+  // })
 
   // menu id="editor"
   // credit for grid style https://dev.to/dawnind/3-ways-to-display-two-divs-side-by-side-3d8b
   // credit for input https://www.w3schools.com/tags/att_input_value.asp
-
   let editorScrollMenuHeight = '70px';
   GM.add("body", `<div id="editor" style="display:none; width:100%; height:100%;"></div>`);
   GM.add("#editor", `<div class="centered"><canvas></canvas></div>`);
@@ -113,21 +121,20 @@ function defineMenus() {
     ],
     tableAttributes: `style="position:absolute; bottom:0px;"`
   });
-  // GM.add("#editor", `<div id="editor-scroll-menu" style=" position:absolute; bottom:0px; height:${editorScrollMenuHeight}; background:var(--header-background);"></div>`)
   GM.drawTable({
     parentSelector: '#editor-scroll-menu',
     td: [
       [`
         <div style="text-align:center;">
           <div id="settings-tab" class="tab" style="width:40px; font-size:20px; height:100%;">${symbols.bars}</div>
-          <div class="tab" style="width:40px; font-size:20px; height:100%;">${symbols.play}</div>
+          <div id="play" class="tab" style="width:40px; font-size:20px; height:100%;">${symbols.play}</div>
         </div>
         `, `
         <div class="scrollmenu">
-          <div class="tab has-menu" id="scenes-tab" style="height:100%;">scenes</div>
-          <div class="tab has-menu" id="entities-tab" style="height:100%;">entities</div>
-          <div class="tab has-menu" id="components-tab" style="height:100%;">components</div>
-          <div class="tab has-menu" id="systems-tab" style="height:100%;">systems</div>
+          <div class="tab has-menu" id="scenes-tab" style="height:100%;">Scenes</div>
+          <div class="tab has-menu" id="assemblages-tab" style="height:100%;">Assemblages</div>
+          <div class="tab has-menu" id="components-tab" style="height:100%;">Components</div>
+          <div class="tab has-menu" id="systems-tab" style="height:100%;">Systems</div>
         </div>`],
     ],
     colgroupAttributes: [`style="width:120px;"`],
@@ -149,20 +156,46 @@ function defineMenus() {
     trAttributes: ['', 'style="height:30px;"'],
     tableAttributes: `style="height:100%;"`
   })
-  // submenu id="entities"
-  GM.add("#entities", `<div id="world-assemblages" style="margin:10px;"></div>`);
-  GM.add("#entities", `<div style="position:fixed; width:100%; bottom:${editorScrollMenuHeight};"><button id="new-assemblage-button" style="text-align:center; width:100%;">New  entity</button></div>`);
+
+  // submenu id="assemblages"
+  GM.drawTable({
+    parentSelector: "#assemblages",
+    td: [
+      [`<div id="all-assemblages" style="margin:10px; overflow:auto; height:100%;"></div>`],
+      [`<button id="new-assemblage-button" style="text-align:center; width:100%;">New assemblage</button>`]
+    ],
+    trAttributes: ['', 'style="height:30px;"'],
+    tableAttributes: `style="height:100%;"`
+  })
 
   // submenu id="components"
-  GM.add("#components", `<div id="world-components" style="margin:10px;"></div>`);
-  GM.add("#components", `<div style="position:fixed; width:100%; bottom:${editorScrollMenuHeight};"><button id="new-component-button" style="text-align:center; width:100%;">New component</button></div>`);
+  GM.drawTable({
+    parentSelector: "#components",
+    td: [
+      [`<div id="all-components" style="margin:10px; overflow:auto; height:100%;"></div>`],
+      [`<button id="new-component-button" style="text-align:center; width:100%;">New component</button>`]
+    ],
+    trAttributes: ['', 'style="height:30px;"'],
+    tableAttributes: `style="height:100%;"`
+  })
+  // component drawing methods dropdown menu
+  drawDropdownMenu('component-drawing-methods-dropdown', ['Vec2', 'Color', 'Text', 'Checkbox', 'Number', 'Image'])
+
+  // component settings dropdown
+  drawDropdownMenu('component-settings', ['Edit', 'Remove']);
 
   // submenu id="systems"
-  GM.add("#systems", `<div id="all-scenes" style="margin:10px;"></div>`);
-  GM.add("#systems", `<div style="position:fixed; width:100%; bottom:${editorScrollMenuHeight};"><button id="new-system-button" style="text-align:center; width:100%;">New system</button></div>`);
+  GM.drawTable({
+    parentSelector: "#systems",
+    td: [
+      [`<div id="all-systems" style="margin:10px; overflow:auto; height:100%;"></div>`],
+      [`<button id="new-system-button" style="text-align:center; width:100%;">New system</button>`]
+    ],
+    trAttributes: ['', 'style="height:30px;"'],
+    tableAttributes: `style="height:100%;"`
+  })
 
   // menu id="settings"
-  var settingsHeaderHeight = '30px';
   GM.add("body", `<div id="settings" style="position:absolute; top:0px; display:none; width:100%; height:100%;"></div>`);
   GM.add("#settings", mask).onclick = () => {
     GM.get("#settings").style.display = 'none';
@@ -171,14 +204,14 @@ function defineMenus() {
   GM.drawTable({
     parentSelector: "#settings-ui",
     td: [
-      [`<div id="settings-header" style="margin:10px; height:${settingsHeaderHeight};"></div>`],
+      [`<div id="settings-header" style="margin:10px;"></div>`],
       [`<div id="settings-list" style="overflow:auto;" class="table-container"><div>`]
     ]
   })
   GM.drawTable({
     parentSelector: "#settings-header",
     td: [
-      [`<div style="color:var(--primary-text-color); font-size:25px; white-space:nowrap;"><div style="text-align:center; background:#ff8c00; line-height:${settingsHeaderHeight}; width:${settingsHeaderHeight}; height:${settingsHeaderHeight}; border-radius:${parseInt(settingsHeaderHeight) / 10}px; display:inline-block;">B</div> Settings</div>`, `<button id="settings-close-button" style="float:right;">close</button>`],
+      [`<div style="color:var(--primary-text-color); font-size:25px; white-space:nowrap;">${symbols.Bozo["32x32"]} Settings</div>`, `<button id="settings-close-button" style="float:right;">${symbols.xMark}</button>`],
     ],
     colgroupAttributes: ['', 'style="width:60px;"']
   });
@@ -210,11 +243,10 @@ function defineMenus() {
       [`<div id="renderer-options-apply" style="float:right;"><button>apply</button></div>`]
     ],
   })
-  drawVec2Input("display size", `#display-size-vec2-input`, { x: E.renderer.size.x, y: E.renderer.size.y });
-  drawNumberInput("pixel density", "#pixel-density", E.renderer.pixelDensity);
-  drawColorInput("clear color", "#clear-color-input", E.renderer.clearColor);
+  drawVec2Input("Display size", `#display-size-vec2-input`, { x: E.renderer.size.x, y: E.renderer.size.y });
+  drawNumberInput("Pixel density", "#pixel-density", E.renderer.pixelDensity);
+  drawColorInput("Clear color", "#clear-color-input", E.renderer.clearColor);
   drawCheckboxInput("Fullscreen", "#is-fullscreen", E.renderer.isFullscreen);
-
 }
 
 function attachEventListeners() {
@@ -355,24 +387,19 @@ function attachEventListeners() {
   // scenes
   GM.get("#new-scene-button").onclick = () => {
     let world = E.ecs.createWorld();
-    GM.drawTable({
-      parentSelector: "#all-scenes",
-      td: [[`<div id="scene-info-${world.id}" class="table-container"></div>`]],
-      tableAttributes: `id="scene-${world.id}"`
-    })
+    GM.add(`#all-scenes`, `<div id="scene-info-${world.id}" class="table-container"></div>`);
     GM.drawTable({
       parentSelector: `#scene-info-${world.id}`,
       td: [
-        ['title:', `<input id="world-title-${world.id}" style="width:100%; padding:5px; background:var(--body-background-color);" value="${world.title}"></input>`],
-        ['id:', `<div style="white-space:nowrap; overflow:auto;">${world.id}</div>`],
-        ['active status:', `<div id="is-active-${world.id}">${symbols.circle.outline}</div>`]
+        ['Title:', `<input id="world-title-${world.id}" style="width:100%;" value="${world.title}"></input>`],
+        ['Active status:', `<div id="is-active-${world.id}">${symbols.circle.outline}</div>`],
       ],
-      colgroupAttributes: [`style="width:20%; min-width:100px;"`]
+      colgroupAttributes: [`style="width:20%; min-width:130px;"`]
     })
     GM.drawTable({
       parentSelector: `#scene-info-${world.id}`,
       td: [
-        [`<button id="scene-${world.id}-active" style="width:100%;">${symbols.check} set active</button>`, `<button id="scene-${world.id}-remove" style="width:100%;">${symbols.trashCan} remove</button>`],
+        [`<button id="scene-${world.id}-active" style="width:100%;">${symbols.check} Set active</button>`, `<button id="scene-${world.id}-remove" style="width:100%;">${symbols.trashCan} Remove</button>`],
       ],
     })
     GM.get(`#world-title-${world.id}`).onchange = () => {
@@ -383,7 +410,7 @@ function attachEventListeners() {
       E.ecs.removeWorld(world.id);
     }
     GM.get(`#scene-${world.id}-active`).onclick = () => {
-      E.ecs._activeWorld = world;
+      E.ecs.setActiveWorld = world;
       checkActiveWorld();
     }
     checkActiveWorld();
@@ -396,19 +423,210 @@ function attachEventListeners() {
     }
   }
 
-  // entities
+  // assemblages
   GM.get("#new-assemblage-button").onclick = () => {
-    console.log("new assemblage");
+    let id = uuidv4();
+    GM.add("#all-assemblages", `<div class="table-container" id="container-${id}"></div>`);
+    GM.drawTable({
+      parentSelector: `#container-${id}`,
+      td: [
+        ["Title:", `<input style="width:100%;" id="title-${id}" value="New assemblage">`],
+        [`Registration status:`, `<div id="status-${id}" style="font-size:25px;">${symbols.circle.outline}</div>`],
+        [`Components:`, `<div id="components-${id}"></div>`],
+      ],
+      colgroupAttributes: [`style="width:20%; min-width:130px;"`]
+    })
+    GM.drawTable({
+      parentSelector: `#container-${id}`,
+      td: [
+        [`<button id="edit-${id}" style="width:100%;">Edit components</button>`, `<button style="width:100%;" id="register-${id}">Register</button>`, `<button id="remove-${id}" style="width:100%;">${symbols.trashCan} Remove</button>`]
+      ]
+    })
+    GM.get(`#remove-${id}`).onclick = () => {
+      GM.remove(`#container-${id}`);
+    }
+    GM.get(`#edit-${id}`).onclick = () => {
+
+    }
+    GM.get(`#container-${id}`).onchange = () => {
+    }
   }
 
   // components
-  GM.get("#new-component-button").onclick = () => {
-    console.log("new component");
+  GM.get("#new-component-button").onclick = drawNewComponent;
+  
+  // Draw predefined components from config.js
+  for (let i = 0; i < config.components.length; i++) {
+    drawNewComponent(config.components[i]);
   }
+  function drawNewComponent(compObj) {
+    // Unique id for the component and divs
+    let id = uuidv4();
+    let component = compObj || {};
+    GM.add('#all-components', `<div class="table-container" id="container-${id}"></div>`);
+    GM.drawTable({
+      parentSelector: `#container-${id}`,
+      td: [
+        [`Title:`, `<input style="width:100%;" id="title-${id}" value="${component.title || `New component`}">`, `<div style="text-align:center;"><button id="component-settings-${id}">${symbols.gear}</button></div>`],
+      ],
+      colgroupAttributes: [`style="width:20%; min-width:130px;"`, ``, `style="width:80px;"`]
+    })
+
+    drawCollapsible(`Data`, `#container-${id}`, 'var(--header-background)');
+    GM.add(`#container-${id}-collapsible-container`, `<div id="data-list-${id}"></div>`);
+    GM.add(`#container-${id}-collapsible-container`, `<button style="width:100%;" id="data-add-${id}">${symbols.plus}</button>`)
+
+    // When it isn't a PointerEvent, I know it is a predefined component
+    if (compObj.constructor.name !== 'PointerEvent') {
+      GM.get(`#data-add-${id}`).classList.toggle('hidden', true);
+      deserializeInputs(`#data-list-${id}`, component.data, false);
+    }
+
+    GM.get(`#component-settings-${id}`).onclick = (e) => {
+      let settings = GM.get(`#component-settings-${id}`);
+      let dropdown = GM.get('#component-settings');
+      if (settings.lastChild == dropdown) {
+        dropdown.classList.toggle('hidden');
+      } else {
+        dropdown.classList.remove('hidden');
+        settings.appendChild(dropdown);
+      }
+
+      switch (e.target.innerText) {
+        case 'Edit':
+          GM.get(`#data-add-${id}`).classList.toggle('hidden');
+          if (GM.get(`#data-add-${id}`).classList.contains('hidden')) {
+            let dataObj = serializeInputs(`#data-list-${id}`);
+            if (!dataObj) return;
+            component.title = GM.get(`#title-${id}`).value;
+            component.data = dataObj;
+            deserializeInputs(`#data-list-${id}`, component.data, false);
+          } else {
+            deserializeInputs(`#data-list-${id}`, component.data);
+          }
+          break;
+        case 'Remove':
+          document.body.appendChild(GM.get('#component-drawing-methods-dropdown'));
+          document.body.appendChild(GM.get('#component-settings'));
+          GM.remove(`#container-${id}`);
+          break;
+        default:
+          break;
+      }
+    }
+
+    GM.get(`#data-add-${id}`).onclick = drawData;
+
+    // I should put the DOM manipulation code in a separate function
+    function drawData(e) {
+      drawInput(e.target.innerText, ``, `#data-list-${id}`);
+      let add = GM.get(`#data-add-${id}`);
+      let dropdown = GM.get('#component-drawing-methods-dropdown');
+      if (add.lastChild == dropdown) {
+        dropdown.classList.toggle('hidden');
+      } else {
+        dropdown.classList.remove('hidden');
+        add.appendChild(dropdown);
+      }
+    }
+
+    function deserializeInputs(parentSelector, dataObj, inputs = true) {
+      if (!dataObj) return;
+      GM.update(parentSelector, ``);
+      for (let prop in dataObj) {
+        let name = inputs ? `<input placeholder="${dataObj[prop].type} input label" value="${prop}">` : prop;
+        drawInput(dataObj[prop].type, name, parentSelector, dataObj[prop].data);
+      }
+      if (inputs) return;
+      let inputElements = GM.getAll(`${parentSelector} input`);
+      for (let i = 0; i < inputElements.length; i++) {
+        inputElements[i].disabled = true;
+      }
+    }
+
+    function serializeInputs(parentSelector) {
+      let inputs = GM.getAll(`${parentSelector} input`);
+      let values = [];
+      let types = [];
+      let dataObj = {};
+      let valuesIndex = 0;
+
+      // I need to know the type of data to serialize
+      for (let i = 0; i < inputs.length; i++) {
+        let inputIdLast = inputs[i].id.split('-').pop();
+        switch (inputIdLast) {
+          // When I see 'x' at the end of an id, I know it is a Vec2
+          case 'x':
+            types.push('Vec2');
+            break;
+          // So I don't care about 'y' anymore
+          case 'y':
+            break;
+          // I made it so that the end of an id is always the type, but I need it capitalized
+          default:
+            if (!inputIdLast) break;
+            // Capitalization
+            let first = inputIdLast.at(0);
+            let remaining = inputIdLast.slice(1);
+            first = first.toUpperCase();
+            types.push(first + remaining);
+            break;
+        }
+        values.push(inputs[i].type !== "checkbox" ? inputs[i].value : inputs[i].checked);
+      }
+
+      for (let i = 0; i < types.length; i++) {
+        let title, data;
+        switch (types[i]) {
+          case 'Vec2':
+            title = values[valuesIndex] || ' ';
+            data = { x: parseFloat(values[valuesIndex + 1]), y: parseFloat(values[valuesIndex + 2]) };
+            valuesIndex += 3;
+            break;
+          default:
+            title = values[valuesIndex] || ' ';
+            data = values[valuesIndex + 1];
+            valuesIndex += 2;
+            break;
+        }
+        if (title === ' ') return;
+
+        dataObj[title] = { data, type: types[i] };
+      }
+      return dataObj;
+    }
+  }
+
 
   // system
   GM.get("#new-system-button").onclick = () => {
-    console.log('new system');
+    let id = uuidv4();
+    GM.add('#all-systems', `<div class="table-container" id="container-${id}"></div>`);
+    GM.drawTable({
+      parentSelector: `#container-${id}`,
+      td: [
+        [`Title:`, `<input style="width:100%;" id="title-${id}" value="New system">`],
+        [`Registration status:`, `<div id="status-${id}" style="font-size:25px;">${symbols.circle.outline}</div>`]
+      ],
+      colgroupAttributes: [`style="width:20%; min-width:100px;"`]
+    })
+    GM.drawTable({
+      parentSelector: `#container-${id}`,
+      td: [
+        [`<button id="edit-${id}" style="width:100%;">Edit</button>`, `<button style="width:100%;" id="register-${id}">Register</button>`, `<button style="width:100%;" id="remove-${id}">Remove</button>`]
+      ]
+    })
+    GM.get(`#remove-${id}`).onclick = () => {
+      GM.remove(`#container-${id}`);
+    }
+    GM.get(`#edit-${id}`).onclick = () => {
+
+    }
+  }
+
+  GM.get('#play').onclick = () => {
+    GM.get(`#play`).classList.toggle('active');
+    GM.get('#play').classList.contains('active') ? E.ecs.activeWorld?.disable() : E.ecs.activeWorld?.enable();
   }
 }
 
@@ -421,44 +639,68 @@ function hideAllMenus() {
 function guiUpdate() {
 }
 
+// I separated each input types drawing method, so I can customize each one. There are still more types of inputs though.
 function drawColorInput(name, parentSelector, defaultValue = "#000000") {
+  let id = `${parentSelector.slice(1)}-color`;
   GM.drawTable({
     parentSelector,
     td: [
-      [`${name}:`, `<input id="${parentSelector.slice(1)}-color" type="color" value="${defaultValue}">`]
+      [`<label for="${id}">${name}</label>:`, `<input id="${id}" type="color" value="${defaultValue}">`]
+    ]
+  })
+}
+
+function drawImageInput(name, parentSelector) {
+  let id = `${parentSelector.slice(1)}-image`;
+  GM.drawTable({
+    parentSelector,
+    td: [
+      [`<label for="${id}">${name}</label>:`, `<input id="${id}" type="image" value="choose image">`]
     ]
   })
 }
 
 function drawVec2Input(name, parentSelector, defaultValues = { x: 0, y: 0 }) {
+  let idx = `${parentSelector.slice(1)}-x`;
+  let idy = `${parentSelector.slice(1)}-y`;
   GM.drawTable({
     parentSelector,
     td: [
-      [`<div style="white-space:nowrap;">${name}:</div>`],
-      [`<div style="background:red;">x</div>`, `<div style="background:green;">y</div>`],
-      [`<input id="${parentSelector.slice(1)}-x" type="number" style="width:100%;" value="${defaultValues.x}">`, `<input id="${parentSelector.slice(1)}-y" type="number" style="width:100%;" value="${defaultValues.y}">`]
+      [`<label style="white-space:nowrap;">${name}</label>:`],
+      [`<div style="background:red; width:100%; padding:5px;"><label for="${idx}">x</label></div>`, `<div style="background:green; width:100%; padding:5px;"><label for="${idy}">y</label></div>`],
+      [`<input id="${idx}" type="number" style="width:100%;" value="${defaultValues.x}">`, `<input id="${idy}" type="number" style="width:100%;" value="${defaultValues.y}">`]
     ],
   });
 }
 
 function drawNumberInput(name, parentSelector, defaultValue = 0) {
+  let id = `${parentSelector.slice(1)}-number`;
   GM.drawTable({
     parentSelector,
     td: [
-      [`${name}:`, `<input id="${parentSelector.slice(1)}-number-input" type="number" value="${defaultValue}" style="width:100%;">`]
+      [`<label for="${id}">${name}</label>:`, `<input id="${id}" type="number" value="${defaultValue}" style="width:100%;">`]
     ],
   })
 }
 
-function drawCheckboxInput(name, parentSelector, defaultValue = false) {
-  let isChecked = "";
-  if (defaultValue) {
-    isChecked = 'checked';
-  };
+function drawTextInput(name, parentSelector, defaultValue = ``) {
+  let id = `${parentSelector.slice(1)}-text`;
   GM.drawTable({
     parentSelector,
     td: [
-      [`${name}:`, `<input id="${parentSelector.slice(1)}-boolean" type="checkbox" ${isChecked}>`]
+      [`<label for="${id}">${name}</label>:`, `<input id="${id}" value="${defaultValue}" style="width:100%;">`]
+    ]
+  })
+}
+
+function drawCheckboxInput(name, parentSelector, defaultValue = false) {
+  let id = `${parentSelector.slice(1)}-checkbox`;
+  let isChecked = "";
+  if (defaultValue) isChecked = 'checked';
+  GM.drawTable({
+    parentSelector,
+    td: [
+      [`<label for="${id}">${name}</label>:`, `<input id="${id}" type="checkbox" ${isChecked}>`]
     ]
   });
 }
@@ -481,5 +723,44 @@ function drawCollapsible(name, parentSelector, containerBackground) {
       span.innerHTML = symbols.chevron.right;
       container.style.display = "none";
     }
+  }
+}
+
+function drawDropdownMenu(id, td) {
+  GM.add('body', `<div class="hidden" style="background:var(--body-background-color); color:var(--secondary-text-color);" id="${id}"></div>`)
+  let data = [];
+  for (let i = 0; i < td.length; i++) {
+    data.push([`<div class="dropdown-content" style="padding:3px;">${td[i]}</div>`]);
+  }
+  GM.drawTable({
+    parentSelector: `#${id}`,
+    td: data,
+  })
+}
+
+// This function utilizes the other input drawing functions, so only one function is needed for serializing
+function drawInput(type, name, parentSelector, defaultValues) {
+  let label = name ? name : `<input placeholder="${type} input label">`;
+  switch (type) {
+    case 'Vec2':
+      drawVec2Input(label, parentSelector, defaultValues);
+      break;
+    case 'Text':
+      drawTextInput(label, parentSelector, defaultValues);
+      break;
+    case 'Color':
+      drawColorInput(label, parentSelector, defaultValues);
+      break;
+    case 'Number':
+      drawNumberInput(label, parentSelector, defaultValues);
+      break;
+    case 'Checkbox':
+      drawCheckboxInput(label, parentSelector, defaultValues);
+      break;
+    case 'Image':
+      drawImageInput(label, parentSelector);
+      break;
+    default:
+      break;
   }
 }

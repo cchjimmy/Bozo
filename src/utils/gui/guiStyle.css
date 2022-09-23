@@ -89,6 +89,7 @@ input {
   background-color: var(--body-background-color);
   color: var(--secondary-text-color);
   border-width: 0px;
+  padding: 5px;
 }
 
 /* credit: https://www.w3schools.com/howto/howto_css_menu_horizontal_scroll.asp */
@@ -106,7 +107,7 @@ input {
   padding: 7px;
 }
 
-.tab:hover {
+.tab:hover, .dropdown-content:hover{
   background-color: var(--scrollmenu-hover-color);
 }
 

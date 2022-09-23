@@ -3,8 +3,35 @@
 
 export default class ECS {
   constructor() {
-    this.worlds = [];
-    this._activeWorld
+    this._worlds = [];
+    this._activeWorld;
+    this._registeredSystems = [];
+    this._registeredComponents = {};
+    this._assemblages = [];
+  }
+
+  set setActiveWorld(world) {
+    this._activeWorld = world;
+  }
+
+  get activeWorld() {
+    return this._activeWorld;
+  }
+
+  get systems() {
+    return this._registeredSystems;
+  }
+
+  get components() {
+    return this._registeredComponents;
+  }
+
+  get assemblages() {
+    return this._assemblages;
+  }
+
+  get worlds() {
+    return this._worlds;
   }
 
   createWorld(isEnabled = true) {
@@ -21,41 +48,32 @@ export default class ECS {
    * @returns the removed world
    */
   removeWorld(id) {
+    if (this._activeWorld?.id === id) this._activeWorld = null;
     for (let i = 0; i < this.worlds.length; i++) {
-      if (this.worlds[i].id === id) return this.worlds.splice(i, 1);
+      if (this.worlds[i].id !== id) continue;
+      return this.worlds.splice(i, 1);
     }
   }
 
   update(param) {
-    if (!this._activeWorld) return;
-    this._activeWorld.update(param);
-  }
-}
-
-ECS.prototype.Component = class Component {
-  // credit: https://www.samanthaming.com/tidbits/70-3-ways-to-clone-objects/
-  clone() {
-    return new this.constructor().copy(this);
+    this._activeWorld?.update(param);
   }
 
-  copy(component) {
-    for (let prop in component) {
-      if (!this.hasOwnProperty(prop)) continue;
-      if (typeof component[prop] == "object") {
-        Object.assign(this[prop], component[prop]);
-        continue;
-      }
-      this[prop] = component[prop];
-    }
+  registerComponent(component) {
+    this._registeredComponents[component.title] = component.data;
+  }
+
+  registerSystem(system) {
+    if (doesObjectExist(system, this._registeredSystems) || !system.prototype.isSystem) return this;
+    this._registeredSystems.push(system);
     return this;
   }
-};
 
-ECS.prototype.Component.prototype.isComponent = true;
-
-ECS.prototype.TagComponent = class TagComponent { };
-
-ECS.prototype.TagComponent.prototype.isTagComponent = true;
+  unregisterSystem(system) {
+    if (!doesObjectExist(system, this._registeredSystems)) return;
+    return this._registeredSystems.splice(this._registeredSystems.indexOf(system), 1);
+  }
+}
 
 ECS.prototype.System = class System {
   constructor(world) {
@@ -95,9 +113,10 @@ ECS.prototype.System = class System {
 ECS.prototype.System.prototype.isSystem = true;
 
 ECS.prototype.Entity = class Entity {
-  constructor(world) {
+  constructor(ecs, world) {
     this._id = uuidv4();
     this._components = {};
+    this.ecs = ecs;
     this.world = world;
   }
 
@@ -106,22 +125,22 @@ ECS.prototype.Entity = class Entity {
   }
 
   addComponent(component) {
-    if (!component.prototype.isComponent && !component.prototype.isTagComponent || !this.world.registeredComponents[component.name] || this.hasComponent(component)) return this;
-    this._components[component.name] = new this.world.registeredComponents[component.name];;
+    if (this.hasComponent(component)) return this;
+    this._components.push(new component);
     debounce({ context: this.world, func: this.world.newSystemsQuery });
     return this;
   }
 
   removeComponent(component) {
-    if (!component.prototype.isComponent && !component.prototype.isTagComponent || !this.world.registeredComponents[component.name] || !this.hasComponent(component)) return this;
-    delete this._components[component.name];
+    if (!this.hasComponent(component)) return this;
+    this._components.splice(this._components.indexOf(this._components.find(comp => comp instanceof component)), 1)
     debounce({ context: this.world, func: this.world.newSystemsQuery });
     return this;
   }
 
   hasComponent(component) {
     // credit: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Conditional_Operator
-    return this._components[component.name] ? true : false;
+    return doesObjectExist(component, this._components);
   }
 
   hasAllComponents(components = []) {
@@ -133,8 +152,17 @@ ECS.prototype.Entity = class Entity {
 
   getComponent(component, clone = false) {
     if (!this.hasComponent(component)) return;
-    let comp = this._components[component.name];
+    let comp = this._components.find(comp => comp instanceof component);
     return clone ? comp.clone() : comp;
+  }
+
+  clone() {
+    let clone = new Entity(this.ecs, this.world);
+    for (let i = 0; i < this._components.length; i++) {
+      
+      clone._components.push(component);
+    }
+    return clone;
   }
 }
 
@@ -143,14 +171,12 @@ ECS.prototype.World = class World {
     this.ecs = ecs;
     this._id = uuidv4();
     this._title = "New world";
-    this.registeredComponents = {};
-    this.assemblages = {};
-    this.registeredSystems = {};
-    this.entities = [];
+    this._systems = [];
+    this._entities = [];
 
     this._isEnabled = true;
 
-    this.state;
+    // this.state;
   }
 
   // saveState() {
@@ -182,78 +208,49 @@ ECS.prototype.World = class World {
     this._title = title;
   }
 
-  registerComponent(component) {
-    if (this.registeredComponents[component] || !component.prototype.isComponent && !component.prototype.isTagComponent) return this;
-    this.registeredComponents[component.name] = component;
-    return this;
+  get isEnabled() {
+    return this._isEnabled;
   }
 
-  registerSystem(system) {
-    if (this.registeredSystems[system] || !system.prototype.isSystem) return this;
-    this.registeredSystems[system.name] = new system(this);
-    this.enableSystem(system);
-    return this;
-  }
-
-  getSystem(system) {
-    return this.registeredSystems[system.name];
-  }
-
-  createEntity(assemblageName = "") {
-    if (!assemblageName) {
-      const e = new this.ecs.Entity(this);
-      this.entities.push(e);
-      return e;
+  addEntity(components = []) {
+    let entity = new this.ecs.Entity(this.ecs, this);
+    for (let i = 0; i < components.length; i++) {
+      entity.addComponent(components[i]);
     }
-    if (!this.assemblages[assemblageName]) return;
-    return this.assemblages[assemblageName]();
+    this._entities.push(entity);
+    return entity;
   }
 
   removeEntity(entity) {
-    this.entities.splice(this.entities.indexOf(entity), 1);
-  }
-
-  newAssemblage(name = "", components = []) {
-    if (!components.length) return;
-    this.assemblages[name] = () => {
-      let e = this.createEntity();
-      for (let i = 0; i < components.length; i++) {
-        e.addComponent(components[i]);
-      }
-      return e;
-    };
+    return this._entities.splice(this.entities.indexOf(entity), 1);
   }
 
   update(param) {
     if (!this.isEnabled) return;
-    for (let rs in this.registeredSystems) {
-      if (!this.registeredSystems[rs].isEnabled || !this.registeredSystems[rs].isReady) continue;
-      this.registeredSystems[rs].update(param);
+    for (let i = 0; i < this._systems.length; i++) {
+      if (!this._systems[i].isEnabled || !this._systems[i].isReady) continue;
+      this._systems[i].update(param);
     }
   }
 
   /**
    * query outputs a list entites
-   * @param {*} components 
+   * @param {array} components 
    * @returns 
    */
   query(components = []) {
     let results = [];
-    for (let entity in this.entities) {
-      if (!this.entities[entity].hasAllComponents(components)) continue;
-      results.push(this.entities[entity]);
+    for (let i = 0; i < this._entities.length; i++) {
+      if (!this._entities[i].hasAllComponents(components)) continue;
+      results.push(this._entities[i]);
     }
     return results;
   }
 
   newSystemsQuery() {
-    for (let rs in this.registeredSystems) {
-      this.registeredSystems[rs].query();
+    for (let i = 0; i < this._systems.length; i++) {
+      this._systems[i].query();
     }
-  }
-
-  get isEnabled() {
-    return this._isEnabled;
   }
 
   enable() {
@@ -264,12 +261,20 @@ ECS.prototype.World = class World {
     this._isEnabled = false;
   }
 
-  enableSystem(system) {
-    this.registeredSystems[system.name].enable();
+  addSystem(system) {
+    if (doesObjectExist(system, this._systems)) return;
+    let sys = new system(this)
+    this._systems.push(sys);
+    sys.enable();
+    return this;
   }
 
-  disableSystem(system) {
-    this.registeredSystems[system.name].disable();
+  getSystem(system) {
+    return this._systems.find(sys => sys instanceof system);
+  }
+
+  removeSystem(system) {
+    return this.systems.splice(this.systems.indexOf(this.getSystem(system), 1));
   }
 }
 
@@ -286,4 +291,24 @@ function uuidv4() {
   return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
     (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
   );
+}
+
+/**
+ * checks if an object type exists in an array
+ * @param {object} object the object itself not an instance of it
+ * @param {array} array array to be evaluated
+ * @returns {boolean}
+ */
+function doesObjectExist(object, array) {
+  return array.some(obj => obj instanceof object || obj === object);
+}
+
+/**
+ * checks if an object instance exists in an array
+ * @param {object} instance must be an instance of an object not the object itself
+ * @param {array} array array to be evaluated
+ * @returns {boolean}
+ */
+function doesInstanceExist(instance, array) {
+  return array.includes(instance);
 }

@@ -4,7 +4,7 @@
 var timer = {};
 /**
  * when called, timeout is cleared and the input function is called after the timeout
- * @param {executionContext} context the execution context for the input function
+ * @param {this} context the execution context for the input function
  * @param {function} func the input function to be debounced
  * @param {number} timeout timeout before function execution
  * @returns a function to be called
