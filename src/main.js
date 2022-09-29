@@ -132,7 +132,7 @@ function defineMenus() {
         `, `
         <div class="scrollmenu">
           <div class="tab has-menu" id="scenes-tab" style="height:100%;">Scenes</div>
-          <div class="tab has-menu" id="assemblages-tab" style="height:100%;">Assemblages</div>
+          <div class="tab has-menu" id="entities-tab" style="height:100%;">Entities</div>
           <div class="tab has-menu" id="components-tab" style="height:100%;">Components</div>
           <div class="tab has-menu" id="systems-tab" style="height:100%;">Systems</div>
         </div>`],
@@ -157,12 +157,12 @@ function defineMenus() {
     tableAttributes: `style="height:100%;"`
   })
 
-  // submenu id="assemblages"
+  // submenu id="entities"
   GM.drawTable({
-    parentSelector: "#assemblages",
+    parentSelector: "#entities",
     td: [
-      [`<div id="all-assemblages" style="margin:10px; overflow:auto; height:100%;"></div>`],
-      [`<button id="new-assemblage-button" style="text-align:center; width:100%;">New assemblage</button>`]
+      [`<div id="all-entities" style="margin:10px; overflow:auto; height:100%;"></div>`],
+      [`<button id="new-entity-button" style="text-align:center; width:100%;">New entity</button>`]
     ],
     trAttributes: ['', 'style="height:30px;"'],
     tableAttributes: `style="height:100%;"`
@@ -315,13 +315,13 @@ function attachEventListeners() {
       document.body.classList = GM.get('#theme-select').value;
     }
     GM.get("#renderer-options").onchange = () => {
-      if (!GM.get("#renderer-unapplied-changes")) GM.add("#renderer-options-collapsible-container", `<div id="renderer-unapplied-changes">There are unapplied changes</div>`)
+      if (!GM.get("#renderer-unapplied-changes")) GM.add("#renderer-options-collapsible-container", `<div id="renderer-unapplied-changes">There are unapplied changes</div>`);
     }
     GM.get("#renderer-options-apply").onclick = () => {
       E.renderer.setSize = { x: parseInt(GM.get("#display-size-vec2-input-x").value), y: parseInt(GM.get("#display-size-vec2-input-y").value) };
       E.renderer.setClearColor = GM.get("#clear-color-input-color").value;
-      E.renderer.setPixelDensity = parseInt(GM.get("#pixel-density-number-input").value);
-      E.renderer.setFullscreen = GM.get("#is-fullscreen-boolean").checked;
+      E.renderer.setPixelDensity = parseInt(GM.get("#pixel-density-number").value);
+      E.renderer.setFullscreen = GM.get("#is-fullscreen-checkbox").checked;
       E.renderer.handleFullscreen();
       GM.remove("#renderer-unapplied-changes");
     }
@@ -399,17 +399,17 @@ function attachEventListeners() {
     GM.drawTable({
       parentSelector: `#scene-info-${world.id}`,
       td: [
-        [`<button id="scene-${world.id}-active" style="width:100%;">${symbols.check} Set active</button>`, `<button id="scene-${world.id}-remove" style="width:100%;">${symbols.trashCan} Remove</button>`],
+        [`<button id="scene-active-${world.id}" style="width:100%;">${symbols.check} Set active</button>`, `<button id="scene-remove-${world.id}" style="width:100%;">${symbols.trashCan} Remove</button>`],
       ],
     })
     GM.get(`#world-title-${world.id}`).onchange = () => {
       world.setTitle = GM.get(`#world-title-${world.id}`).value;
     }
-    GM.get(`#scene-${world.id}-remove`).onclick = () => {
+    GM.get(`#scene-remove-${world.id}`).onclick = () => {
       GM.remove(`#scene-${world.id}`);
       E.ecs.removeWorld(world.id);
     }
-    GM.get(`#scene-${world.id}-active`).onclick = () => {
+    GM.get(`#scene-active-${world.id}`).onclick = () => {
       E.ecs.setActiveWorld = world;
       checkActiveWorld();
     }
@@ -424,13 +424,13 @@ function attachEventListeners() {
   }
 
   // assemblages
-  GM.get("#new-assemblage-button").onclick = () => {
+  GM.get("#new-entity-button").onclick = () => {
     let id = uuidv4();
-    GM.add("#all-assemblages", `<div class="table-container" id="container-${id}"></div>`);
+    GM.add("#all-entities", `<div class="table-container" id="container-${id}"></div>`);
     GM.drawTable({
       parentSelector: `#container-${id}`,
       td: [
-        ["Title:", `<input style="width:100%;" id="title-${id}" value="New assemblage">`],
+        ["Title:", `<input style="width:100%;" id="title-${id}" value="New entity">`],
         [`Registration status:`, `<div id="status-${id}" style="font-size:25px;">${symbols.circle.outline}</div>`],
         [`Components:`, `<div id="components-${id}"></div>`],
       ],
@@ -454,7 +454,7 @@ function attachEventListeners() {
 
   // components
   GM.get("#new-component-button").onclick = drawNewComponent;
-  
+
   // Draw predefined components from config.js
   for (let i = 0; i < config.components.length; i++) {
     drawNewComponent(config.components[i]);
@@ -476,10 +476,10 @@ function attachEventListeners() {
     GM.add(`#container-${id}-collapsible-container`, `<div id="data-list-${id}"></div>`);
     GM.add(`#container-${id}-collapsible-container`, `<button style="width:100%;" id="data-add-${id}">${symbols.plus}</button>`)
 
-    // When it isn't a PointerEvent, I know it is a predefined component
+    // When it isn't a PointerEvent, it is a predefined component
     if (compObj.constructor.name !== 'PointerEvent') {
       GM.get(`#data-add-${id}`).classList.toggle('hidden', true);
-      deserializeInputs(`#data-list-${id}`, component.data, false);
+      deserializeInputs(`#data-list-${id}`, component.data, false, false);
     }
 
     GM.get(`#component-settings-${id}`).onclick = (e) => {
@@ -500,7 +500,7 @@ function attachEventListeners() {
             if (!dataObj) return;
             component.title = GM.get(`#title-${id}`).value;
             component.data = dataObj;
-            deserializeInputs(`#data-list-${id}`, component.data, false);
+            deserializeInputs(`#data-list-${id}`, component.data, false, false);
           } else {
             deserializeInputs(`#data-list-${id}`, component.data);
           }
@@ -517,7 +517,7 @@ function attachEventListeners() {
 
     GM.get(`#data-add-${id}`).onclick = drawData;
 
-    // I should put the DOM manipulation code in a separate function
+    // Should put the DOM manipulation code in a separate function
     function drawData(e) {
       drawInput(e.target.innerText, ``, `#data-list-${id}`);
       let add = GM.get(`#data-add-${id}`);
@@ -529,74 +529,7 @@ function attachEventListeners() {
         add.appendChild(dropdown);
       }
     }
-
-    function deserializeInputs(parentSelector, dataObj, inputs = true) {
-      if (!dataObj) return;
-      GM.update(parentSelector, ``);
-      for (let prop in dataObj) {
-        let name = inputs ? `<input placeholder="${dataObj[prop].type} input label" value="${prop}">` : prop;
-        drawInput(dataObj[prop].type, name, parentSelector, dataObj[prop].data);
-      }
-      if (inputs) return;
-      let inputElements = GM.getAll(`${parentSelector} input`);
-      for (let i = 0; i < inputElements.length; i++) {
-        inputElements[i].disabled = true;
-      }
-    }
-
-    function serializeInputs(parentSelector) {
-      let inputs = GM.getAll(`${parentSelector} input`);
-      let values = [];
-      let types = [];
-      let dataObj = {};
-      let valuesIndex = 0;
-
-      // I need to know the type of data to serialize
-      for (let i = 0; i < inputs.length; i++) {
-        let inputIdLast = inputs[i].id.split('-').pop();
-        switch (inputIdLast) {
-          // When I see 'x' at the end of an id, I know it is a Vec2
-          case 'x':
-            types.push('Vec2');
-            break;
-          // So I don't care about 'y' anymore
-          case 'y':
-            break;
-          // I made it so that the end of an id is always the type, but I need it capitalized
-          default:
-            if (!inputIdLast) break;
-            // Capitalization
-            let first = inputIdLast.at(0);
-            let remaining = inputIdLast.slice(1);
-            first = first.toUpperCase();
-            types.push(first + remaining);
-            break;
-        }
-        values.push(inputs[i].type !== "checkbox" ? inputs[i].value : inputs[i].checked);
-      }
-
-      for (let i = 0; i < types.length; i++) {
-        let title, data;
-        switch (types[i]) {
-          case 'Vec2':
-            title = values[valuesIndex] || ' ';
-            data = { x: parseFloat(values[valuesIndex + 1]), y: parseFloat(values[valuesIndex + 2]) };
-            valuesIndex += 3;
-            break;
-          default:
-            title = values[valuesIndex] || ' ';
-            data = values[valuesIndex + 1];
-            valuesIndex += 2;
-            break;
-        }
-        if (title === ' ') return;
-
-        dataObj[title] = { data, type: types[i] };
-      }
-      return dataObj;
-    }
   }
-
 
   // system
   GM.get("#new-system-button").onclick = () => {
@@ -639,7 +572,74 @@ function hideAllMenus() {
 function guiUpdate() {
 }
 
-// I separated each input types drawing method, so I can customize each one. There are still more types of inputs though.
+function deserializeInputs(parentSelector, dataObj, inputs = true, editableLabels = true) {
+  if (!dataObj) return;
+  GM.update(parentSelector, ``);
+  for (let prop in dataObj) {
+    let name = editableLabels ? `<input placeholder="${dataObj[prop].type} input label" value="${prop}">` : prop;
+    drawInput(dataObj[prop].type, name, parentSelector, dataObj[prop].data);
+  }
+  if (inputs) return;
+  let inputElements = GM.getAll(`${parentSelector} input`);
+  for (let i = 0; i < inputElements.length; i++) {
+    inputElements[i].disabled = true;
+  }
+}
+
+function serializeInputs(parentSelector) {
+  let inputs = GM.getAll(`${parentSelector} input`);
+  let values = [];
+  let types = [];
+  let dataObj = {};
+  let valuesIndex = 0;
+
+  // Need to know the type of data to serialize
+  for (let i = 0; i < inputs.length; i++) {
+    // The end of an id is always the type
+    let inputIdLast = inputs[i].id.split('-').pop();
+    switch (inputIdLast) {
+      // When there is 'x' at the end of an id, it is a Vec2
+      case 'x':
+        types.push('Vec2');
+        break;
+      // So don't care about 'y' anymore
+      case 'y':
+        break;
+      // Type needs to be capitalized
+      default:
+        // Not all ids can be split, this prevents that
+        if (!inputIdLast) break;
+        // Capitalization
+        types.push(inputIdLast.at(0).toUpperCase() + inputIdLast.slice(1));
+        break;
+    }
+    values.push(inputs[i].type !== "checkbox" ? inputs[i].value : inputs[i].checked);
+  }
+
+  // Construct the data object
+  for (let i = 0; i < types.length; i++) {
+    let title, data;
+    switch (types[i]) {
+      case 'Vec2':
+        title = values[valuesIndex] || ' ';
+        data = { x: parseFloat(values[valuesIndex + 1]), y: parseFloat(values[valuesIndex + 2]) };
+        valuesIndex += 3;
+        break;
+      default:
+        title = values[valuesIndex] || ' ';
+        data = values[valuesIndex + 1];
+        valuesIndex += 2;
+        break;
+    }
+    // If title is space, continue to prevent collision in dataObj. However, the data is lost.
+    if (title === ' ') continue;
+
+    dataObj[title] = { data, type: types[i] };
+  }
+  return dataObj;
+}
+
+// Separated each input types drawing method, so each one can be customized. There are still more types of inputs though.
 function drawColorInput(name, parentSelector, defaultValue = "#000000") {
   let id = `${parentSelector.slice(1)}-color`;
   GM.drawTable({
@@ -705,7 +705,7 @@ function drawCheckboxInput(name, parentSelector, defaultValue = false) {
   });
 }
 
-function drawCollapsible(name, parentSelector, containerBackground) {
+function drawCollapsible(name, parentSelector, containerBackground, isCollapsed = true) {
   GM.drawTable({
     parentSelector,
     td: [
@@ -713,9 +713,15 @@ function drawCollapsible(name, parentSelector, containerBackground) {
       [`<div id="${parentSelector.slice(1)}-collapsible-container" class="table-container" style="display:none; background:${containerBackground};"></div>`]
     ]
   });
+  let span = GM.get(`#${parentSelector.slice(1)}-collapsible-header span`);
+  let container = GM.get(`#${parentSelector.slice(1)}-collapsible-container`);
+
+  if (!isCollapsed) {
+    span.innerHTML = symbols.chevron.down;
+    container.style.display = "block";
+  }
+
   GM.get(`#${parentSelector.slice(1)}-collapsible-header`).onclick = () => {
-    let span = GM.get(`#${parentSelector.slice(1)}-collapsible-header span`);
-    let container = GM.get(`#${parentSelector.slice(1)}-collapsible-container`);
     if (container.style.display == "none") {
       span.innerHTML = symbols.chevron.down;
       container.style.display = "block";

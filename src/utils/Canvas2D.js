@@ -1,7 +1,7 @@
 export default class Canvas2D {
   constructor() {
     this.canvas = document.createElement("canvas");
-    this.context = this.canvas.getContext("2d", { alpha: false });
+    this.context = this.canvas.getContext('2d');
     this._unitScale = 10;
     this._pixelDensity = 1;
     this._clearColor = "#000000";
